@@ -1,6 +1,6 @@
 {% load calls_tags keyword_tags i18n future %}
 {% if user.is_superuser  or perms.calls.add_callspost  %} 
-    <div class="pull-right">
+    <div class="pull-right"> 
         <a class="btn btn-small btn-info" href="/admin/calls/callspost/add/">{% trans "Add new call" %}</a><br>
     </div>
 {% endif %}

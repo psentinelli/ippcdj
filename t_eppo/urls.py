@@ -7,7 +7,7 @@ from mezzanine.conf import settings
 # Leading and trailing slahes for urlpatterns based on setup.
 # _slashes = (
 #     "/" if settings.calls_SLUG else "",
-#     "/" if settings.APPEND_SLASH else "",
+#     "/" if settings.APPEND_SLASH else "", 
 # )
 
 # calls patterns.

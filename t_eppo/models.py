@@ -13,7 +13,7 @@ class Authorities(models.Model):
     idauthor = models.IntegerField(_("id"), blank=True, null=True)
     authdesc = models.CharField(_("Authority description"), max_length=250)
    
-    def __unicode__(self):
+    def __str__(self):
         return self.authdesc
 
 class Datatypes(models.Model):
@@ -21,7 +21,7 @@ class Datatypes(models.Model):
     datatype = models.CharField(_("datatype code"), max_length=3)
     libdatatype = models.CharField(_("libdatatype"), max_length=250)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.country 
         
 class Countries(models.Model):
@@ -29,7 +29,7 @@ class Countries(models.Model):
     isocountry = models.CharField(_("iso2 code"), max_length=3)
     country = models.CharField(_("Country"), max_length=250)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.country
         
 class Langs(models.Model):
@@ -37,7 +37,7 @@ class Langs(models.Model):
     isolang = models.CharField(_("isolang"), max_length=1)
     language = models.CharField(_("language"), max_length=250)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.language
         
 class Vars(models.Model):
@@ -45,7 +45,7 @@ class Vars(models.Model):
     varkey = models.CharField(_("isolang"), max_length=32)
     varval = models.CharField(_("language"), max_length=250)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.varkey
  
 
@@ -58,7 +58,7 @@ class Codes(models.Model):
     c_date = models.DateTimeField(_("Creation date"),  blank=True, null=True, editable=True)
     m_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.eppocode
         
   
@@ -78,7 +78,7 @@ class Names(models.Model):
     status = models.CharField(_("isolang"), max_length=1)
 
 
-    def __unicode__(self):
+    def __str__(self):
         return self.codename
 
     def getName(self):
@@ -147,6 +147,6 @@ class Links(models.Model):
     m_date = models.DateTimeField(_("Modified date"),  blank=True, null=True, editable=True)
     
     typelink=models.CharField(_("typelink"), max_length=1)
-    def __unicode__(self):
+    def __str__(self):
         return self.eppocode   
 

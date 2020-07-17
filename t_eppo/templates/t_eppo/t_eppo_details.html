@@ -1,5 +1,5 @@
 {% extends "calls/calls_post_list.html" %}
-{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n future disqus_tags %}
+{% load mezzanine_tags  comment_tags keyword_tags rating_tags i18n  disqus_tags %}
 
 {% block meta_title %}{{ calls_post.meta_title }}{% endblock %}
 
@@ -73,7 +73,7 @@
 
 {% block calls_post_detail_content %}
 {# {% editable calls_post.content %} #}
-{{ calls_post.content|richtext_filter|safe }}
+{{ calls_post.content|richtext_filters|safe }}
 {# {% endeditable %} #}
 {% endblock %}
 

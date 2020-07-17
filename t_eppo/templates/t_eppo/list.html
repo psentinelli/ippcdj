@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n future mezzanine_tags calls_tags keyword_tags disqus_tags %}
+{% load i18n  mezzanine_tags calls_tags  keyword_tags disqus_tags %}
 
 {% block meta_title %}{% if page %}{{ page.richtextpage.meta_title }}{% else %}{% trans "Calls" %}{% endif %}{% endblock %}
 
@@ -64,7 +64,7 @@
     {% if page %}
     {% block calls_post_list_pagecontent %}
     {# {% editable page.richtextpage.content %} #}
-    {{ page.richtextpage.content|richtext_filter|safe }}
+    {{ page.richtextpage.content|richtext_filters|safe }}
     {# {% endeditable %} #}
     {% endblock %}
     {% endif %}
