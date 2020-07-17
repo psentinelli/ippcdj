@@ -14,7 +14,7 @@ hidden_field_defaults = ("status", "gen_description", "allow_comments")
 
 class CallsPostForm(forms.ModelForm):
     """
-    Model form for ``CallsPost`` that provides the quick Calls panel in the
+    Model form for ``CallsPost`` that  provides the quick Calls panel in the
     admin dashboard.
     """
 

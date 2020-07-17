@@ -1,5 +1,10 @@
+from __future__ import unicode_literals
+from future.builtins import str
+
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
+
 
 from mezzanine.conf import settings
 from mezzanine.core.fields import FileField
@@ -27,14 +32,14 @@ class CallsPost(Displayable, Ownable, RichText, AdminThumbMixin):
                                  verbose_name=_("Related posts"), blank=True)
 
     admin_thumb_field = "featured_image"
-    deadline_date = models.DateTimeField(_("Deadline date"), blank=True, null=True, editable=True)
+    deadline_date =  models.DateTimeField(_("Deadline date"), blank=True, null=True, editable=True)
    
     class Meta:
         verbose_name = _("Call")
         verbose_name_plural = _("Calls")
         ordering = ("-publish_date",)
 
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         """
         URLs for calls posts can either be just their slug, or prefixed
@@ -59,7 +64,9 @@ class CallsPost(Displayable, Ownable, RichText, AdminThumbMixin):
                 kwargs[date_part] = date_value
                 if date_part == settings.CALLS_URLS_DATE_FORMAT:
                     break
-        return (url_name, (), kwargs)
+        #return (url_name, (), kwargs)
+
+        return reverse(url_name, kwargs=kwargs)
 
     # These methods are deprecated wrappers for keyword and category
     # access. They existed to support Django 1.3 with prefetch_related
@@ -73,16 +80,16 @@ class CallsPost(Displayable, Ownable, RichText, AdminThumbMixin):
              "use calls_post.categories.all which are prefetched")
         return getattr(self, "_categories", self.categories.all())
 
-    def keyword_list(self):
-        from warnings import warn
-        warn("calls_post.keyword_list in templates is deprecated"
-             "use the keywords_for template tag, as keywords are prefetched")
-        try:
-            return self._keywords
-        except AttributeError:
-            keywords = [k.keyword for k in self.keywords.all()]
-            setattr(self, "_keywords", keywords)
-            return self._keywords
+    #def keyword_list(self):
+    #    from warnings import warn
+    #    warn("calls_post.keyword_list in templates is deprecated"
+    #         "use the keywords_for template tag, as keywords are prefetched")
+    #    try:
+    #        return self._keywords
+    #    except AttributeError:
+    #        keywords = [k.keyword for k in self.keywords.all()]
+    #        setattr(self, "_keywords", keywords)
+    #        return self._keywords
 
 
 class CallsCategory(Slugged):
@@ -95,7 +102,7 @@ class CallsCategory(Slugged):
         verbose_name_plural = _("Calls Categories")
         ordering = ("title",)
 
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         return ("calls_post_list_category", (), {"category": self.slug})
 
@@ -108,7 +115,7 @@ class Translatable(models.Model):
         ordering = ("lang",)
         
 class TransCallsPost(Translatable,   Slugged):
-    translation = models.ForeignKey(CallsPost, related_name="translation")
+    translation = models.ForeignKey(CallsPost, related_name="translation",on_delete=models.DO_NOTHING,)
     content = models.TextField(blank=True, null=True)
     
     class Meta:
