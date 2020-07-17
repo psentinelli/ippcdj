@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n future mezzanine_tags calls_tags keyword_tags disqus_tags %}
+{% load i18n  mezzanine_tags  calls_tags keyword_tags disqus_tags %}
 
 {% block meta_title %}{% if page %}{{ page.richtextpage.meta_title }}{% else %}{% trans "Calls" %}{% endif %}{% endblock %}
 
@@ -64,7 +64,7 @@
     {% if page %}
     {% block calls_post_list_pagecontent %}
     {# {% editable page.richtextpage.content %} #}
-    {{ page.richtextpage.content|richtext_filter|safe }}
+    {{ page.richtextpage.content|richtext_filters|safe }}
     {# {% endeditable %} #}
     {% endblock %}
     {% endif %}
@@ -120,9 +120,9 @@
     {% endif %}<br>
                 {% with calls_post|get_object_translation as translated_page %}
                     {% if LANGUAGE_CODE == 'zh' %}
-                        {{ translated_page.content|richtext_filter|safe |truncatechars:100 }} 
+                        {{ translated_page.content|richtext_filters|safe |truncatechars:100 }} 
                     {% else %}
-                        {{ translated_page.content|richtext_filter|safe |truncatewords_html:40 }} <!--truncatewords_html:100-->
+                        {{ translated_page.content|richtext_filters|safe |truncatewords_html:40 }} <!--truncatewords_html:100-->
                       {% endif %}
                  {% endwith %}
             </p>		

@@ -1,4 +1,4 @@
-{% load calls_tags keyword_tags i18n future %}
+{% load calls_tags keyword_tags i18n  %}
 {% if user.is_superuser  or perms.calls.add_callspost  %} 
     <div class="pull-right">
         <a class="btn btn-small btn-info" href="/admin/calls/callspost/add/">{% trans "Add new call" %}</a><br>
@@ -8,7 +8,7 @@
 
 {% if calls_post %}
   
-    <div class="card card-cascade wider" style="width: 100%">
+    <div class="card card-cascade wider"  style="width: 100%">
       <div class="card-body card-body-cascade text-center">
         <p class="card-text">{% trans "Share this call" %}</p>
         <a target="_blank" href="http://twitter.com/home?status={{ calls_post.short_url|urlencode }}%20{{ calls_post.title|urlencode }}"><button on type="button" class="btn btn-fb"><i class="fab fa-facebook-f"></i></button></a>

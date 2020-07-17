@@ -17,7 +17,7 @@ register = template.Library()
 @register.as_tag
 def calls_months(*args):
     """
-    Put a list of dates for calls posts into the template context.
+    Put a list of dates  for calls posts into the template context.
     """ 
     dates = CallsPost.objects.published().values_list("publish_date", flat=True)
     date_dicts = [{"date": datetime(d.year, d.month, 1)} for d in dates]

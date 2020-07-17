@@ -1,11 +1,11 @@
 {% extends "calls/calls_post_list.html" %}
-{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n future disqus_tags calls_tags %}
+{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n  disqus_tags calls_tags %}
 
 
 {% block meta_title %}{{ calls_post.meta_title }}{% endblock %}
 
 {% block meta_keywords %}{% metablock %}
-{% keywords_for calls_post as tags %}
+{% keywords_for calls_post as  tags %}
 {% for tag in tags %}{% if not forloop.first %}, {% endif %}{{ tag }}{% endfor %}
 {% endmetablock %}{% endblock %}
 
@@ -33,7 +33,7 @@
 {% if user.is_superuser or perms.calls.add_callspost  %} {#and request.user.get_profile.user_id  == calls_post.user_id#} 
 
     <div class="pull-right">
-        <a class="btn btn-info btn-small" href="/admin/calls/callspost/{{ calls_post.id }}">{% trans "Edit as Admin" %}</a><br>
+        <a class="btn btn-info btn-small" href="/admin/calls/callspost/{{ calls_post.id }}/change/">{% trans "Edit as Admin" %}</a><br>
     </div>
 {% endif %}
 {% block calls_post_detail_postedby %}
@@ -63,7 +63,7 @@
 
 
  {% with calls_post|get_object_translation as translated_page %}
-            {{ translated_page.content|richtext_filter|safe  }}
+            {{ translated_page.content|richtext_filters|safe  }}
     {% endwith %}
 
 {% endblock %}
