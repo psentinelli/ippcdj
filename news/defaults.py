@@ -17,7 +17,7 @@ from mezzanine.conf import register_setting
 
 
 register_setting(
-    name="NEWS_USE_FEATURED_IMAGE",
+    name="NEWS_USE_FEATURED_IMAGE", 
     description=_("Enable featured images in news posts"),
     editable=False,
     default=False,

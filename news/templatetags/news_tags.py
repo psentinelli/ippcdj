@@ -16,7 +16,7 @@ register = template.Library()
 @register.as_tag
 def news_months(*args):
     """
-    Put a list of dates for news posts into the template context.
+    Put a list of dates  for news posts into the template context.
     """
     dates = NewsPost.objects.published().values_list("publish_date", flat=True)
     date_dicts = [{"date": datetime(d.year, d.month, 1)} for d in dates]

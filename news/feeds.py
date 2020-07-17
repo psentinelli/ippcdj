@@ -1,6 +1,6 @@
 
 from django.contrib.syndication.views import Feed
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.feedgenerator import Atom1Feed
 from django.utils.html import strip_tags
@@ -16,7 +16,7 @@ User = get_user_model()
 
 class PostsRSS(Feed):
     """
-    RSS feed for all news posts.
+    RSS feed for all news posts. 
     """
 
     def __init__(self, *args, **kwargs):

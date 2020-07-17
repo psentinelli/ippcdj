@@ -15,7 +15,7 @@ hidden_field_defaults = ("status", "gen_description", "allow_comments")
 class NewsPostForm(forms.ModelForm):
     """
     Model form for ``newsPost`` that provides the quick news panel in the
-    admin dashboard.
+    admin dashboard. 
     """
 
     class Meta:

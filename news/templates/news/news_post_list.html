@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n future mezzanine_tags news_tags keyword_tags disqus_tags %}
+{% load i18n   mezzanine_tags news_tags keyword_tags disqus_tags %}
 
 {% block meta_title %}{% if page %}{{ page.richtextpage.meta_title }}{% else %}{% trans "News" %}{% endif %}{% endblock %}
 
@@ -76,7 +76,7 @@
   <p> {% trans "<b><a href='/news/category/announcements/'>Announcements</a></b>: these related to organizational arrangements for IPPC meetings, publications of meeting papers or reports and general IPPC administrative issues. " %}</p>
    <p> {% trans "<b><a href='/calls/'>Call and Deadlines</a></b>: these are requests from the IPPC Secretariat for the nomination of experts for a variety of meetings and activities, initiation of country consultation periods, launching of competitions, and deadlines for consultations e.g. draft ISPMs. " %}</p>
     {% block news_post_list_pagecontent %}
-     {{ page.richtextpage.content|richtext_filter|safe }}
+     {{ page.richtextpage.content|richtext_filters|safe }}
     {% endblock %}
     {% endif %}
 {% endif %}
@@ -127,9 +127,9 @@
                 
                 {% with news_post|get_object_translation as translated_page %}
                     {% if LANGUAGE_CODE == 'zh' %}
-                        {{ translated_page.content|richtext_filter|safe |truncatechars:100 }} 
+                        {{ translated_page.content|richtext_filters|safe |truncatechars:100 }} 
                     {% else %}
-                        {{ translated_page.content|richtext_filter|safe |truncatewords_html:40 }} <!--truncatewords_html:100-->
+                        {{ translated_page.content|richtext_filters|safe |truncatewords_html:40 }} <!--truncatewords_html:100-->
                       {% endif %}
                  {% endwith %}
             </p>		

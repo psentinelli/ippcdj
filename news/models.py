@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
+from django.urls import reverse
 from mezzanine.conf import settings
 from mezzanine.core.fields import FileField
 from mezzanine.core.models import Displayable, Ownable, RichText, Slugged
@@ -10,7 +10,7 @@ from mezzanine.utils.models import AdminThumbMixin, upload_to
 
 class NewsPost(Displayable, Ownable, RichText, AdminThumbMixin):
     """
-    A News Post.
+    A News Post. 
     """
 
     categories = models.ManyToManyField("NewsCategory",
@@ -37,7 +37,7 @@ class NewsPost(Displayable, Ownable, RichText, AdminThumbMixin):
         verbose_name_plural = _("News")
         ordering = ("-publish_date",)
 
-    @models.permalink
+    ##@models.permalink
     def get_absolute_url(self):
         """
         URLs for news posts can either be just their slug, or prefixed
@@ -62,7 +62,9 @@ class NewsPost(Displayable, Ownable, RichText, AdminThumbMixin):
                 kwargs[date_part] = date_value
                 if date_part == settings.NEWS_URLS_DATE_FORMAT:
                     break
-        return (url_name, (), kwargs)
+        #return (url_name, (), kwargs)
+
+        return reverse(url_name, kwargs=kwargs)
 
     # These methods are deprecated wrappers for keyword and category
     # access. They existed to support Django 1.3 with prefetch_related
@@ -98,7 +100,7 @@ class NewsCategory(Slugged):
         verbose_name_plural = _("News Categories")
         ordering = ("title",)
 
-    @models.permalink
+    ##@models.permalink
     def get_absolute_url(self):
         return ("news_post_list_category", (), {"category": self.slug})
 
@@ -111,7 +113,7 @@ class Translatable(models.Model):
         ordering = ("lang",)
         
 class TransNewsPost(Translatable,   Slugged):
-    translation = models.ForeignKey(NewsPost, related_name="translation")
+    translation = models.ForeignKey(NewsPost, related_name="translation",on_delete=models.DO_NOTHING,)
     content = models.TextField(blank=True, null=True)
     caption_image=models.CharField(blank=True, null=True, max_length=250)
     related_info = models.TextField(blank=True, null=True)

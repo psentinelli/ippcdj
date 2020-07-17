@@ -1,7 +1,14 @@
+from __future__ import unicode_literals
+from future.builtins import str, int
+
 from calendar import month_name
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+
+from django.template.response import TemplateResponse
+from django.utils.translation import ugettext_lazy as _
+
 
 from news.models import NewsPost, NewsCategory
 from news.feeds import PostsRSS, PostsAtom
@@ -16,7 +23,7 @@ User = get_user_model()
 def news_post_list(request, tag=None, year=None, month=None, username=None,
                    category=None, template="news/news_post_list.html"):
     """
-    Display a list of news posts that are filtered by tag, year, month,
+    Display a list of news posts that  are filtered by tag, year, month,
     author or category. Custom templates are checked for using the name
     ``news/news_post_list_XXX.html`` where ``XXX`` is either the
     category slug or author's username if given.
@@ -36,7 +43,7 @@ def news_post_list(request, tag=None, year=None, month=None, username=None,
         category = get_object_or_404(NewsCategory, slug=category)
         news_posts = news_posts.filter(categories=category)
         templates.append(u"news/news_post_list_%s.html" %
-                          unicode(category.slug))
+                          str(category.slug))
     author = None
     if username is not None:
         author = get_object_or_404(User, username=username)
@@ -51,16 +58,22 @@ def news_post_list(request, tag=None, year=None, month=None, username=None,
     subscribed=0
  
     if category is not None:
+        print("-----------------------")
+        print(category)
+        print("-----------------------")
         if category.id == 1:
             subscribed=request.user.groups.filter(name='News Notification group').exists()
         elif category.id == 3:
             subscribed=request.user.groups.filter(name='Announcement Notification group').exists()
+  
     context = {"news_posts": news_posts, "year": year, "month": month,
                "tag": tag, "category": category, "author": author, "subscribed":subscribed, }
     
     templates.append(template)
   
-    return render(request, templates, context)
+  
+ #return render(request, templates, context)
+    return TemplateResponse(request, templates, context)
 
 
 def news_post_detail(request, slug, year=None, month=None, day=None,
@@ -85,9 +98,9 @@ def news_post_detail(request, slug, year=None, month=None, day=None,
     elif category_id == 3:
         subscribed=request.user.groups.filter(name='Announcement Notification group').exists()
     context = {"news_post": news_post, "editable_obj": news_post,"subscribed":subscribed,"category":category_id}
-    templates = [u"news/news_post_detail_%s.html" % unicode(slug), template]
-    return render(request, templates, context)
-
+    templates = [u"news/news_post_detail_%s.html" % str(slug), template]
+    #return render(request, templates, context)
+    return TemplateResponse(request, templates, context)
 
 def news_post_feed(request, format, **kwargs):
     """

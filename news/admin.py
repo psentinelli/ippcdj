@@ -4,10 +4,10 @@ from copy import deepcopy
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
-from news.models import NewsPost, NewsCategory,TransNewsPost
+from news.models import NewsPost, NewsCategory,TransNewsPost 
 from ippc.models import MassEmailUtilityMessage
 from mezzanine.conf import settings
-from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin,StackedDynamicInlineAdmin
+from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin,TabularDynamicInlineAdmin
 from django.contrib.auth.models import User,Group
 from django.shortcuts import get_object_or_404
 from django.core import mail
@@ -16,12 +16,14 @@ from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
 
 from datetime import datetime
-from django_markdown.widgets import MarkdownWidget
+#from django_markdown.widgets import MarkdownWidget
 from django import forms
-from django_markdown.admin import MarkdownModelAdmin
-from django_markdown.widgets import AdminMarkdownWidget
+#from django_markdown.admin import MarkdownModelAdmin
+#from django_markdown.widgets import AdminMarkdownWidget
+from mezzanine_pagedown.widgets import PageDownWidget
 
-class TransNewsPostAdmin(StackedDynamicInlineAdmin):
+from django.utils.html import format_html
+class TransNewsPostAdmin(TabularDynamicInlineAdmin):
     model = TransNewsPost
     fields = ("lang", "title","caption_image", "content","related_info")
 
@@ -31,10 +33,10 @@ newspost_fieldsets[0][1]["fields"].extend(["caption_image"])
 newspost_fieldsets[0][1]["fields"].extend(["content"])
 newspost_fieldsets[0][1]["fields"].extend(["related_info"])
 
-newspost_list_display = ["title", "user","publish_date", "status", "admin_link"]
+newspost_list_display = ["title", "user","publish_date", "status", "admin_link1"]
 if settings.NEWS_USE_FEATURED_IMAGE:
     newspost_fieldsets[0][1]["fields"].insert(-2, "featured_image")
-    newspost_list_display.insert(0, "admin_thumb")
+    newspost_list_display.insert(0, "thumbnail")
 newspost_fieldsets = list(newspost_fieldsets)
 newspost_fieldsets.insert(1, (_("Other posts"), {
     "classes": ("collapse-closed",),
@@ -44,18 +46,40 @@ newspost_list_filter = deepcopy(DisplayableAdmin.list_filter) + ("categories",)
 class NewsPostAdminForm(forms.ModelForm):
     class Meta:
         model = NewsPost
-        widgets = { 'related_info':AdminMarkdownWidget() 
+        fields = '__all__'
+        widgets = { 'related_info':PageDownWidget() 
 
-}
+        }
+#class NewsPostAdmin(DisplayableAdmin, OwnableAdmin):
+
+
+    
 #class NewsPostAdmin(DisplayableAdmin, OwnableAdmin):
 class NewsPostAdmin(DisplayableAdmin):
     """
     Admin class for news posts.
     """
+    def thumbnail(self, obj):
+        if obj.featured_image:
+            return format_html('<img src="'+settings.MEDIA_URL+format(obj.featured_image)+'" style="width: 30px; height: 30px"/>')
+        else:
+            return format_html('')
+    def admin_link1(self, obj):
+        return format_html("<a href='"+obj.get_absolute_url()+"'>View on site</a>")
+ 
+    admin_link1.allow_tags = True
+    admin_link1.short_description = ""
+    thumbnail.short_description = 'thumbnail'
+    
+    """
+    Admin class for news posts.
+    """
     form = NewsPostAdminForm
     fieldsets = newspost_fieldsets
+    
     list_display = newspost_list_display
     list_filter = newspost_list_filter
+    #paola formfield_overrides = {'related_info': {'widget': AdminMarkdownWidget}}
     filter_horizontal = ("categories", "related_posts",)
     inlines = [ TransNewsPostAdmin]
     def save_form(self, request, form, change):
@@ -165,7 +189,7 @@ class NewsPostAdmin(DisplayableAdmin):
               
                 notifificationmessage = mail.EmailMessage(subnew,text,'ippc@fao.org',  ['paola.sentinelli@fao.org'], ['paola.sentinelli@fao.org'])
                 notifificationmessage.content_subtype = "html"  
-                sent =notifificationmessage.send()
+                # sent =notifificationmessage.send()
     
                 #######################################
                 #notifificationmessage = mail.EmailMessage(subject,text,'ippc@fao.org',  emailto_all, ['paola.sentinelli@fao.org'])

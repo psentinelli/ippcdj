@@ -1,5 +1,5 @@
 {% extends "news/news_post_list.html" %}
-{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n future disqus_tags news_tags %}
+{% load mezzanine_tags  comment_tags keyword_tags rating_tags i18n  disqus_tags news_tags %}
 
 {% block meta_title %}{{ news_post.meta_title }}{% endblock %}
 
@@ -35,7 +35,7 @@
 {% block main %}
     {% if user.is_superuser or perms.news.add_newspost %} 
         <div class="pull-right">
-            <a class="btn btn-info btn-small" href="/admin/news/newspost/{{ news_post.id }}">{% trans "Edit as Admin" %}</a><br>
+            <a class="btn btn-info btn-small" href="/admin/news/newspost/{{ news_post.id }}/change/">{% trans "Edit as Admin" %}</a><br>
         </div>
     {% endif %}
     {% block news_post_detail_postedby %}
@@ -55,7 +55,7 @@
             {%if news_post.caption_image != None and news_post.caption_image != ''%}
                <figcaption class="figure-caption text-right">
                    {% with news_post|get_object_translation as translated_page %}
-                    {{ translated_page.caption_image|richtext_filter|safe }}
+                    {{ translated_page.caption_image|richtext_filters|safe }}
                 {% endwith %} 
                </figcaption>
             {% endif %}
@@ -65,7 +65,7 @@
 
     {% block news_post_detail_content %}
         {% with news_post|get_object_translation as translated_page %}
-            {{ translated_page.content|richtext_filter|safe }}
+            {{ translated_page.content|richtext_filters|safe }}
         {% endwith %}
     {% endblock %}
 

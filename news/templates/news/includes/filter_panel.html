@@ -1,5 +1,5 @@
-{% load news_tags keyword_tags i18n future %}
-{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n future disqus_tags news_tags %}
+{% load news_tags keyword_tags i18n  %}
+{% load mezzanine_tags  comment_tags keyword_tags rating_tags i18n  disqus_tags news_tags %}
 
 {% if user.is_superuser  or perms.news.add_newspost  %} 
     <div class="pull-right">
@@ -14,7 +14,7 @@
     <div class="card card-cascade wider" style="width: 100%">
       <div class="card-body card-body-cascader">
            {% with news_post|get_object_translation as translated_page %}
-                {{ translated_page.related_info|richtext_filter|safe }}
+                {{ translated_page.related_info|richtext_filters|safe }}
             {% endwith %}
       </div>
     </div>
