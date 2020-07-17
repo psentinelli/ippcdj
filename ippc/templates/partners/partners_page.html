@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}
   {{ page.title }}
@@ -39,7 +39,7 @@
   </div>
   {% endif %}
   
-  {% if perms.ippc.change_partnerspage and request.user.get_profile.partner.id == page.id %}
+  {% if perms.ippc.change_partnerspage and profile.partner.id == page.id %}
    <div class="pull-right">
       <a class="btn btn-small btn-info" href="/partners/page/edit/{{ page.id }}">Edit page</a><br>
   </div>
@@ -57,7 +57,7 @@
     {% if user.is_superuser %}
     <div class="alert alert-warning"> Last edited by {{edituser}} on {{ modify_date|date:"d M Y" }}  </div>  
     {% endif %}
-    <div>   {{ content|richtext_filter|safe }}</div>
+    <div>   {{ content|richtext_filters|safe }}</div>
   
   {% if page.get_content_model.contact_point.username %}
     <div class="card" style="width: 100%">
@@ -107,7 +107,7 @@
   <a class="btn btn-small btn-info" href="{% url 'partner-websites-create' page.get_content_model.partner_slug %}">+ {% trans "Add new website" %}</a>
  {% endif %}
  {% endfor %}
-  {% if perms.ippc.add_partnerspublication and request.user.get_profile.partner.name == page.get_content_model.name %}
+  {% if perms.ippc.add_partnerspublication and profile.partner.name == page.get_content_model.name %}
 <a class="btn btn-small btn-info" href="{% url 'partner-publication-create' page.get_content_model.partner_slug %}">+ {% trans "Add new publication" %}</a>
    <a class="btn btn-small btn-info" href="{% url 'partner-news-create' page.get_content_model.partner_slug %}">+ {% trans "Add new news" %}</a>
    
@@ -140,7 +140,7 @@
       <td>{{ object.publish_date|date:"d M Y" }}</td>
       <td>{% trans "Publication" %}
       {% if user.is_superuser %} 
-            <a class="small pull-right" href="/admin/ippc/partnerspublication/{{ object.id }}"><i class="icon-edit"></i> Edit as Admin</a><br>
+            <a class="small pull-right" href="/admin/ippc/partnerspublication/{{ object.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br>
         {% endif %}
  {% for group in request.user.groups.all %}
     {% if group.name == 'IPPC Secretariat' and not user.is_superuser %}
@@ -167,7 +167,7 @@
         <td>{{ object.publish_date|date:"d M Y" }}</td>
         <td>{% trans "News" %}
         {% if user.is_superuser %} 
-            <a class="small pull-right" href="/admin/ippc/partnersnews/{{ object.id }}"><i class="icon-edit"></i> Edit as Admin</a><br>
+            <a class="small pull-right" href="/admin/ippc/partnersnews/{{ object.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br>
         {% endif %}
 {% for group in request.user.groups.all %}
     {% if group.name == 'IPPC Secretariat' and not user.is_superuser %}
@@ -196,7 +196,7 @@
       <td>{{ object.publish_date|date:"d M Y" }}</td>
       <td>{% trans "Website" %}
         {% if user.is_superuser %} 
-            <a class="small pull-right" href="/admin/ippc/partnerswebsite/{{ object.id }}"><i class="icon-edit"></i> Edit as Admin</a><br>
+            <a class="small pull-right" href="/admin/ippc/partnerswebsite/{{ object.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br>
         {% endif %}
 {% for group in request.user.groups.all %}
     {% if group.name == 'IPPC Secretariat' and not user.is_superuser %}

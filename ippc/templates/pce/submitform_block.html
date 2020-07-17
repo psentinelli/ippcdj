@@ -1,4 +1,6 @@
-{% load i18n future mezzanine_tags accounts_tags %}
+{% load i18n  mezzanine_tags accounts_tags ippc_tags%}
+ {% get_profile_usr user.id as userprofile %}
+
 <div class="form-actions">
 {% if context == 'Edit' %}  
     <a class="btn btn-small btn-info" href="javascript:history.go(-1)">{% trans "Cancel" %}</a>
@@ -9,10 +11,10 @@
             {%if module != 1 %}
      
             {%if is_pa_filled %}
-                <a class="btn btn-large btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/{{module}}/problemanalysis/{{pa_id}}">{% trans "Go to Problem Analysis for Module" %} {{module}} -></a>
+                <a class="btn btn-large btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/{{module}}/problemanalysis/{{pa_id}}">{% trans "Go to Problem Analysis for Module" %} {{module}} -></a>
             {% else%}
                 {%if is_st_filled and m_percentage == 100 %}
-                    <a class="btn btn-large  btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/{{module}}/problemanalysis/view">{% trans "Go to Problem Analysis for Module" %} {{module}} -></a>
+                    <a class="btn btn-large  btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/{{module}}/problemanalysis/view">{% trans "Go to Problem Analysis for Module" %} {{module}} -></a>
                 {% endif%}  
             {% endif%}  
             {% endif%}  
@@ -23,22 +25,22 @@
     {% if id != ''%}  
         {% if modulestr == '2 part 1' or modulestr == '2 part 2'%}
             {% if modulestr == '2 part 1'%}
-                <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/module2_1/pdf/{{id}}" target="_blank">{% trans "Export as PDF" %}</a>
+                <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/module2_1/pdf/{{id}}" target="_blank">{% trans "Export as PDF" %}</a>
             {% elif modulestr == '2 part 2'%}
-                <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/module2_2/pdf/{{id}}" target="_blank">{% trans "Export as PDF" %}</a>
+                <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/module2_2/pdf/{{id}}" target="_blank">{% trans "Export as PDF" %}</a>
             {% endif %}   
           {% else%}
-            <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/module{{module}}/pdf/{{id}}" target="_blank">{% trans "Export as PDF" %}</a>
+            <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/module{{module}}/pdf/{{id}}" target="_blank">{% trans "Export as PDF" %}</a>
          {% endif %}   
     {% else%}            
         {% if modulestr == '2 part 1' or modulestr == '2 part 2'%}
             {% if modulestr == '2 part 1'%}
-                   <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/module2_1/pdf_empty/" target="_blank">{% trans "Export as PDF" %}</a>
+                   <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/module2_1/pdf_empty/" target="_blank">{% trans "Export as PDF" %}</a>
               {% elif modulestr == '2 part 2'%}
-                 <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/module2_2/pdf_empty/" target="_blank">{% trans "Export as PDF" %}</a>
+                 <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/module2_2/pdf_empty/" target="_blank">{% trans "Export as PDF" %}</a>
               {% endif %}      
          {% else%}
-            <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/module{{module}}/pdf_empty/" target="_blank">{% trans "Export as PDF" %}</a>
+            <a class="btn btn-large btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/module{{module}}/pdf_empty/" target="_blank">{% trans "Export as PDF" %}</a>
         {% endif %}   
       {% endif %}   
    <a class="btn btn-large btn-info" href="javascript:window.print();" >{% trans "PRINT" %}</a>

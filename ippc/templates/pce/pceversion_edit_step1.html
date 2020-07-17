@@ -1,7 +1,7 @@
 {% extends "pce/basepce.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
-{% block meta_title %}{% trans "Configuration" %} - {{ user.get_profile.country.name}} {% endblock %}
+{% block meta_title %}{% trans "Configuration" %} - {{ userprofile.country.name}} {% endblock %}
 
 
 
@@ -9,11 +9,11 @@
 
 {% block breadcrumb_menu %}
 <li>
-    <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name }}/sessions">{% trans "PCE Home" %}</a>
-    <span class="divider">/</span>
+    <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name }}/sessions">{% trans "PCE Home" %}</a>
+    
 </li>
 <li class="active">
-    {{ user.get_profile.country.name }} - {% trans " PCE Re-Configuration: Basic Information" %}
+    {{ userprofile.country.name }} - {% trans " PCE Re-Configuration: Basic Information" %}
 </li>
 {% endblock %}
 

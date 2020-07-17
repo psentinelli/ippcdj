@@ -1,19 +1,19 @@
 {% extends "pce/basepce.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 {% if context == 'View' or context == 'Edit'%}
-{% block meta_title %}{% trans "Swot Analysis" %} - {{ user.get_profile.country.name}} {% endblock %}
+{% block meta_title %}{% trans "Swot Analysis" %} - {{ userprofile.country.name}} {% endblock %}
 
 {% block body_class %}wide{% endblock %}
 
 {% block breadcrumb_menu %}
 <li>
-    <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name }}/sessions">{% trans "PCE Home" %}</a>
-    <span class="divider">/</span>
+    <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name }}/sessions">{% trans "PCE Home" %}</a>
+    
 </li>
 <li>
-    <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/session/dashboard/{{sessionid}}">  {% trans "PCE Dashboard for" %} {{ user.get_profile.country.name }}</a>
-    <span class="divider">/</span>
-<li>
+    <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/session/dashboard/{{sessionid}}">  {% trans "PCE Dashboard for" %} {{ userprofile.country.name }}</a>
+    
+</li>
 <li class="active">{% trans "Swot Analysis for Module " %}{{module}}</li>
 {% endblock %}
 
@@ -49,7 +49,7 @@
                         <h3 class="panel-title"> {% trans "Swot Analysis - Module" %} {{module}}
                          {% if context == 'View' and can_edit  and id != ''%}  
                         <span  class="pull-right">  
-                            <a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/{{module}}/swotanalysis/edit/{{sa_id}}">{% trans "Edit table" %}</a>
+                            <a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/{{module}}/swotanalysis/edit/{{sa_id}}">{% trans "Edit table" %}</a>
                         </span>
                         {% endif %}  </h3>
                        
@@ -443,11 +443,11 @@
                             </tbody>
                         </table>   
                         {% endif %} {% if context == 'View'%}
-                        <span  class="pull-left"><a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/{{modulename}}/view/{{moduleid}}"><- {% trans "back to Module" %} {{module}}</a></span>
+                        <span  class="pull-left"><a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/{{modulename}}/view/{{moduleid}}"><- {% trans "back to Module" %} {{module}}</a></span>
                         &#160;&#160;&#160;<a class="btn  btn-info" href="javascript:window.print();">{% trans "PRINT" %}</a>  
                         {% if lf_id != ''%}  
-                        &#160;&#160;&#160;<a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/{{module}}/swotanalysis/pdf/{{sa_id}}" target="_blank">{% trans "Export as PDF" %}</a>
-                        <span  class="pull-right"><a class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/{{module}}/logicalframework/{{lf_id}}">{% trans "Go to Logical Framework for Module" %} {{module}} -></a></span>
+                        &#160;&#160;&#160;<a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/{{module}}/swotanalysis/pdf/{{sa_id}}" target="_blank">{% trans "Export as PDF" %}</a>
+                        <span  class="pull-right"><a class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/{{module}}/logicalframework/{{lf_id}}">{% trans "Go to Logical Framework for Module" %} {{module}} -></a></span>
 
                         {% endif%}
                         {% endif%}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Latest News" %}{% endblock %}
 
@@ -15,9 +15,9 @@
 <div class="well localnav">
   <p><a href="/{{ pageslug}}/">« {% trans "Back to " %}{{pagetitle}}</a></p>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/partnersnews/{{ partnersnews.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/partnersnews/{{ partnersnews.id }}/change/">Edit as Admin</a><br>
     {% endif %}
-    {% if perms.ippc.change_partnersnews and request.user.get_profile.partner.name == partnersnews.partners.name %}
+    {% if perms.ippc.change_partnersnews and request.userprofile.partner.name == partnersnews.partners.name %}
         <a class="btn btn-small btn-info" href="{% url 'partner-news-edit' partnersnews.partners.name|slugify partnersnews.id %}"><i class="icon-edit icon-white"></i> Edit</a>
     {% else %}
     {% endif %}
@@ -51,7 +51,7 @@
 
  {% if partnersnews.short_description %}
   <dt>{% trans "Description of the mark" %}</dt>
-  <dd>{{ partnersnews.short_description|richtext_filter|safe }}</dd>
+  <dd>{{ partnersnews.short_description|richtext_filters|safe }}</dd>
   {% endif %}
   
 

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}
   {% trans "Publications" %}: 
@@ -40,7 +40,7 @@
 
 <p class="pull-right">
   <a href="javascript:history.go(-1)">{% trans "« Go back" %}</a>
-  {% if perms.ippc.add_cnpublication and request.user.get_profile.country.name == page.title %}
+  {% if perms.ippc.add_cnpublication and userprofile.country.name == page.title %}
   <br>
   <small><a class="btn btn-small btn-info" href="{% url 'country-publication-create' page.title|slugify %}">+ {% trans "Add new publication" %}</a></small>
   <br>
@@ -74,10 +74,10 @@
       <td>{{ object.modify_date|date:"d M Y" }}
 
         {% if user.is_superuser %} 
-            <a class="small pull-right" href="/admin/ippc/publication/{{ object.id }}"><i class="icon-edit"></i> Edit as Admin</a><br>
+            <a class="small pull-right" href="/admin/ippc/publication/{{ object.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br>
         {% endif %}
 
-        {% if perms.ippc.change_cnpublication and request.user.get_profile.country.name == page.title %}
+        {% if perms.ippc.change_cnpublication and userprofile.country.name == page.title %}
             <a class="small pull-right" href="{% url 'country-publication-edit' object.country.country_slug object.id %}"><i class="icon-edit"></i> {% trans "Edit" %}</a>
             {# <a class="btn" href="{% url 'country-publication-edit' cnpublication.id %}"><i class="icon-edit"></i> Edit</a> #}
         {% else %}

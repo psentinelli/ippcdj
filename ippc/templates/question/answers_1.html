@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles %}
+{% load pages_tags mezzanine_tags i18n static %}
 
 {% block meta_title %}{% trans "Question" %}{% endblock %}
 
@@ -35,13 +35,13 @@
             <i>{% trans "Publication date" %}: <b>{{ question.pub_date|date:"d M Y" }}</b></i><br><br>
             {% if question.short_description %}
             <strong>{% trans "BACKGROUND INFORMATION" %}</strong><br>
-            {{ question.short_description |richtext_filter|safe }}<br><br>
+            {{ question.short_description |richtext_filters|safe }}<br><br>
             {% endif %}
 						<hr>
             <h2>Answers:</h2>
             {% if answers %} 
             {% for answer in  answers%}
-            {{answer.0 |richtext_filter|safe }}
+            {{answer.0 |richtext_filters|safe }}
                 {% if user.is_superuser or perms.irss.change_answer %}
                 <a class="small pull-right" href="/qa/{{question.id}}/answer/{{answer.1}}/edit/"><i class="icon-edit"></i> Edit</a>
                 {% endif %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Latest Pest Free Areas" %}{% endblock %}
 
@@ -29,10 +29,10 @@
      {% else %}
           <p><a href="/countries/{{ pfa.country.name|slugify }}/pestfreeareas/">« {% trans "Back to" %} {% trans "Pest Free Areas" %}</a></p>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/pestfreearea/{{ pfa.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/pestfreearea/{{ pfa.id }}/change/">Edit as Admin</a><br>
     {% endif %}
         
-    {% if perms.ippc.change_pestfreearea and request.user.get_profile.country.name == page.title %}
+    {% if perms.ippc.change_pestfreearea and userprofile.country.name == page.title %}
         <a class="btn btn-small btn-info" href="{% url 'pfa-edit' pfa.country.name|slugify pfa.id %}"><i class="icon-edit icon-white"></i> Edit</a>
         
     {% endif %}
@@ -86,7 +86,7 @@
   
  {% if pfa.short_description %}
   <dt>{% trans "Short Description" %}</dt>
-  <dd>{{ pfa.short_description|richtext_filter|safe }}</dd>
+  <dd>{{ pfa.short_description|richtext_filters|safe }}</dd>
   {% endif %}
   
   {% if pfa.contact_for_more_information %}

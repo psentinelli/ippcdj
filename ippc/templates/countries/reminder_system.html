@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles %}
+{% load pages_tags mezzanine_tags i18n static %}
 
 {% block meta_title %}{% trans "Automatic Reminder system for Countries " %}{% endblock %}
 
@@ -23,7 +23,7 @@
   <tbody>
     {% for object in textmessages %}
     <tr>
-      <td>{{object|richtext_filter|safe }}</td>
+      <td>{{object|richtext_filters|safe }}</td>
     </tr>
 
     {% endfor %}

@@ -1,4 +1,4 @@
-{% load mezzanine_tags i18n future %}
+{% load mezzanine_tags i18n  %}
 <form class="form-inline mt-3 mb-0" action="{% url "search" %}">
 <i class="fas fa-search" aria-hidden="true"></i>
 <input placeholder="{% trans "Search" %}" type="text" name="q" value="{{ request.REQUEST.q }}" class="form-control form-control-sm ml-2 w-25" aria-label="Search" >

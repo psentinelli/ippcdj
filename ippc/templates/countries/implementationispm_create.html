@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
-{% block meta_title %}{% trans "New implementation ispm" %} - {{ user.get_profile.country.name}} {% endblock %}
+{% block meta_title %}{% trans "New implementation ispm" %} - {{ userprofile.country.name}} {% endblock %}
 
 {% block body_class %}wide{% endblock %}
 
@@ -11,13 +11,13 @@
   
 </li>
 <li class="breadcrumb-item">
-  <a href="/countries/{{ user.get_profile.country.name|slugify }}/">
-    {{ user.get_profile.country.name }}
+  <a href="/countries/{{ userprofile.country.name|slugify }}/">
+    {{ userprofile.country.name }}
   </a>
   
 </li>
 <li class="breadcrumb-item">
-  <a href="/countries/{{ user.get_profile.country.name|slugify }}/implementationispms/">{% trans "Implementation for ISPM 15" %}</a>
+  <a href="/countries/{{ userprofile.country.name|slugify }}/implementationispms/">{% trans "Implementation for ISPM 15" %}</a>
   
 </li>
 <li   class="breadcrumb-item active">{% trans "Create New" %}</li>
@@ -36,7 +36,7 @@
   <a href="javascript:history.go(-1)">{% trans "« Cancel and go back" %}</a>
 </p>
 
-<h1><span class="normal">{% trans "Create New Implementation for ISPM 15" %}</span> {{ user.get_profile.country.name }}</h1>
+<h1><span class="normal">{% trans "Create New Implementation for ISPM 15" %}</span> {{ userprofile.country.name }}</h1>
 
 <form class="customform" method="POST" action="" enctype="multipart/form-data">
     {% csrf_token %}

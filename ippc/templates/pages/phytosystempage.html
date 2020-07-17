@@ -1,6 +1,6 @@
 {% extends "pages/page.html" %}
 
-{% load mezzanine_tags translate_tags staticfiles i18n %}
+{% load mezzanine_tags translate_tags static i18n %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static "css/DT_bootstrap.css" %}">
@@ -31,7 +31,7 @@
         {% include "pages/phytosystempage_images.html" %}
         
         {% with page.phytosystempage|get_object_translation as translated_page %}
-            {{ translated_page.content|richtext_filter|safe }}
+            {{ translated_page.content|richtext_filters|safe }}
         {% endwith %}
          
     {% else %}
@@ -43,7 +43,7 @@
             {% include "pages/phytosystempage_images.html" %}
 
             {% with page.phytosystempage|get_object_translation as translated_page %}
-                {{ translated_page.content|richtext_filter|safe }}
+                {{ translated_page.content|richtext_filters|safe }}
             {% endwith %}
 
               {% include "pages/publicationtablerestricted.html" %}
@@ -57,7 +57,7 @@
         {% include "pages/phytosystempage_images.html" %}
        
         {% with page.phytosystempage|get_object_translation as translated_page %}
-          {{ translated_page.content|richtext_filter|safe }}
+          {{ translated_page.content|richtext_filters|safe }}
         {% endwith %}
         
         {%if page.phytosystempage.collapse2content.all %} 

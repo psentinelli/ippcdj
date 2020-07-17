@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 #import autocomplete_light_registry
-import autocomplete_light
+#import autocomplete_light
+
+from dal import autocomplete
 #autocomplete_light.autodiscover()
+from dal_select2.widgets import  Select2,  Select2Multiple,  ModelSelect2 ,   ModelSelect2Multiple,TagSelect2,        ListSelect2
 
 
 
@@ -92,7 +95,6 @@ class QAAnswerForm(forms.ModelForm):
               
                  ]
         exclude = ('status', 'slug',  'modify_date','publish_date' ,  'bestanswer',)                               
-        
 class PestReportForm(forms.ModelForm):
 
     # country = forms.ChoiceField(widget=forms.Select(), initial='country')
@@ -122,8 +124,15 @@ class PestReportForm(forms.ModelForm):
         widgets = {
             'country': forms.HiddenInput(),
             'report_number': forms.HiddenInput(),
-            #'pest_identity': autocomplete_light.ChoiceWidget('EppoCodeAutocomplete'),
-            'pest_identity': autocomplete_light.ChoiceWidget('NamesAutocomplete'),
+         #   'pest_identity': autocomplete.ChoiceWidget('NamesAutocomplete'),
+     
+            'pest_identity': ModelSelect2(url='names-autocomplete',attrs={
+        # Set some placeholder
+        'data-placeholder': 'Type at least two letters ...',
+        # Only trigger autocompletion after 3 characters have been typed
+        'data-minimum-input-length': 2,
+    },)
+        
             
         }
         
@@ -163,7 +172,14 @@ class IssueKeywordsRelateForm(forms.ModelForm):
         fields = [
             'issuename',]
         widgets = {
-         'issuename': autocomplete_light.MultipleChoiceWidget ('IssueKeywordAutocomplete'),   
+         #'issuename': autocomplete.MultipleChoiceWidget ('IssueKeywordAutocomplete'),   
+            
+            'issuename': ModelSelect2Multiple(url='issuekeyword-autocomplete',attrs={
+        # Set some placeholder
+        'data-placeholder': 'Type at least two letters ...',
+        # Only trigger autocompletion after 3 characters have been typed
+        'data-minimum-input-length': 2,
+    },)
          }
      
     
@@ -173,7 +189,13 @@ class CommodityKeywordsRelateForm(forms.ModelForm):
         fields = [
             'commname',]
         widgets = {
-         'commname': autocomplete_light.MultipleChoiceWidget ('CommodityKeywordAutocomplete'),   
+        # 'commname': autocomplete.MultipleChoiceWidget ('CommodityKeywordAutocomplete'),   
+         'commname': ModelSelect2Multiple(url='commoditykeyword-autocomplete',attrs={
+        # Set some placeholder
+        'data-placeholder': 'Type at least two letters ...',
+        # Only trigger autocompletion after 3 characters have been typed
+        'data-minimum-input-length': 2,
+    },)
          }   
          
 
@@ -435,10 +457,13 @@ class PhytosanitaryTreatmentForm(forms.ModelForm):
             ]
         exclude = ('author', 'slug', 'publish_date', 'modify_date', 'summary', 'temperature', )
         widgets = {
-            'treatment_type': autocomplete_light.ChoiceWidget('PhytosanitaryTreatmentTypeAutocomplete'),
-            # 'treatment_pestidentity': autocomplete_light.ChoiceWidget('NamesAutocomplete'),
-            #'product_commodityidentity': autocomplete_light.ChoiceWidget('NamesAutocomplete'),
-            
+           # 'treatment_type': autocomplete.ChoiceWidget('PhytosanitaryTreatmentTypeAutocomplete'),
+            'treatment_type': ModelSelect2(url='phytosanitarytreatmenttype-autocomplete',attrs={
+        # Set some placeholder
+        'data-placeholder': 'Type at least two letters ...',
+        # Only trigger autocompletion after 3 characters have been typed
+        'data-minimum-input-length': 2,
+    },)
         }
 class PhytosanitaryTreatmentPestsIdentityForm(forms.ModelForm):
 
@@ -452,11 +477,18 @@ class PhytosanitaryTreatmentPestsIdentityForm(forms.ModelForm):
         ]
         exclude = ('phytosanitarytreatment', 'pestidentitydescr')
         widgets = {
-              'pest': autocomplete_light.ChoiceWidget('NamesAutocomplete'),
+             # 'pest': autocomplete.ChoiceWidget('NamesAutocomplete'),
+             
+            'pest': ModelSelect2(url='names-autocomplete',attrs={
+        # Set some placeholder
+        'data-placeholder': 'Start typing a letter ...',
+        # Only trigger autocompletion after 3 characters have been typed
+        'data-minimum-input-length': 1,
+    },)
         }
 
 
-PhytosanitaryTreatmentPestsIdentityFormSet = inlineformset_factory(PhytosanitaryTreatment, PhytosanitaryTreatmentPestsIdentity,  form=PhytosanitaryTreatmentPestsIdentityForm, extra=3)
+PhytosanitaryTreatmentPestsIdentityFormSet = inlineformset_factory(PhytosanitaryTreatment, PhytosanitaryTreatmentPestsIdentity,  form=PhytosanitaryTreatmentPestsIdentityForm, extra=3,fields = '__all__')
 
 class PhytosanitaryTreatmentCommodityIdentityForm(forms.ModelForm):
 
@@ -470,51 +502,57 @@ class PhytosanitaryTreatmentCommodityIdentityForm(forms.ModelForm):
         ]
         exclude = ('phytosanitarytreatment','commoditydescr' )
         widgets = {
-              'commodity': autocomplete_light.ChoiceWidget('NamesAutocomplete'),
+              #'commodity': autocomplete.ChoiceWidget('NamesAutocomplete'),
+               'commodity': ModelSelect2(url='names-autocomplete',attrs={
+                # Set some placeholder
+                'data-placeholder': 'Start typing a letter ...',
+                # Only trigger autocompletion after 3 characters have been typed
+                'data-minimum-input-length': 1,
+            },)
         }
+ 
+
+PhytosanitaryTreatmentCommodityIdentityFormSet = inlineformset_factory(PhytosanitaryTreatment, PhytosanitaryTreatmentCommodityIdentity,  form=PhytosanitaryTreatmentCommodityIdentityForm, extra=3,fields = '__all__')
 
 
-PhytosanitaryTreatmentCommodityIdentityFormSet = inlineformset_factory(PhytosanitaryTreatment, PhytosanitaryTreatmentCommodityIdentity,  form=PhytosanitaryTreatmentCommodityIdentityForm, extra=3)
 
 
 
-
-
-PublicationUrlFormSet  = inlineformset_factory(Publication,  PublicationUrl, extra=1)
-PublicationFileFormSet = inlineformset_factory(Publication,  PublicationFile,extra=1)
+PublicationUrlFormSet  = inlineformset_factory(Publication,  PublicationUrl, extra=1,fields = '__all__')
+PublicationFileFormSet = inlineformset_factory(Publication,  PublicationFile,extra=1,fields = '__all__')
                  
-CountryNewsUrlFormSet  = inlineformset_factory(CountryNews,  CountryNewsUrl, extra=1)
-CountryNewsFileFormSet = inlineformset_factory(CountryNews,  CountryNewsFile,extra=1)
-PartnersNewsUrlFormSet  = inlineformset_factory(PartnersNews,  PartnersNewsUrl, extra=1)
-PartnersNewsFileFormSet = inlineformset_factory(PartnersNews,  PartnersNewsFile,extra=1)
+CountryNewsUrlFormSet  = inlineformset_factory(CountryNews,  CountryNewsUrl, extra=1,fields = '__all__')
+CountryNewsFileFormSet = inlineformset_factory(CountryNews,  CountryNewsFile,extra=1,fields = '__all__')
+PartnersNewsUrlFormSet  = inlineformset_factory(PartnersNews,  PartnersNewsUrl, extra=1,fields = '__all__')
+PartnersNewsFileFormSet = inlineformset_factory(PartnersNews,  PartnersNewsFile,extra=1,fields = '__all__')
                   
-CnPublicationUrlFormSet  = inlineformset_factory(CnPublication,  CnPublicationUrl, extra=1)
-CnPublicationFileFormSet = inlineformset_factory(CnPublication,  CnPublicationFile,extra=1)
+CnPublicationUrlFormSet  = inlineformset_factory(CnPublication,  CnPublicationUrl, extra=1,fields = '__all__')
+CnPublicationFileFormSet = inlineformset_factory(CnPublication,  CnPublicationFile,extra=1,fields = '__all__')
        
-PartnersPublicationUrlFormSet  = inlineformset_factory(PartnersPublication,  PartnersPublicationUrl, extra=1)
-PartnersPublicationFileFormSet = inlineformset_factory(PartnersPublication,  PartnersPublicationFile,extra=1)
+PartnersPublicationUrlFormSet  = inlineformset_factory(PartnersPublication,  PartnersPublicationUrl, extra=1,fields = '__all__')
+PartnersPublicationFileFormSet = inlineformset_factory(PartnersPublication,  PartnersPublicationFile,extra=1,fields = '__all__')
        
                
         
         
-WebsiteUrlFormSet  = inlineformset_factory(Website,  WebsiteUrl, extra=1)
-PartnersWebsiteUrlFormSet  = inlineformset_factory(PartnersWebsite,  PartnersWebsiteUrl, extra=1)
+WebsiteUrlFormSet  = inlineformset_factory(Website,  WebsiteUrl, extra=1,fields = '__all__')
+PartnersWebsiteUrlFormSet  = inlineformset_factory(PartnersWebsite,  PartnersWebsiteUrl, extra=1,fields = '__all__')
  
-EventreportingUrlFormSet  = inlineformset_factory(EventReporting,  EventreportingUrl, extra=1)
-EventreportingFileFormSet = inlineformset_factory(EventReporting,  EventreportingFile,extra=1)
+EventreportingUrlFormSet  = inlineformset_factory(EventReporting,  EventreportingUrl, extra=1,fields = '__all__')
+EventreportingFileFormSet = inlineformset_factory(EventReporting,  EventreportingFile,extra=1,fields = '__all__')
 
 
-ImplementationISPMFileFormSet = inlineformset_factory(ImplementationISPM,  ImplementationISPMFile,extra=1)
-ImplementationISPMUrlFormSet  = inlineformset_factory(ImplementationISPM,  ImplementationISPMUrl, extra=1)
+ImplementationISPMFileFormSet = inlineformset_factory(ImplementationISPM,  ImplementationISPMFile,extra=1,fields = '__all__')
+ImplementationISPMUrlFormSet  = inlineformset_factory(ImplementationISPM,  ImplementationISPMUrl, extra=1,fields = '__all__')
 
-PestFreeAreaFileFormSet = inlineformset_factory(PestFreeArea,  PestFreeAreaFile,extra=1) 
-PestFreeAreaUrlFormSet  = inlineformset_factory(PestFreeArea,  PestFreeAreaUrl, extra=1)
+PestFreeAreaFileFormSet = inlineformset_factory(PestFreeArea,  PestFreeAreaFile,extra=1,fields = '__all__') 
+PestFreeAreaUrlFormSet  = inlineformset_factory(PestFreeArea,  PestFreeAreaUrl, extra=1,fields = '__all__')
 
-PestReportFileFormSet = inlineformset_factory(PestReport,  PestReportFile,extra=1)
-PestReportUrlFormSet  = inlineformset_factory(PestReport,  PestReportUrl, extra=1)
+PestReportFileFormSet = inlineformset_factory(PestReport,  PestReportFile,extra=1,fields = '__all__')
+PestReportUrlFormSet  = inlineformset_factory(PestReport,  PestReportUrl, extra=1,fields = '__all__')
 
-ReportingoblicationFileFormSet = inlineformset_factory(ReportingObligation,  ReportingObligation_File,extra=1)
-ReportingObligationUrlFormSet  = inlineformset_factory(ReportingObligation,  ReportingObligationUrl, extra=1)
+ReportingoblicationFileFormSet = inlineformset_factory(ReportingObligation,  ReportingObligation_File,extra=1,fields = '__all__')
+ReportingObligationUrlFormSet  = inlineformset_factory(ReportingObligation,  ReportingObligationUrl, extra=1,fields = '__all__')
 
 #class TransReportingObligationForm(forms.ModelForm):
 #    class Meta:
@@ -545,7 +583,7 @@ class DraftProtocolForm(forms.ModelForm):
             'closing_date': AdminDateWidget(),
         
         }
-DraftProtocolFileFormSet = inlineformset_factory(DraftProtocol,  DraftProtocolFile,extra=1)
+DraftProtocolFileFormSet = inlineformset_factory(DraftProtocol,  DraftProtocolFile,extra=1,fields = '__all__')
 #
 class DraftProtocolCommentsForm(forms.ModelForm):
     class Meta:
@@ -563,7 +601,7 @@ class DraftProtocolCommentsForm(forms.ModelForm):
            'draftprotocol': forms.HiddenInput(),
         }
 
-Poll_ChoiceFormSet = inlineformset_factory(Poll,  Poll_Choice,extra=1)
+Poll_ChoiceFormSet = inlineformset_factory(Poll,  Poll_Choice,extra=1,fields = '__all__')
 
 class PollForm(forms.ModelForm):
     class Meta:
@@ -596,7 +634,7 @@ class EmailUtilityMessageForm(forms.ModelForm):
            ]
        
         exclude = ( 'date','sent', 'groups')      
-EmailUtilityMessageFileFormSet = inlineformset_factory(EmailUtilityMessage,  EmailUtilityMessageFile,extra=1)
+EmailUtilityMessageFileFormSet = inlineformset_factory(EmailUtilityMessage,  EmailUtilityMessageFile,extra=1,fields = '__all__')
 
 
 
@@ -621,7 +659,7 @@ class MassEmailUtilityMessageForm(forms.ModelForm):
 
         exclude = ( 'date','sent', 'groups','not_sentto','sentto','author','status','emailtoISO3','not_senttoISO3','senttoISO3')       
         
-MassEmailUtilityMessageFileFormSet = inlineformset_factory(MassEmailUtilityMessage,  MassEmailUtilityMessageFile,extra=1)
+MassEmailUtilityMessageFileFormSet = inlineformset_factory(MassEmailUtilityMessage,  MassEmailUtilityMessageFile,extra=1,fields = '__all__')
 
 ##NEW
 class ContactUsEmailMessageForm(forms.ModelForm):
@@ -688,7 +726,7 @@ class IRSSActivityForm(forms.ModelForm):
             'country': forms.HiddenInput(),   
             'publication_date': AdminDateWidget(),
         }
-IRSSActivityFileFormSet = inlineformset_factory(IRSSActivity,  IRSSActivityFile,extra=1)
+IRSSActivityFileFormSet = inlineformset_factory(IRSSActivity,  IRSSActivityFile,extra=1,fields = '__all__')
       
 class UserMembershipHistoryForm(forms.ModelForm):
 
@@ -802,7 +840,7 @@ class TopicLeadsForm(forms.ModelForm):
         exclude = (  )
         
         widgets = {
-              'user': autocomplete_light.ChoiceWidget('UserAutocomplete'),
+              #'user': autocomplete.ChoiceWidget('UserAutocomplete'),
         }
 
 
@@ -823,11 +861,11 @@ class TopicAssistantsForm(forms.ModelForm):
         exclude = (  )
         
         widgets = {
-              'user': autocomplete_light.ChoiceWidget('UserAutocomplete'),
+             # 'user': autocomplete_light.ChoiceWidget('UserAutocomplete'),
         }
 
 
-TopicAssistantsFormSet = inlineformset_factory(Topic, TopicAssistants,  form=TopicAssistantsForm, extra=2)
+TopicAssistantsFormSet = inlineformset_factory(Topic, TopicAssistants,  form=TopicAssistantsForm, extra=2,fields = '__all__')
 
 
 
@@ -893,7 +931,7 @@ class NROStatsForm(forms.ModelForm):
            'date', 
           
         ]
-        exclude = ( 'selcns')
+        exclude = ( 'selcns',)
         widgets = {
              'date': AdminDateWidget(),
               'datetraining': AdminDateWidget(),
@@ -938,17 +976,17 @@ class ContributedResourceForm(forms.ModelForm):
             'resource_provide_by',
             'featured',
             'tag',
-           
+          
             
             ]
         exclude = ('author', 'slug', 'publish_date', 'modify_date', )
         widgets = {
             'publication_date': AdminDateWidget(),
-        }
+      }
 
-ContributedResourceUrlFormSet  = inlineformset_factory(ContributedResource,  ContributedResourceUrl, extra=1)
-ContributedResourceFileFormSet = inlineformset_factory(ContributedResource,  ContributedResourceFile,extra=1)
-ContributedResourcePhotoFormSet = inlineformset_factory(ContributedResource,  ContributedResourcePhoto,extra=1)
+ContributedResourceUrlFormSet  = inlineformset_factory(ContributedResource,  ContributedResourceUrl, extra=1,fields = '__all__')
+ContributedResourceFileFormSet = inlineformset_factory(ContributedResource,  ContributedResourceFile,extra=1,fields = '__all__')
+ContributedResourcePhotoFormSet = inlineformset_factory(ContributedResource,  ContributedResourcePhoto,extra=1,fields = '__all__')
 
 class UserAutoRegistrationResourcesForm(forms.ModelForm):
     class Meta:

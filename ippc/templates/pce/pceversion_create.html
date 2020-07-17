@@ -1,7 +1,7 @@
 {% extends "pce/basepce.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
-{% block meta_title %}{% trans "Configuration" %} - {{ user.get_profile.country.name}} {% endblock %}
+{% block meta_title %}{% trans "Configuration" %} - {{ userprofile.country.name}} {% endblock %}
 
 
 
@@ -10,10 +10,10 @@
 {% block breadcrumb_menu %}
 <li>
     <a href="/pce">{% trans "PCE Home" %}</a>
-    <span class="divider">/</span>
+    
 </li>
 <li class="active">
-    {{ user.get_profile.country.name }} - {% trans " PCE Configuration: Basic Information" %}
+    {{ userprofile.country.name }} - {% trans " PCE Configuration: Basic Information" %}
 </li>
 
 
@@ -104,7 +104,7 @@ function checkRules()
 </div>
 {% else %}
     {% if can_see %}
-        <p class="alert alert-warning">{% trans "The latest session is still open, you can only" %} <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/session/create_step1/{{version_id}}/">{% trans "re-configure!" %}</a></p>
+        <p class="alert alert-warning">{% trans "The latest session is still open, you can only" %} <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/session/create_step1/{{version_id}}/">{% trans "re-configure!" %}</a></p>
     {% else %}
       <p class="alert alert-warning">{% trans "No permissions to see this page." %}</p>
     {% endif %}

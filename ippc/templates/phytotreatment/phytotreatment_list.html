@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 {% block extra_css %}
   <link rel="stylesheet" href="{% static "css/DT_bootstrap.css" %}">
 {% endblock %}
@@ -148,7 +148,7 @@ This web page was last updated on 2017-10-23. For queries or comments regarding 
         {% if user.is_superuser or perms.ippc.change_phytosanitarytreatment %}
         <td>
             {% if user.is_superuser %}   
-                <a class="small pull-right" href="/admin/ippc/phytosanitarytreatment/{{ object.0.id }}"><i class="icon-edit"></i>Edit as Admin</a><br>
+                <a class="small pull-right" href="/admin/ippc/phytosanitarytreatment/{{ object.0.id }}/change/"><i class="icon-edit"></i>Edit as Admin</a><br>
             {% endif %}
             {% if perms.ippc.change_phytosanitarytreatment %}
              <a class="small pull-right" href="/core-activities/standards-setting/technical-panels/technical-panel-phytosanitary-treatments/phytosanitary-treatments-tool/edit/{{ object.0.id }}"><i class="icon-edit"></i> {% trans "Edit" %}</a>

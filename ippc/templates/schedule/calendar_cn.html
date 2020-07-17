@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 {% load scheduletags i18n %}
 
 
@@ -11,7 +11,6 @@
 {% block body_class %}wide{% endblock %}
 
 {% block breadcrumb_menu %}
-<li class="breadcrumb-item"><a href="/{{ LANGUAGE_CODE }}/">{% trans "Home" %}</a></li>
 <li class="breadcrumb-item">
   <a href="/countries/">Countries</a>
  
@@ -35,7 +34,7 @@
 <p class="pull-right">
   <a href="javascript:history.go(-1)">{% trans "« Go back"  %}</a><br/>
   
-      {% if perms.schedule.add_event and request.user.get_profile.country.id == country.id or user.is_superuser %}
+      {% if perms.schedule.add_event and userprofile.country.id == country.id or user.is_superuser %}
     <small>  <a class="btn btn-small btn-info" href="{% url 'calendar_create_event' country|slugify 'calendar' %}">+ {% trans "Add new event" %}</a>
     </small>
     {% endif %}

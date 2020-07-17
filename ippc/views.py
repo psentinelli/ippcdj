@@ -1,12 +1,16 @@
-import autocomplete_light
-#autocomplete_light.autodiscover()
+from django.shortcuts import render
 
+#import autocomplete_light
+from dal import autocomplete
+#autocomplete_light.autodiscover()
+import dal_select2.views 
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.messages import info, error
 from django.utils import timezone
 from django.core import mail
 from django.conf import settings
+from django.template.response import TemplateResponse
 
 from django.contrib.auth.models import User,Group
 from .models import ReminderMessage,ContactType,PublicationLibrary,Publication,EppoCode,EmailUtilityMessage, EmailUtilityMessageFile, Poll_Choice, Poll,PollVotes, IppcUserProfile,\
@@ -14,18 +18,18 @@ CountryPage,PartnersPage, PestStatus, PestReport, IS_PUBLIC, IS_HIDDEN, Publicat
 PublicationFile,PublicationUrl,ReportingObligation_File,ReportingObligationUrl, EventreportingFile,EventreportingUrl,    ImplementationISPMFile,ImplementationISPMUrl, PestFreeAreaFile,PestFreeAreaUrl,\
 DraftProtocol,DraftProtocolComments,NotificationMessageRelate,CommentFile,AnswerVotes,\
 ReportingObligation, BASIC_REP_TYPE_CHOICES, EventReporting, EVT_REP_TYPE_CHOICES,Website,CnPublication,PartnersPublication,PartnersNews, PartnersWebsite,CountryNews, \
-PestFreeArea,ImplementationISPM,REGIONS, IssueKeywordsRelate,CommodityKeywordsRelate,EventreportingFile,ReportingObligation_File,\
+PestFreeArea,ImplementationISPM,REGIONS,IssueKeyword,CommodityKeyword, IssueKeywordsRelate,CommodityKeywordsRelate,EventreportingFile,ReportingObligation_File,\
 ContactUsEmailMessage,FAQsItem,FAQsCategory,QAQuestion, QAAnswer,UserAutoRegistration,UserAutoRegistrationResources,IRSSActivity,IRSSActivityFile,IRSS_ACT_TYPE_CHOICES,\
 TransFAQsCategory,TransFAQsItem,MassEmailUtilityMessage,MassEmailUtilityMessageFile,\
 OCPHistory, PartnersContactPointHistory,CnEditorsHistory,PartnersEditorHistory,UserMembershipHistory,MediaKitDocument,MyTool,\
-PhytosanitaryTreatment,PhytosanitaryTreatmentPestsIdentity,PhytosanitaryTreatmentCommodityIdentity,CertificatesTool,WorkshopCertificatesTool,CPMS,TOPIC_PRIORITY_CHOICES,\
+PhytosanitaryTreatment,PhytosanitaryTreatmentType,PhytosanitaryTreatmentPestsIdentity,PhytosanitaryTreatmentCommodityIdentity,CertificatesTool,WorkshopCertificatesTool,CPMS,TOPIC_PRIORITY_CHOICES,\
 Topic,TopicAssistants,TopicLeads,TransTopic,TOPIC_STATUS_CHOICES,SC_TYPE_CHOICES,B_CertificatesTool,NROStats,MyTool2,ContributedResource,CommitteeMeeting
 #TransReportingObligation,#COOPTYPE_CHOICES,
 
 from mezzanine.core.models import Displayable, CONTENT_STATUS_DRAFT, CONTENT_STATUS_PUBLISHED
 from mezzanine.pages.models import Page, RichTextPage
 
-from .forms import PestReportForm,PublicationUrlFormSet,PublicationForm, PublicationFileFormSet, ReportingObligationForm, EventReportingForm, PestFreeAreaForm,\
+from ippc.forms import PestReportForm,PublicationUrlFormSet,PublicationForm, PublicationFileFormSet, ReportingObligationForm, EventReportingForm, PestFreeAreaForm,\
 ImplementationISPMForm,IssueKeywordsRelateForm,CommodityKeywordsRelateForm,EventreportingFileFormSet,ReportingoblicationFileFormSet,\
 ImplementationISPMFileFormSet,PestFreeAreaFileFormSet, PestReportFileFormSet,WebsiteUrlFormSet,WebsiteForm, \
 EventreportingUrlFormSet, ReportingObligationUrlFormSet ,PestFreeAreaUrlFormSet,ImplementationISPMUrlFormSet,PestReportUrlFormSet,\
@@ -43,21 +47,23 @@ ContributedResourceForm, ContributedResourceUrlFormSet, ContributedResourceFileF
    
 ##TansReportingObligationForm , UserForm,
 
-from schedule.models import Event, EventParticipants
+from schedule.models import Event , EventParticipants
+
 from django.views.generic import ListView, MonthArchiveView, YearArchiveView, DetailView, TemplateView, CreateView
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.mail import send_mail,send_mass_mail
 
 from django.template.defaultfilters import slugify, lower
 from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import  get_object_or_404, redirect#render_to_response,
+from django.shortcuts import render
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.forms.models import inlineformset_factory
-from django.contrib.contenttypes.generic import generic_inlineformset_factory 
+from django.contrib.contenttypes.forms import generic_inlineformset_factory 
 from django.forms.formsets import formset_factory
-from compiler.pyassem import order_blocks
+#from compiler.pyassem import order_blocks
 import time
 from django.http import HttpResponse
 from datetime import datetime
@@ -65,19 +71,22 @@ from django.contrib.contenttypes.models import ContentType
 from mezzanine.generic import views as myview
 from mezzanine.generic import models
 from t_eppo.models  import Names,Links
-
+from django.contrib.auth.models import User,Group
 import os
 import shutil
 
 import zipfile
-import StringIO
-from settings import PROJECT_ROOT, PROJECT_DIRNAME, MEDIA_ROOT,DATABASES,ALLOWED_HOSTS
+#import StringIO
+from io import StringIO
+#from settings import PROJECT_ROOT, PROJECT_DIRNAME, MEDIA_ROOT,DATABASES,ALLOWED_HOSTS
+from myzzz.settings import PROJECT_ROOT, PROJECT_DIRNAME, MEDIA_URL,MEDIA_ROOT,DATABASES,ALLOWED_HOSTS
 from django.core.files.storage import default_storage
 
 import getpass, imaplib, email
 from xml.dom import minidom
 
 def get_profile():
+    print("aaaaaaaaaaaaaaaaaa")
     return IppcUserProfile.objects.all()
 # def pest_report_country():
 #     return PestReport.objects.all()
@@ -734,7 +743,8 @@ def reporting_trough_eppo1(request):
 
 
 import datetime as dt
-import urllib2
+#import urllib2
+from urllib.request import urlopen
 import socket
 def reminder_getlink(cn,type,obj):
     return "https://www.ippc.int/countries/"+cn+"/"+type+"/"+str(obj.publish_date.strftime("%Y"))+'/'+str(obj.publish_date.strftime("%m"))+'/'+obj.slug+'/'
@@ -837,17 +847,17 @@ def reminder_to_cn(request,id=None):
     if timezone.now().day == date_day:
         db = MySQLdb.connect(DATABASES["default"]["HOST"],DATABASES["default"]["USER"],DATABASES["default"]["PASSWORD"],DATABASES["default"]["NAME"])
         cursor = db.cursor()
-       # reminder_log_report.write("date_day="+ str(date_day)+" \n\n")
-       # reminder_log_report.write("id cron="+ str(id)+" \n\n")
-      #  reminder_log_report.write("id_range_min="+ str(id_range_min)+", id_range_max="+str(id_range_max)+" \n\n")
+        # reminder_log_report.write("date_day="+ str(date_day)+" \n\n")
+        # reminder_log_report.write("id cron="+ str(id)+" \n\n")
+        #  reminder_log_report.write("id_range_min="+ str(id_range_min)+", id_range_max="+str(id_range_max)+" \n\n")
               
         countriesList=CountryPage.objects.filter().exclude(id='-1')
         for cn in countriesList :
-	 #   reminder_log_report.write("cn="+lower(slugify(cn))+" \n\n")
-            if cn.send_reminder and cn.id >=id_range_min and cn.id <=id_range_max :          
-		aa+=lower(slugify(cn)) +'<br>'
+	    #reminder_log_report.write("cn="+lower(slugify(cn))+" \n\n")
+            if cn.send_reminder and cn.id >=id_range_min and cn.id <=id_range_max:          
+		#aa += lower(slugify(cn))
                 country_slug = lower(slugify(cn))   
-              #  reminder_log_report.write("["+ timezone.now().strftime('%Y%m%d%H%M%S')+" - send reminder] "+country_slug+" \n\n")
+                #reminder_log_report.write("["+ timezone.now().strftime('%Y%m%d%H%M%S')+" - send reminder] "+country_slug+" \n\n")
                 
                 countryo = get_object_or_404(CountryPage, page_ptr_id=cn.id)
                 cp = countryo.contact_point_id
@@ -948,7 +958,7 @@ def reminder_to_cn(request,id=None):
                         #print('test-sending')
                         sent=connection.send_messages(messages)#
                         connection.close()
-			remider_message.sent = True
+                        remider_message.sent = True
                         remider_message.save()  
                 #every 3 months  CPs                          
                 if timezone.now().month in date3month :
@@ -1064,7 +1074,7 @@ def reminder_to_cn(request,id=None):
                         message.content_subtype = "html"
                         messages.append(message)
                         
-			connection = mail.get_connection()
+                        connection = mail.get_connection()
                         connection.open()
                         #print('test-sending')
                         sent=connection.send_messages(messages)#
@@ -1087,15 +1097,15 @@ def reminder_to_cn(request,id=None):
                        reportingobligations_files= ReportingObligation_File.objects.filter(reportingobligation_id=r.id)
                        reportingobligations_urls= ReportingObligationUrl.objects.filter(reportingobligation_id=r.id)
                        for f in reportingobligations_files:
-                          link=''
-                          link='https://www.ippc.int/static/media/'+str(f.file)
-                          try:
-                             urllib2.urlopen(link)
-#                             req = urllib2.Request(link)
-#                             response = urllib2.urlopen(req)
-                          except:
-                             print "invalid: ", link
-                             links_to_notify=links_to_notify+link+'<br>'
+                            link=''
+                            link='https://www.ippc.int/static/media/'+str(f.file)
+                            try:
+                                urlopen(link)
+                            #                             req = Request(link)
+                            #                             response = urllib2.urlopen(req)
+                            except:
+                                print("invalid: link")
+                                links_to_notify=links_to_notify+link+'<br>'
                        for u in reportingobligations_urls:
                           url=''
                           url=str(u.url_for_more_information)
@@ -1119,11 +1129,11 @@ def reminder_to_cn(request,id=None):
                           link=''
                           link='https://www.ippc.int/static/media/'+str(f.file)
                           try:
-                             urllib2.urlopen(link)
+                              urlopen(link)
 #                             req = urllib2.Request(link)
 #                             response = urllib2.urlopen(req)
                           except:
-                             print "invalid: ", link
+                             print("invalid:  link")
                              links_to_notifye=links_to_notifye+link+'<br>'
                        for u in ev_urls:
                           url=''
@@ -1148,11 +1158,11 @@ def reminder_to_cn(request,id=None):
                           link=''
                           link='https://www.ippc.int/static/media/'+str(f.file)
                           try:
-                             urllib2.urlopen(link)
+                             urlopen(link)
 #                             req = urllib2.Request(link)
 #                             response = urllib2.urlopen(req)
                           except:
-                             print "invalid: ", link
+                             print("invalid:  link")
                              links_to_notifyp=links_to_notifyp+link+'<br>'
                        for u in p_urls:
                           url=''
@@ -1348,7 +1358,8 @@ def disable_users(request):
         db.rollback()
         error(reques, _("ERROR DISABLED / ENABLED all users."))
     db.close() 
-    return redirect('/work-area/')
+    return redirect('/work-area/')   
+
 class ReminderMessageListView(ListView):
     """    ReminderMessage List view """
     context_object_name = 'latest'
@@ -1391,9 +1402,11 @@ def commenta(request, template="generic/comments.html"):
             emailto_all.append(str(user_email))
            # print("-----------------------------")
     
-    import sys;
-    reload(sys);
-    sys.setdefaultencoding("utf8")
+    #import sys;
+    #from importlib import reload
+    #reload(sys);
+    
+    #sys.setdefaultencoding("utf8")
     error_msg=''
     form = myview.ThreadedCommentForm(request, obj, post_data)
     if form.is_valid():
@@ -1416,7 +1429,7 @@ def commenta(request, template="generic/comments.html"):
       
         notifificationmessage = mail.EmailMessage(subject,text,'ippc@fao.org', emailto_all, ['paola.sentinelli@fao.org'])
         notifificationmessage.content_subtype = "html"
-        sent =notifificationmessage.send()
+        #paola sent =notifificationmessage.send()
             
         response = redirect(myview.add_cache_bypass(comment.get_absolute_url()))
         # Store commenter's details in a cookie for 90 days.
@@ -1461,7 +1474,7 @@ class CountryView(TemplateView):
             # 'editors': self.kwargs['editors']
             # 'profile_user': self.kwargs['profile_user']
         })
-        
+
      
         reporting_array = []
         for i in range(1,5):
@@ -1473,7 +1486,16 @@ class CountryView(TemplateView):
             evrep=EventReporting.objects.filter(country__country_slug=self.country,event_rep_type=i,is_version=False)
             eventreporting_array.append(evrep.count())
         
-     
+        countryo = get_object_or_404(CountryPage, country_slug=self.country)
+        cn_cpid=countryo.contact_point_id
+        user_obj=User.objects.get(id=cn_cpid)
+        cp=get_object_or_404(IppcUserProfile,user_id=cn_cpid)
+       
+        
+
+        context['profile']=cp
+        
+        
         pestreporting_array = []
         pests=PestReport.objects.filter(country__country_slug=self.country,is_version=False)
         pestreporting_array.append(pests.count())
@@ -1864,6 +1886,10 @@ class PestReportListView(ListView):
         # context.update({
         #     'country': self.kwargs['country']
         # })
+        user=self.request.user
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile']   =userprofile  
+ 
         return context
 
 # @login_required
@@ -1895,6 +1921,9 @@ class PestReportHiddenListView(ListView):
         # context.update({
         #     'country': self.kwargs['country']
         # })
+        user=self.request.user
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile']   =userprofile
         return context
 
     # put class-based generic view behind login
@@ -1911,15 +1940,18 @@ class PestReportDetailView(DetailView):
     model = PestReport
     context_object_name = 'report'
     template_name = 'countries/pest_report_detail.html'
-    queryset = PestReport.objects.filter(status=CONTENT_STATUS_PUBLISHED)
+    queryset = PestReport.objects.filter(status=CONTENT_STATUS_PUBLISHED, is_version=False)
     
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(PestReportDetailView, self).get_context_data(**kwargs)
       
-        p = get_object_or_404(PestReport, slug=self.kwargs['slug'])
+        p = get_object_or_404(PestReport, slug=self.kwargs['slug'],is_version=False,country__country_slug=self.kwargs['country'])
         context['8col'] = 1
         versions= PestReport.objects.filter(country__country_slug=self.kwargs['country'], status=CONTENT_STATUS_PUBLISHED, is_version=True, parent_id=p.id).order_by('-modify_date')
         context['versions'] = versions
+        user=self.request.user
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile']   =userprofile
         return context
     
 class PublicationListView(ListView):
@@ -1931,6 +1963,7 @@ class PublicationListView(ListView):
     date_field = 'modify_date'
     template_name = 'pages/publication_list.html'
     queryset = Publication.objects.filter(status=IS_PUBLIC,is_version=False).order_by('-publication_date', 'title')
+   
     allow_future = False
     allow_empty = True
     paginate_by = 500
@@ -2124,7 +2157,7 @@ class PublicationFilesListView(ListView):
             zip_lang1 = "/static/media/tmp/"+"archive_"+str(lang[0])+"_"+ date+".zip"
             zip_lang = zipfile.ZipFile(MEDIA_ROOT+"/tmp/"+"archive_"+str(lang[0])+"_"+ date+".zip", "w")
             for file_path in lang[1]:
-                # strfpath=os.path.join('/work/projects/ippcdj-env/public/', '/work/projects/ippcdj-env/public/static/media/')+str(file_path)
+                #strfpath=os.path.join('/work/projects/ippcdj-env/public/', '/work/projects/ippcdj-env/public/static/media/')+str(file_path)
                 strfpath=os.path.join(MEDIA_ROOT, str(file_path))
                 filename = strfpath.split('/');
                 fname=filename[len(filename)-1]
@@ -2327,7 +2360,7 @@ def send_report_notification_message(newitem,type,id,content_type,title,url):
     #print(textmessage)
     message.content_subtype = "html"
     #print('test-sending')
-    sent =message.send()
+    #paola sent =message.send()
  
 @login_required
 @permission_required('ippc.add_pestreport', login_url="/accounts/login/")
@@ -2335,7 +2368,8 @@ def pest_report_create(request, country):
     """ Create Pest Report """
     user = request.user
     author = user
-    country=user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+    country=userprofile.country
     user_country_slug = lower(slugify(country))
 
     form = PestReportForm(request.POST, request.FILES)
@@ -2397,8 +2431,10 @@ def pest_report_create(request, country):
             else:
                 return redirect("pest-report-detail", country=user_country_slug, year=new_pest_report.publish_date.strftime("%Y"), month=new_pest_report.publish_date.strftime("%m"), slug=new_pest_report.slug)
          else:
-             return render_to_response('countries/pest_report_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
-             context_instance=RequestContext(request))
+             #return render('countries/pest_report_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request, 'countries/pest_report_create.html', {'userprofile':userprofile,'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},)      
+ 
        
     else:
         form = PestReportForm(initial={'country': country}, instance=PestReport())
@@ -2408,9 +2444,10 @@ def pest_report_create(request, country):
    
         f_form =PestReportFileFormSet()
         u_form =PestReportUrlFormSet()
-    return render_to_response('countries/pest_report_create.html', {'form': form,'f_form': f_form,'u_form':u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
-        context_instance=RequestContext(request))
-
+    #return render('countries/pest_report_create.html', {'form': form,'f_form': f_form,'u_form':u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request, 'countries/pest_report_create.html', {'userprofile':userprofile,'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},)      
+ 
 import MySQLdb
 # http://stackoverflow.com/a/1854453/412329
 @login_required
@@ -2419,7 +2456,9 @@ def pest_report_edit(request, country, id=None, template_name='countries/pest_re
     """ Edit Pest Report """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     
@@ -2608,9 +2647,11 @@ def pest_report_edit(request, country, id=None, template_name='countries/pest_re
         notifyrelateform =NotificationMessageRelateForm(instance=notifications)
         f_form = PestReportFileFormSet(instance=pest_report)
         u_form = PestReportUrlFormSet(instance=pest_report)
-    return render_to_response(template_name, {
-        'form': form,'f_form':f_form,'u_form':u_form,'issueform': issueform,'commodityform': commodityform,  "pest_report": pest_report,'notifyrelateform':notifyrelateform
-    }, context_instance=RequestContext(request))
+    #return render(template_name, {
+    #    'form': form,'f_form':f_form,'u_form':u_form,'issueform': issueform,'commodityform': commodityform,  "pest_report": pest_report,'notifyrelateform':notifyrelateform
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request, template_name, {'userprofile':userprofile,  'form': form,'f_form':f_form,'u_form':u_form,'issueform': issueform,'commodityform': commodityform,  "pest_report": pest_report,'notifyrelateform':notifyrelateform},)      
+ 
 
 #
 ## http://stackoverflow.com/a/1854453/412329
@@ -2620,7 +2661,9 @@ def pest_report_validate(request, country, id=None):
     """ VALIDATE PestReport  """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     if id:
@@ -2665,6 +2708,9 @@ class ReportingObligationListView(ListView):
         context['country'] = self.kwargs['country']
         context['basic_types'] =BASIC_REP_TYPE_CHOICES
         context['current_type'] =int(self.kwargs['type'])
+        user = self.request.user 
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] =userprofile
         return context
    
    
@@ -2680,7 +2726,26 @@ class IppcUserProfileDetailView(DetailView):
     context_object_name = 'user'
     template_name = 'accounts/account_profile.html'
     queryset = IppcUserProfile.objects.filter()
+    
+    
+   
+   
+ 
 
+def profile(request, username, template="accounts/account_profile.html",
+            extra_context=None):
+    """
+    Display a profile.
+    """
+    lookup = {"username__iexact": username, "is_active": True}
+    user_obj= get_object_or_404(User, **lookup)
+    userippc = get_object_or_404(IppcUserProfile, user_id=user_obj.id)
+          
+    context = {"profile_user": userippc}
+    context.update(extra_context or {})
+    #return TemplateResponse(request, template, context)
+    
+    return render(request, template, context)
 
 @login_required
 def profile_update(request, template="accounts/account_profile_update.html"):
@@ -2720,7 +2785,7 @@ def profile_update(request, template="accounts/account_profile_update.html"):
 #         form = IppcUserProfileForm(instance=profile)
 #         userform = UserForm(request.POST, instance=request.user)
 #
-#     return render_to_response(template_name, {
+#     return render(template_name, {
 #         'form': form, 'userform': userform,'email':request.user.email,
 #     }, context_instance=RequestContext(request))
        
@@ -2730,17 +2795,20 @@ class ReportingObligationDetailView(DetailView):
     model = ReportingObligation
     context_object_name = 'reportingobligation'
     template_name = 'countries/reporting_obligation_detail.html'
-    queryset = ReportingObligation.objects.filter()
+    queryset = ReportingObligation.objects.filter(is_version=False)
    
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(ReportingObligationDetailView, self).get_context_data(**kwargs)
-        p = get_object_or_404(ReportingObligation, slug=self.kwargs['slug'])
+        p = get_object_or_404(ReportingObligation, slug=self.kwargs['slug'],is_version=False,country__country_slug=self.kwargs['country'])
         context['8col'] = 1
         
         versions= ReportingObligation.objects.filter(country__country_slug=self.kwargs['country'], is_version=True, parent_id=p.id).order_by('-modify_date')
         context['versions'] = versions
-      
+        user =  self.request.user  
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] =userprofile
         return context
+
 
 @login_required
 @permission_required('ippc.add_reportingobligation', login_url="/accounts/login/")
@@ -2748,7 +2816,9 @@ def reporting_obligation_create(request, country,type):
     """ Create Reporting Obligation """
     user = request.user
     author = user
-    country=user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     user_country_slug = lower(slugify(country))
 
     form = ReportingObligationForm(request.POST, request.FILES)
@@ -2797,8 +2867,10 @@ def reporting_obligation_create(request, country,type):
             info(request, _("Successfully created Reporting obligation."))
             return redirect("reporting-obligation-detail", country=user_country_slug, year=new_reporting_obligation.publish_date.strftime("%Y"), month=new_reporting_obligation.publish_date.strftime("%m"), slug=new_reporting_obligation.slug)
          else:
-            return render_to_response('countries/reporting_obligation_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
-             context_instance=RequestContext(request))
+            #return render('countries/reporting_obligation_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
+            # context_instance=RequestContext(request))
+             #return render(request, templates, context)
+            return TemplateResponse(request, 'countries/reporting_obligation_create.html',  {'userprofile':userprofile,'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform})
     else:
         form = ReportingObligationForm(initial={'country': country,'reporting_obligation_type': type}, instance=ReportingObligation())
         issueform =IssueKeywordsRelateForm(request.POST)
@@ -2807,9 +2879,9 @@ def reporting_obligation_create(request, country,type):
         f_form =ReportingoblicationFileFormSet()
         u_form =ReportingObligationUrlFormSet()
 
-    return render_to_response('countries/reporting_obligation_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
-        context_instance=RequestContext(request))
-        
+    #return render('countries/reporting_obligation_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
+     #   context_instance=RequestContext(request), render=None)
+    return TemplateResponse(request, 'countries/reporting_obligation_create.html', {'userprofile':userprofile,'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},)      
         
         
 # http://stackoverflow.com/a/1854453/412329
@@ -2819,8 +2891,9 @@ def reporting_obligation_edit(request, country, id=None, template_name='countrie
     """ Edit Reporting Obligation """
     user = request.user
     author = user
-    country = user.get_profile().country
-    # country_id = PestReport.objects.filter(country__country_id=country.id)
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     user_country_slug = lower(slugify(country))
     if id:
         reporting_obligation = get_object_or_404(ReportingObligation, country=country, pk=id)
@@ -2980,9 +3053,11 @@ def reporting_obligation_edit(request, country, id=None, template_name='countrie
         notifyrelateform =NotificationMessageRelateForm(instance=notifications)
         f_form = ReportingoblicationFileFormSet(instance=reporting_obligation)
         u_form = ReportingObligationUrlFormSet(instance=reporting_obligation)
-    return render_to_response(template_name, {
-        'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "reporting_obligation": reporting_obligation,'notifyrelateform':notifyrelateform
-    }, context_instance=RequestContext(request))
+    #return render(template_name, {
+    #    'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "reporting_obligation": reporting_obligation,'notifyrelateform':notifyrelateform
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request, template_name,  {'userprofile':userprofile,'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "reporting_obligation": reporting_obligation,'notifyrelateform':notifyrelateform})
+   
 
 ## http://stackoverflow.com/a/1854453/412329
 #@login_required
@@ -3013,7 +3088,7 @@ def reporting_obligation_edit(request, country, id=None, template_name='countrie
 #    else:
 #        transform = TransReportingObligationForm(instance=treporting_obligation)
 #        
-#    return render_to_response(template_name, {
+#    return render(template_name, {
 #        'transform':transform,'lang':lang,"reporting_obligation":reporting_obligation,"treporting_obligation": treporting_obligation,
 #    }, context_instance=RequestContext(request))
 #
@@ -3026,7 +3101,9 @@ def reporting_obligation_validate(request, country, id=None):
     """ VALIDATE Reporting Obligation """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     #print(id)
@@ -3070,6 +3147,9 @@ class EventReportingListView(ListView):
         context['country'] = self.kwargs['country']
         context['event_types'] =EVT_REP_TYPE_CHOICES
         context['current_type'] =int(self.kwargs['type'])
+        user = self.request.user 
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] =userprofile
         return context
    
        
@@ -3079,16 +3159,18 @@ class EventReportingDetailView(DetailView):
     model = EventReporting
     context_object_name = 'eventreporting'
     template_name = 'countries/eventreporting_detail.html'
-    queryset = EventReporting.objects.filter()
+    queryset = EventReporting.objects.filter(is_version=False)
     
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(EventReportingDetailView, self).get_context_data(**kwargs)
-        p = get_object_or_404(EventReporting, slug=self.kwargs['slug'])
+        p = get_object_or_404(EventReporting, slug=self.kwargs['slug'],is_version=False,country__country_slug=self.kwargs['country'])
         context['8col'] = 1
         
         versions= EventReporting.objects.filter(country__country_slug=self.kwargs['country'], is_version=True, parent_id=p.id).order_by('-modify_date')
         context['versions'] = versions
-      
+        user = self.request.user 
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] =userprofile
         return context
       
 
@@ -3098,7 +3180,9 @@ def event_reporting_create(request, country,type):
     """ Create Event Reporting """
     user = request.user
     author = user
-    country=user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     user_country_slug = lower(slugify(country))
 
 
@@ -3146,7 +3230,7 @@ def event_reporting_create(request, country,type):
             info(request, _("Successfully added Event reporting."))
             return redirect("event-reporting-detail", country=user_country_slug, year=new_event_reporting.publish_date.strftime("%Y"), month=new_event_reporting.publish_date.strftime("%m"), slug=new_event_reporting.slug)
         else:
-            return render_to_response('countries/event_reporting_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform': notifyrelateform,},#'docform':myformset,
+            return render('countries/event_reporting_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform': notifyrelateform,},#'docform':myformset,
              context_instance=RequestContext(request))
 
           
@@ -3159,9 +3243,10 @@ def event_reporting_create(request, country,type):
         f_form = EventreportingFileFormSet()
         u_form = EventreportingUrlFormSet()
     
-    return render_to_response('countries/event_reporting_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform': notifyrelateform,},
-        context_instance=RequestContext(request))
-
+   #return render('countries/event_reporting_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform': notifyrelateform,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request, 'countries/event_reporting_create.html',  {'userprofile':userprofile,'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform': notifyrelateform,})
+   
         
 
 @login_required
@@ -3170,7 +3255,9 @@ def event_reporting_edit(request, country, id=None, template_name='countries/eve
     """ Edit  Reporting """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     if id:
@@ -3280,19 +3367,6 @@ def event_reporting_edit(request, country, id=None, template_name='countries/eve
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             form.save()
             issue_instance = issueform.save(commit=False)
             issue_instance.content_object = event_reporting
@@ -3350,10 +3424,11 @@ def event_reporting_edit(request, country, id=None, template_name='countries/eve
         f_form = EventreportingFileFormSet(instance=event_reporting)
         u_form = EventreportingUrlFormSet( instance=event_reporting)
       
-    return render_to_response(template_name, {
-        'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "event_reporting": event_reporting,'notifyrelateform':notifyrelateform
-    }, context_instance=RequestContext(request))
-    
+    #return render(template_name, {
+    #    'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "event_reporting": event_reporting,'notifyrelateform':notifyrelateform
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request, template_name,  {'userprofile':userprofile,'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "event_reporting": event_reporting,'notifyrelateform':notifyrelateform,})
+   
 
 ## http://stackoverflow.com/a/1854453/412329
 @login_required
@@ -3362,7 +3437,9 @@ def event_reporting_validate(request, country, id=None):
     """ VALIDATE Event reporting  """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     #print(id)
@@ -3444,7 +3521,7 @@ def draftprotocol_create(request):
             info(request, _("Successfully added Draft Protocol."))
             return redirect("draftprotocol-detail",  year=new_draftprotocol.publish_date.strftime("%Y"), month=new_draftprotocol.publish_date.strftime("%m"), slug=new_draftprotocol.slug)
         else:
-            return render_to_response('dp/dp_create.html', {'form': form,'f_form': f_form,},#'entryform': entryform,'docform':myformset,
+            return render('dp/dp_create.html', {'form': form,'f_form': f_form,},#'entryform': entryform,'docform':myformset,
              context_instance=RequestContext(request))
 
           
@@ -3453,7 +3530,7 @@ def draftprotocol_create(request):
         form = DraftProtocolForm(instance=DraftProtocol())
         f_form =DraftProtocolFileFormSet()
       
-    return render_to_response('dp/dp_create.html', {'form': form,'f_form': f_form,},
+    return render('dp/dp_create.html', {'form': form,'f_form': f_form,},
         context_instance=RequestContext(request))
 
         
@@ -3486,9 +3563,10 @@ def draftprotocol_edit(request, id=None, template_name='dp/dp_edit.html'):
         f_form = DraftProtocolFileFormSet(instance=draftprotocol)
       
       
-    return render_to_response(template_name, {
-        'form': form, 'f_form':f_form, "draftprotocol": draftprotocol
-    }, context_instance=RequestContext(request))
+    #return render_to_response(template_name, {
+    #    'form': form, 'f_form':f_form, "draftprotocol": draftprotocol
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  { 'form': form, 'f_form':f_form, "draftprotocol": draftprotocol})        
     
 
 
@@ -3524,13 +3602,16 @@ def draftprotocol_comment_create(request, id=None):
             info(request, _("Successfully added Comment."))
             return redirect("draftprotocol-detail",  year=draftprotocol.publish_date.strftime("%Y"), month=draftprotocol.publish_date.strftime("%m"), slug=draftprotocol.slug)
         else:
-            return render_to_response('dp/dp_comment_create.html', {'form': form,},
-             context_instance=RequestContext(request))
+           # return render_to_response('dp/dp_comment_create.html', {'form': form,},
+            # context_instance=RequestContext(request))
+            return TemplateResponse(request,'dp/dp_comment_create.html',  { 'form': form,})        
+     
     else:
         form = DraftProtocolCommentsForm(initial={'draftprotocol': id},instance=DraftProtocolComments())
       
-    return render_to_response('dp/dp_comment_create.html', {'form': form,'draftprotocol': id,},
-        context_instance=RequestContext(request))
+    #return render_to_response('dp/dp_comment_create.html', {'form': form,'draftprotocol': id,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'dp/dp_comment_create.html',  {     'form': form,'draftprotocol': id,})        
 
         
 
@@ -3562,10 +3643,11 @@ def draftprotocol_comment_edit(request, id=None, dp_id=None, template_name='dp/d
         
       
       
-    return render_to_response(template_name, {
-        'form': form,  "draftprotocolcomment": draftprotocolcomment
-    }, context_instance=RequestContext(request))
-    
+   # return render_to_response(template_name, {
+   #     'form': form,  "draftprotocolcomment": draftprotocolcomment
+   # }, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {  'form': form,  "draftprotocolcomment": draftprotocolcomment})        
+
 
 
 
@@ -3591,6 +3673,10 @@ class WebsiteListView(ListView):
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(WebsiteListView, self).get_context_data(**kwargs)
         context['country'] = self.kwargs['country']
+        user = self.request.user
+   
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] = userprofile
         return context
    
        
@@ -3601,7 +3687,14 @@ class WebsiteDetailView(DetailView):
     context_object_name = 'website'
     template_name = 'countries/website_detail.html'
     queryset = Website.objects.filter()
-
+    
+    def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
+        context = super(WebsiteDetailView, self).get_context_data(**kwargs)
+        user = self.request.user
+   
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] = userprofile
+        return context
 
 
 @login_required
@@ -3610,7 +3703,10 @@ def website_create(request, country):
     """ Create website """
     user = request.user
     author = user
-    country=user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
+
     user_country_slug = lower(slugify(country))
 
     form = WebsiteForm(request.POST or None, request.FILES)
@@ -3642,9 +3738,10 @@ def website_create(request, country):
             info(request, _("Successfully added Website."))
             return redirect("website-detail", country=user_country_slug, year=new_website.publish_date.strftime("%Y"), month=new_website.publish_date.strftime("%m"), slug=new_website.slug)
         else:
-            return render_to_response('countries/website_create.html', {'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},#'entryform': entryform,'docform':myformset,
-             context_instance=RequestContext(request))
-
+           # return render_to_response('countries/website_create.html', {'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},#'entryform': entryform,'docform':myformset,
+            # context_instance=RequestContext(request))
+            return TemplateResponse(request, 'countries/website_create.html',  {'userprofile':userprofile,'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,})
+      
           
         
     else:
@@ -3653,8 +3750,10 @@ def website_create(request, country):
         commodityform =CommodityKeywordsRelateForm(request.POST)
         u_form = WebsiteUrlFormSet()
     
-    return render_to_response('countries/website_create.html', {'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
-        context_instance=RequestContext(request))
+    #return render_to_response('countries/website_create.html', {'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request, 'countries/website_create.html',  {'userprofile':userprofile,'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,})
+   
 
         
 
@@ -3664,7 +3763,9 @@ def website_edit(request, country, id=None, template_name='countries/website_edi
     """ Edit  website """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     if id:
@@ -3719,10 +3820,11 @@ def website_edit(request, country, id=None, template_name='countries/website_edi
             commodityform =CommodityKeywordsRelateForm()
         u_form = WebsiteUrlFormSet( instance=website)
       
-    return render_to_response(template_name, {
-        'form': form, 'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "website": website
-    }, context_instance=RequestContext(request))
-    
+    #return render_to_response(template_name, {
+    #    'form': form, 'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "website": website
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request, template_name,  {'userprofile':userprofile, 'form': form, 'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "website": website,})
+      
 
 
 
@@ -3742,7 +3844,10 @@ class PartnersWebsiteDetailView(DetailView):
         page = get_object_or_404(PartnersPage, name=self.kwargs['partners'])
         context['pagetitle'] =  page.name
         context['pageslug'] =  page.slug
-       # context['page'] =  page.partner_slug
+        user = self.request.user
+  
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] =userprofile
         return context
      
 
@@ -3752,8 +3857,7 @@ def partner_websites_create(request, partners):
     """ Create website """
     user = request.user
     author = user
-    if user.get_profile().partner:
-        partners=user.get_profile().partner
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
          
     user_partner_slug = lower(slugify(partners))
     #partners=user.get_profile().partner
@@ -3789,8 +3893,10 @@ def partner_websites_create(request, partners):
             info(request, _("Successfully added Website."))
             return redirect("partner-websites-detail", partners=user_partner_slug, year=new_website.publish_date.strftime("%Y"), month=new_website.publish_date.strftime("%m"), slug=new_website.slug)
         else:
-            return render_to_response('partners/website_create.html', {'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},#'entryform': entryform,'docform':myformset,
-             context_instance=RequestContext(request))
+            #return render_to_response('partners/website_create.html', {'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},#'entryform': entryform,'docform':myformset,
+            # context_instance=RequestContext(request))
+            return TemplateResponse(request,'partners/website_create.html',  { 'userprofile':userprofile, 'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform})        
+ 
 
           
         
@@ -3800,9 +3906,10 @@ def partner_websites_create(request, partners):
         commodityform =CommodityKeywordsRelateForm(request.POST)
         u_form = PartnersWebsiteUrlFormSet()
     
-    return render_to_response('partners/website_create.html', {'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
-        context_instance=RequestContext(request))
-
+    #return render_to_response('partners/website_create.html', {'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'partners/website_create.html',  {'userprofile':userprofile, 'form': form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform})        
+ 
         
 
 @login_required
@@ -3811,9 +3918,8 @@ def partner_websites_edit(request, partners, id=None, template_name='partners/we
     """ Edit  website """
     user = request.user
     author = user
-    if user.get_profile().partner:
-        partners=user.get_profile().partner
-         
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+   
     user_partner_slug = lower(slugify(partners))
     #partners=user.get_profile().partner
     page = get_object_or_404(PartnersPage, name=user_partner_slug)
@@ -3870,10 +3976,11 @@ def partner_websites_edit(request, partners, id=None, template_name='partners/we
             commodityform =CommodityKeywordsRelateForm()
         u_form =PartnersWebsiteUrlFormSet( instance=website)
       
-    return render_to_response(template_name, {
-        'form': form, 'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "website": website
-    }, context_instance=RequestContext(request))
-    
+    #return render_to_response(template_name, {
+    #    'form': form, 'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "website": website
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {'userprofile':userprofile, 'form': form, 'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "website": website})        
+
 
 
 
@@ -3905,6 +4012,10 @@ class CnPublicationListView(ListView):
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(CnPublicationListView, self).get_context_data(**kwargs)
         context['country'] = self.kwargs['country']
+        user = self.request.user
+   
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] = userprofile
         return context
    
        
@@ -3915,8 +4026,17 @@ class CnPublicationDetailView(DetailView):
     context_object_name = 'cnpublication'
     template_name = 'countries/cnpublication_detail.html'
     queryset = CnPublication.objects.filter()
-
-
+    
+    def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
+        context = super(CnPublicationDetailView, self).get_context_data(**kwargs)
+        
+        user = self.request.user
+   
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] = userprofile
+        return context
+   
+       
 
 @login_required
 @permission_required('ippc.add_cnpublication', login_url="/accounts/login/")
@@ -3924,7 +4044,9 @@ def country_publication_create(request, country):
     """ Create  Country Publication """
     user = request.user
     author = user
-    country=user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+       
+    country=userprofile.country
     user_country_slug = lower(slugify(country))
 
     form = CnPublicationForm(request.POST or None, request.FILES)
@@ -3958,9 +4080,9 @@ def country_publication_create(request, country):
             info(request, _("Successfully added publication."))
             return redirect("country-publication-detail", country=user_country_slug, year=new_cnpublication.publish_date.strftime("%Y"), month=new_cnpublication.publish_date.strftime("%m"), slug=new_cnpublication.slug)
         else:
-            return render_to_response('countries/cnpublication_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},#'entryform': entryform,'docform':myformset,
-             context_instance=RequestContext(request))
-
+           # return render_to_response('countries/cnpublication_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},#'entryform': entryform,'docform':myformset,
+            # context_instance=RequestContext(request))
+            return TemplateResponse(request, 'countries/cnpublication_create.html', {'userprofile':userprofile,'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},)
           
         
     else:
@@ -3970,9 +4092,10 @@ def country_publication_create(request, country):
         f_form = CnPublicationFileFormSet()
         u_form = CnPublicationUrlFormSet()
     
-    return render_to_response('countries/cnpublication_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
-        context_instance=RequestContext(request))
-
+    #return render_to_response('countries/cnpublication_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request, 'countries/cnpublication_create.html', {'userprofile':userprofile,'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},)      
+ 
         
 
 @login_required
@@ -3981,7 +4104,9 @@ def country_publication_edit(request, country, id=None, template_name='countries
     """ Edit   Country Publication """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     if id:
@@ -4039,10 +4164,10 @@ def country_publication_edit(request, country, id=None, template_name='countries
         f_form = CnPublicationFileFormSet(instance=cnpublication)
         u_form = CnPublicationUrlFormSet( instance=cnpublication)
       
-    return render_to_response(template_name, {
-        'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "cnpublication": cnpublication
-    }, context_instance=RequestContext(request))            
-            
+    #return render_to_response(template_name, {
+     #    'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "cnpublication": cnpublication
+   # }, context_instance=RequestContext(request))            
+    return TemplateResponse(request, template_name, {'userprofile':userprofile,'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "cnpublication": cnpublication},)        
 
 
 
@@ -4075,7 +4200,13 @@ class PartnersView(TemplateView):
         context['publications'] = PartnersPublication.objects.filter(partners__partner_slug=self.kwargs['partner'],status=2)
         context['news'] = PartnersNews.objects.filter(partners__partner_slug=self.kwargs['partner'],status=2)
         context['websites'] = PartnersWebsite.objects.filter(partners__partner_slug=self.kwargs['partner'],status=2)
+        cn_cpid=page.contact_point_id
+        user_obj=User.objects.get(id=cn_cpid)
+        cp=get_object_or_404(IppcUserProfile,user_id=cn_cpid)
        
+        
+
+        context['profile']=cp
         return context
     
      
@@ -4095,7 +4226,12 @@ class PartnersPublicationDetailView(DetailView):
         page = get_object_or_404(PartnersPage, name=self.kwargs['partners'])
         context['pagetitle'] =  page.name
         context['pageslug'] =  page.slug
-       # context['page'] =  page.partner_slug
+        user = self.request.user
+  
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] =userprofile
+        
+    
         return context
      
 
@@ -4106,11 +4242,11 @@ def partner_publication_create(request, partners):
     """ Create  partner Publication """
     user = request.user
     author = user
-    if user.get_profile().partner:
-        partners=user.get_profile().partner
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
          
     user_partner_slug = lower(slugify(partners))
-    #partners=user.get_profile().partner
+   
     page = get_object_or_404(PartnersPage, name=user_partner_slug)
     partners=page.id  
     #print("-----------------------------------------")
@@ -4147,8 +4283,10 @@ def partner_publication_create(request, partners):
             info(request, _("Successfully added publication."))
             return redirect("partner-publication-detail", partners=user_partner_slug, year=new_partnerpublication.publish_date.strftime("%Y"), month=new_partnerpublication.publish_date.strftime("%m"), slug=new_partnerpublication.slug)
         else:
-            return render_to_response('partners/p_publication_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},#'entryform': entryform,'docform':myformset,
-             context_instance=RequestContext(request))
+           # return render_to_response('partners/p_publication_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},#'entryform': entryform,'docform':myformset,
+            # context_instance=RequestContext(request))
+            return TemplateResponse(request,'partners/p_publication_create.html',  {'userprofile':userprofile, 'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform})        
+ 
 
           
         
@@ -4159,8 +4297,10 @@ def partner_publication_create(request, partners):
         f_form = PartnersPublicationFileFormSet()
         u_form = PartnersPublicationUrlFormSet()
     
-    return render_to_response('partners/p_publication_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
-        context_instance=RequestContext(request))
+#    return render_to_response('partners/p_publication_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
+#        context_instance=RequestContext(request))
+    return TemplateResponse(request,'partners/p_publication_create.html',  {'userprofile':userprofile,'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform})        
+     
 
         
 
@@ -4170,9 +4310,9 @@ def partner_publication_edit(request, partners, id=None, template_name='partners
     """ Edit   partners Publication """
     user = request.user
     author = user
-    if user.get_profile().partner:
-        partners=user.get_profile().partner
-         
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+             
     user_partner_slug = lower(slugify(partners))
     #partners=user.get_profile().partner
     page = get_object_or_404(PartnersPage, name=user_partner_slug)
@@ -4231,9 +4371,10 @@ def partner_publication_edit(request, partners, id=None, template_name='partners
         f_form = PartnersPublicationFileFormSet(instance=partnerspublication)
         u_form = PartnersPublicationUrlFormSet( instance=partnerspublication)
       
-    return render_to_response(template_name, {
-        'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "partnerspublication": partnerspublication
-    }, context_instance=RequestContext(request))            
+    #return render_to_response(template_name, {
+    #    'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "partnerspublication": partnerspublication
+    #}, context_instance=RequestContext(request))            
+    return TemplateResponse(request,template_name,  {'userprofile':userprofile, 'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "partnerspublication": partnerspublication})        
                         
  
 @login_required
@@ -4263,9 +4404,10 @@ def partner_page_edit(request, id=None, template_name='partners/partners_page_fo
         form = PartnerPageForm(instance=ppage)
      
       
-    return render_to_response(template_name, {
-        'form': form, "partnerspage": ppage
-    }, context_instance=RequestContext(request))            
+    #return render_to_response(template_name, {
+    #    'form': form, "partnerspage": ppage
+    #}, context_instance=RequestContext(request))            
+    return TemplateResponse(request,template_name,  {  'form': form, "partnerspage": ppage})        
                         
             
                        
@@ -4292,6 +4434,10 @@ class PestFreeAreaListView(ListView):
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(PestFreeAreaListView, self).get_context_data(**kwargs)
         context['country'] = self.kwargs['country']
+        user=self.request.user
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+       
+        context['userprofile'] = userprofile
         return context
    
        
@@ -4301,15 +4447,18 @@ class PestFreeAreaDetailView(DetailView):
     model = PestFreeArea
     context_object_name = 'pfa'
     template_name = 'countries/pfa_detail.html'
-    queryset = PestFreeArea.objects.filter()
+    queryset = PestFreeArea.objects.filter(is_version=False)
 
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(PestFreeAreaDetailView, self).get_context_data(**kwargs)
-        p = get_object_or_404(PestFreeArea, slug=self.kwargs['slug'])
+        p = get_object_or_404(PestFreeArea, slug=self.kwargs['slug'],is_version=False,country__country_slug=self.kwargs['country'])
         
         versions= PestFreeArea.objects.filter(country__country_slug=self.kwargs['country'], is_version=True, parent_id=p.id).order_by('-modify_date')
         context['versions'] = versions
-      
+        user=self.request.user
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+       
+        context['userprofile'] = userprofile
         return context
 
 @login_required
@@ -4318,7 +4467,9 @@ def pfa_create(request, country):
     """ Create PestFreeArea """
     user = request.user
     author = user
-    country=user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     user_country_slug = lower(slugify(country))
 
 
@@ -4368,8 +4519,10 @@ def pfa_create(request, country):
             
             return redirect("pfa-detail", country=user_country_slug, year=new_pfa.publish_date.strftime("%Y"), month=new_pfa.publish_date.strftime("%m"), slug=new_pfa.slug)
          else:
-             return render_to_response('countries/pfa_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
-             context_instance=RequestContext(request))
+             #return render_to_response('countries/pfa_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request, 'countries/pfa_create.html',  {'userprofile':userprofile,'form': form  ,'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform})
+   
     else:
         form = PestFreeAreaForm(initial={'country': country}, instance=PestFreeArea())
         issueform =IssueKeywordsRelateForm(request.POST)
@@ -4378,8 +4531,10 @@ def pfa_create(request, country):
         f_form =PestFreeAreaFileFormSet()
         u_form = PestFreeAreaUrlFormSet()
 
-    return render_to_response('countries/pfa_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
-        context_instance=RequestContext(request))
+    #return render_to_response('countries/pfa_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request, 'countries/pfa_create.html',  {'userprofile':userprofile,'form': form  ,'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform})
+   
 
 
         
@@ -4390,7 +4545,9 @@ def pfa_edit(request, country, id=None, template_name='countries/pfa_edit.html')
     """ Edit PestFreeArea """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     if id:
@@ -4546,10 +4703,11 @@ def pfa_edit(request, country, id=None, template_name='countries/pfa_edit.html')
         f_form = PestFreeAreaFileFormSet(instance=pfa)
         u_form = PestFreeAreaUrlFormSet(instance=pfa)
         
-    return render_to_response(template_name, {
-        'form': form,'f_form':f_form,'u_form':u_form,'issueform': issueform,'commodityform': commodityform,  "pfa": pfa,'notifyrelateform':notifyrelateform
-    }, context_instance=RequestContext(request))
-    
+    #return render_to_response(template_name, {
+    #    'form': form,'f_form':f_form,'u_form':u_form,'issueform': issueform,'commodityform': commodityform,  "pfa": pfa,'notifyrelateform':notifyrelateform
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {'userprofile':userprofile, 'form': form,'f_form':f_form,'u_form':u_form,'issueform': issueform,'commodityform': commodityform,  "pfa": pfa,'notifyrelateform':notifyrelateform})
+   
 
 class ImplementationISPMListView(ListView):
     """    ImplementationISPM """
@@ -4573,6 +4731,12 @@ class ImplementationISPMListView(ListView):
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(ImplementationISPMListView, self).get_context_data(**kwargs)
         context['country'] = self.kwargs['country']
+        user = self.request.user
+  
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] =userprofile
+        
+          
         return context
    
        
@@ -4582,15 +4746,19 @@ class ImplementationISPMDetailView(DetailView):
     model = ImplementationISPM
     context_object_name = 'implementationispm'
     template_name = 'countries/implementationispm_detail.html'
-    queryset = ImplementationISPM.objects.filter()
+    queryset = ImplementationISPM.objects.filter(is_version=False)
 
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(ImplementationISPMDetailView, self).get_context_data(**kwargs)
-        p = get_object_or_404(ImplementationISPM, slug=self.kwargs['slug'])
+        p = get_object_or_404(ImplementationISPM, slug=self.kwargs['slug'],is_version=False,country__country_slug=self.kwargs['country'])
         
         versions= ImplementationISPM.objects.filter(country__country_slug=self.kwargs['country'], is_version=True, parent_id=p.id).order_by('-modify_date')
         context['versions'] = versions
-      
+        user = self.request.user
+  
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] = userprofile
+        
         return context
 
 @login_required
@@ -4599,7 +4767,9 @@ def implementationispm_create(request, country):
     """ Create ImplementationISPM """
     user = request.user
     author = user
-    country=user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     user_country_slug = lower(slugify(country))
 
 
@@ -4646,8 +4816,10 @@ def implementationispm_create(request, country):
             
             return redirect("implementationispm-detail", country=user_country_slug, year=new_implementationispm.publish_date.strftime("%Y"), month=new_implementationispm.publish_date.strftime("%m"), slug=new_implementationispm.slug)
         else:
-             return render_to_response('countries/implementationispm_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
-             context_instance=RequestContext(request))
+             #return render_to_response('countries/implementationispm_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request, 'countries/implementationispm_create.html',  {'userprofile':userprofile,'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform,})
+    
     else:
         form = ImplementationISPMForm(initial={'country': country}, instance=ImplementationISPM())
         issueform =IssueKeywordsRelateForm(request.POST)
@@ -4656,9 +4828,10 @@ def implementationispm_create(request, country):
         f_form =ImplementationISPMFileFormSet()
         u_form =ImplementationISPMUrlFormSet()
 
-    return render_to_response('countries/implementationispm_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
-        context_instance=RequestContext(request))
-
+    #return render_to_response('countries/implementationispm_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform},
+     #   context_instance=RequestContext(request))
+    return TemplateResponse(request, 'countries/implementationispm_create.html',  {'userprofile':userprofile,'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform,'notifyrelateform':notifyrelateform,})
+   
 
         
 # http://stackoverflow.com/a/1854453/412329
@@ -4668,7 +4841,10 @@ def implementationispm_edit(request, country, id=None, template_name='countries/
     """ Edit implementationispm """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country       
+  
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     if id:
@@ -4823,10 +4999,11 @@ def implementationispm_edit(request, country, id=None, template_name='countries/
         notifyrelateform =NotificationMessageRelateForm(instance=notifications)
         f_form = ImplementationISPMFileFormSet(instance=implementationispm)
         u_form = ImplementationISPMUrlFormSet(instance=implementationispm)
-    return render_to_response(template_name, {
-        'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "implementationispm": implementationispm,'notifyrelateform':notifyrelateform
-    }, context_instance=RequestContext(request))
-
+    #return render_to_response(template_name, {
+    #    'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "implementationispm": implementationispm,'notifyrelateform':notifyrelateform
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request, template_name,  {'userprofile':userprofile,'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "implementationispm": implementationispm,'notifyrelateform':notifyrelateform,})
+   
     #/**************************************************************/
 class CountryNewsListView(ListView):
     """    CountryNews """
@@ -4850,6 +5027,11 @@ class CountryNewsListView(ListView):
     def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
         context = super(CountryNewsListView, self).get_context_data(**kwargs)
         context['country'] = self.kwargs['country']
+        user = self.request.user
+  
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] = userprofile
+        
         return context
    
        
@@ -4860,7 +5042,18 @@ class CountryNewsDetailView(DetailView):
     context_object_name = 'countrynews'
     template_name = 'countries/countrynews_detail.html'
     queryset = CountryNews.objects.filter()
-
+   
+    def get_context_data(self, **kwargs): # http://stackoverflow.com/a/15515220
+        context = super(CountryNewsDetailView, self).get_context_data(**kwargs)
+       
+        user = self.request.user
+  
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] = userprofile
+        
+        return context
+   
+       
 
 
 @login_required
@@ -4869,7 +5062,9 @@ def countrynews_create(request, country):
     """ Create countrynews """
     user = request.user
     author = user
-    country=user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+     
+    country=userprofile.country
     user_country_slug = lower(slugify(country))
 
 
@@ -4905,8 +5100,10 @@ def countrynews_create(request, country):
             
             return redirect("country-news-detail", country=user_country_slug, year=new_countrynews.publish_date.strftime("%Y"), month=new_countrynews.publish_date.strftime("%m"), slug=new_countrynews.slug)
         else:
-             return render_to_response('countries/countrynews_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
-             context_instance=RequestContext(request))
+             #return render_to_response('countries/countrynews_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request, 'countries/countrynews_create.html', {'userprofile':userprofile,'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},)        
+
     else:
         form = CountryNewsForm(initial={'country': country}, instance=CountryNews())
         issueform =IssueKeywordsRelateForm(request.POST)
@@ -4914,8 +5111,9 @@ def countrynews_create(request, country):
         f_form =CountryNewsFileFormSet()
         u_form =CountryNewsUrlFormSet()
 
-    return render_to_response('countries/countrynews_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
-        context_instance=RequestContext(request))
+    #return render_to_response('countries/countrynews_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
+     #   context_instance=RequestContext(request))
+    return TemplateResponse(request, 'countries/countrynews_create.html', {'userprofile':userprofile,'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},)        
 
 
         
@@ -4926,7 +5124,9 @@ def countrynews_edit(request, country, id=None, template_name='countries/country
     """ Edit countrynews """
     user = request.user
     author = user
-    country = user.get_profile().country
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
+    country=userprofile.country
     # country_id = PestReport.objects.filter(country__country_id=country.id)
     user_country_slug = lower(slugify(country))
     if id:
@@ -4985,9 +5185,11 @@ def countrynews_edit(request, country, id=None, template_name='countries/country
       
         f_form = CountryNewsFileFormSet(instance=countrynews)
         u_form = CountryNewsUrlFormSet(instance=countrynews)
-    return render_to_response(template_name, {
-        'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "countrynews": countrynews
-    }, context_instance=RequestContext(request))
+   # return render_to_response(template_name, {
+    #    'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "countrynews": countrynews
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request, template_name, {'userprofile':userprofile, 'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "countrynews": countrynews},)        
+
    
    
    
@@ -5009,6 +5211,11 @@ class PartnersNewsDetailView(DetailView):
         context['pagetitle'] =  page.name
         context['pageslug'] =  page.slug
        # context['page'] =  page.partner_slug
+        user = self.request.user
+  
+        userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+        context['userprofile'] =userprofile
+      
         return context
      
 
@@ -5019,8 +5226,7 @@ def partners_news_create(request, partners):
     """ Create partnersnews """
     user = request.user
     author = user
-    if user.get_profile().partner:
-        partners=user.get_profile().partner
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
          
     user_partner_slug = lower(slugify(partners))
     #partners=user.get_profile().partner
@@ -5063,8 +5269,10 @@ def partners_news_create(request, partners):
             
             return redirect("partner-news-detail", partners=user_partner_slug, year=new_partnersnews.publish_date.strftime("%Y"), month=new_partnersnews.publish_date.strftime("%m"), slug=new_partnersnews.slug)
         else:
-             return render_to_response('partners/partnersnews_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
-             context_instance=RequestContext(request))
+    #         return render_to_response('partners/partnersnews_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
+     #        context_instance=RequestContext(request))
+             return TemplateResponse(request,'partners/partnersnews_create.html',  {'userprofile':userprofile,'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform})
+    
     else:
         form = PartnersNewsForm(initial={'partners': partners}, instance=PartnersNews())
         issueform =IssueKeywordsRelateForm(request.POST)
@@ -5072,8 +5280,10 @@ def partners_news_create(request, partners):
         f_form = PartnersNewsFileFormSet()
         u_form = PartnersNewsUrlFormSet()
 
-    return render_to_response('partners/partnersnews_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
-        context_instance=RequestContext(request))
+    #return render_to_response('partners/partnersnews_create.html', {'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'partners/partnersnews_create.html',  {'userprofile':userprofile,'form': form  ,'f_form': f_form,'u_form': u_form,'issueform':issueform, 'commodityform':commodityform})
+       
 
 
         
@@ -5084,9 +5294,8 @@ def partners_news_edit(request, partners, id=None, template_name='partners/partn
     """ Edit partner news """
     user = request.user
     author = user
-    if user.get_profile().partner:
-        partners=user.get_profile().partner
-         
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+            
     user_partner_slug = lower(slugify(partners))
     #partners=user.get_profile().partner
     page = get_object_or_404(PartnersPage, name=user_partner_slug)
@@ -5144,9 +5353,11 @@ def partners_news_edit(request, partners, id=None, template_name='partners/partn
             commodityform =CommodityKeywordsRelateForm()
         f_form = PartnersNewsFileFormSet(instance=partnernews)
         u_form = PartnersNewsUrlFormSet(instance=partnernews)
-    return render_to_response(template_name, {
-        'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "partnernews": partnernews
-    }, context_instance=RequestContext(request))
+    #return render_to_response(template_name, {
+    #    'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "partnernews": partnernews
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {'userprofile':userprofile, 'form': form,'f_form':f_form,'u_form': u_form,'issueform': issueform,'commodityform': commodityform,  "partnernews": partnernews})
+  
    
     
    
@@ -5293,9 +5504,11 @@ def publication_edit(request, id=None, template_name='pages/publication_edit.htm
         f_form = PublicationFileFormSet(instance=publication)
         u_form = PublicationUrlFormSet( instance=publication)
       
-    return render_to_response(template_name, {
-        'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "publication": publication
-    }, context_instance=RequestContext(request))       
+    #return render_to_response(template_name, {
+    #    'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "publication": publication
+    #}, context_instance=RequestContext(request))   
+    return TemplateResponse(request,template_name,  { 'form': form, 'f_form':f_form,'u_form': u_form,'issueform': issueform,  'commodityform': commodityform, "publication": publication})
+  
     
     
 class CountryListView(ListView):
@@ -5760,9 +5973,9 @@ class CountryStatsSingleListOfRegulatesPestsListView(ListView):
         prevyear=curryear-1
         num_years=curryear-2005
         
-        startstartdate = datetime(1970, 1, 1, 00, 01,00)
-        startdate = datetime(prevyear, 4, 1, 00, 01,00)
-        enddate = datetime(curryear, 3, 31, 23, 59,00)
+        startstartdate = datetime(1970, 1, 1, 00, 1, 00)
+        startdate = datetime(prevyear, 4, 1, 00, 1, 00)
+        enddate = datetime(curryear, 3, 31, 23, 59, 00)
       
         
         regionsPCP = []
@@ -6799,8 +7012,8 @@ class CountryStatsSingleLegislationsListView(ListView):
         prevyear=curryear-1
         num_years=curryear-2005
         
-        startstartdate = datetime(1972, 1, 1, 00, 01,00)
-        startdate = datetime(prevyear, 4, 1, 00, 01,00)
+        startstartdate = datetime(1972, 1, 1, 00, 1,00)
+        startdate = datetime(prevyear, 4, 1, 00, 1,00)
         enddate = datetime(curryear, 3, 31, 23, 59,00)
       
         
@@ -7836,8 +8049,8 @@ class CountryStatsSinglePestReportsListView(ListView):
         prevyear=curryear-1  
         num_years=curryear-2005
         
-        startstartdate = datetime(1972, 1, 1, 00, 01,00)
-        startdate = datetime(prevyear, 4, 1, 00, 01,00)
+        startstartdate = datetime(1972, 1, 1, 00, 1,00)
+        startdate = datetime(prevyear, 4, 1, 00, 1,00)
         enddate = datetime(curryear, 3, 31, 23, 59,00)
         
         regionsPCP = []
@@ -8040,7 +8253,7 @@ class CountryStatsNROsDetailView(DetailView):
         context['date1']=date
         context['cns']=cns
         
-        startdate = datetime(1972, 1, 1, 00, 01,00)
+        startdate = datetime(1972, 1, 1, 00, 1,00)
         enddate   = datetime(date.year, date.month, date.day+1, 23, 59,00)
         trainingdate=''
         if datetraining_checked:
@@ -8163,13 +8376,17 @@ def select_cns_nros_stats(request):
             info(request, _("NROs Statistics created."))
             return redirect("nro-stats-detail",new_nrostats.id)
         else:
-             return render_to_response('countries/countries_stats_nros_select.html', {'form': form,'countries':countries},
-             context_instance=RequestContext(request))
+            # return render_to_response('countries/countries_stats_nros_select.html', {'form': form,'countries':countries},
+            # context_instance=RequestContext(request))
+            return TemplateResponse(request,'countries/countries_stats_nros_select.html',  {'form': form ,'countries':countries})
+    
     else:
         form = NROStatsForm(instance=NROStats())
      
-    return render_to_response('countries/countries_stats_nros_select.html', {'form': form ,'countries':countries},
-        context_instance=RequestContext(request))
+    #return render_to_response('countries/countries_stats_nros_select.html', {'form': form ,'countries':countries},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'countries/countries_stats_nros_select.html',  {'form': form ,'countries':countries})
+      
 
 
 
@@ -9172,7 +9389,7 @@ class CountryRegionsUsersNeverLoggedNewListView(ListView):
        	    numb_countriesperregionncp=CountryPage.objects.filter(region=k,cp_ncp_t_type='NCP').count()
             numb_countriesperregioterr=CountryPage.objects.filter(region=k,cp_ncp_t_type='T').count()
          
-    	    cp=0
+            cp=0
             cp_currYear=0
             cp_1=0
             cp_currYear_1=0
@@ -9309,23 +9526,23 @@ class CountryRegionsUsersNeverLoggedNewListView(ListView):
             datachartTEnever_year_1 += '{  y: '+str(terrEditor_currYear_1)+' , label: "'+str(reg)+'"},'
 
 			
-	datachartCPnever += ' ]},'
+        datachartCPnever += ' ]},'
         datachartCPnever_year += ' ]},'
         datachartEnever += ' ]},'
         datachartEnever_year += ' ]},'
 		
-	datachartNCPnever += ' ]},'
+        datachartNCPnever += ' ]},'
         datachartNCPnever_year += ' ]},'
         datachartNCPEnever += ' ]},'
         datachartNCPEnever_year += ' ]},'
 		
-	datachartTnever += ' ]},'
+        datachartTnever += ' ]},'
         datachartTnever_year += ' ]},'
         datachartTEnever += ' ]},'
         datachartTEnever_year += ' ]},'
 		
 		
-	datachartTnever_1 += ' ]},'
+        datachartTnever_1 += ' ]},'
         datachartTnever_year_1 += ' ]},'
         datachartTEnever_1 += ' ]},'
         datachartTEnever_year_1 += ' ]},'
@@ -9360,17 +9577,17 @@ class CountryRegionsUsersNeverLoggedNewListView(ListView):
         datachartTEnever_year += '{type: "stackedColumn", color:   "#00cc66" ,     name: "Logged in in '+str(prev_year)+'", showInLegend: "true",  dataPoints:['
 		
 		
-	datachartCPnever += datachartCPnever_1
+        datachartCPnever += datachartCPnever_1
         datachartCPnever_year += datachartCPnever_year_1
         datachartEnever += datachartEnever_1
         datachartEnever_year+= datachartEnever_year_1
 		
-	datachartNCPnever += datachartNCPnever_1
+        datachartNCPnever += datachartNCPnever_1
         datachartNCPnever_year+= datachartNCPnever_year_1
         datachartNCPEnever += datachartNCPEnever_1
         datachartNCPEnever_year += datachartNCPEnever_year_1
 		
-	datachartTnever += datachartTnever_1
+        datachartTnever += datachartTnever_1
         datachartTnever_year += datachartTnever_year_1
         datachartTEnever += datachartTEnever_1
         datachartTEnever_year += datachartTEnever_year_1
@@ -9777,7 +9994,7 @@ class CountryStatsChangeInCPsListView(ListView):
         ocp_change=[]
         for m in months:
             mm=[]
-            datex=datetime(prevyear,m, 01,00,01,00)
+            datex=datetime(prevyear,m, 1,00,1,00)
             datey=datetime(prevyear,m, months_days[i],23,59,00)
             ocp=OCPHistory.objects.filter(start_date__gte=datex,start_date__lte=datey).count()
             rppo=PartnersContactPointHistory.objects.filter(start_date__gte=datex,start_date__lte=datey).count()
@@ -9997,7 +10214,7 @@ class PollDetailView(DetailView):
     template_name = 'polls/detail.html'
     def get_queryset(self):
         """Return the last five published polls."""
-        return Poll.objects.filter(pub_date__lte=timezone.now())
+        return Poll.objects.filter()
         
 
 class PollResultsView(DetailView):
@@ -10063,14 +10280,18 @@ def poll_create(request):
             info(request, _("Successfully created Poll."))
             return redirect("detail", pk=new_poll.id)
          else:
-             return render_to_response('polls/poll_create.html', {'form': form,'c_form': c_form,},
-             context_instance=RequestContext(request))
+             #return render_to_response('polls/poll_create.html', {'form': form,'c_form': c_form,},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'countries/poll_create.html',  {'form': form ,'c_form':c_form})
+  
        
     else:
         form = PollForm( instance=Poll())
         c_form =Poll_ChoiceFormSet()
-    return render_to_response('polls/poll_create.html', {'form': form,'c_form': c_form},
-        context_instance=RequestContext(request))
+  #  return render_to_response('polls/poll_create.html', {'form': form,'c_form': c_form},
+   #     context_instance=RequestContext(request))
+    return TemplateResponse(request,'countries/poll_create.html',  {'form': form ,'c_form':c_form})
+      
 
 @login_required
 @permission_required('ippc.change_poll', login_url="/accounts/login/")
@@ -10096,9 +10317,10 @@ def poll_edit(request, id=None, template_name='polls/poll_edit.html'):
         form = PollForm(instance=poll)
         c_form = Poll_ChoiceFormSet(instance=poll)
         
-    return render_to_response(template_name, {
-        'form': form,'c_form':c_form, "poll": poll
-    }, context_instance=RequestContext(request))
+    #return render_to_response(template_name, {
+     #   'form': form,'c_form':c_form, "poll": poll
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {'form': form,'c_form':c_form, "poll": poll})
     
         
 def vote_poll(request, poll_id):
@@ -10345,14 +10567,17 @@ def email_send(request):
             info(request, _("Email  sent."))
             return redirect("email-detail",new_emailmessage.id)
         else:
-             return render_to_response('emailutility/emailutility_send.html', {'form': form,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2},
-             context_instance=RequestContext(request))
+             #return render_to_response('emailutility/emailutility_send.html', {'form': form,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'emailutility/emailutility_send.html',  {'form': form  ,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2})
     else:
         form = EmailUtilityMessageForm(instance=EmailUtilityMessage())
         f_form =EmailUtilityMessageFileFormSet()
       
-    return render_to_response('emailutility/emailutility_send.html', {'form': form  ,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2},#'emailcpu':cpu_set,'emailcpi':cpi_set,'emailcpl':cpl_set
-        context_instance=RequestContext(request))
+    #return render_to_response('emailutility/emailutility_send.html', {'form': form  ,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2},#'emailcpu':cpu_set,'emailcpi':cpi_set,'emailcpl':cpl_set
+     #   context_instance=RequestContext(request))
+    return TemplateResponse(request,'emailutility/emailutility_send.html',  {'form': form  ,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2})
+       
 
 
 class MassEmailUtilityMessageListView(ListView):
@@ -10783,14 +11008,18 @@ def massemail_send(request):
            
             return redirect("mass-email-detail",new_emailmessage.id)
         else:
-             return render_to_response('emailutility/massemailutility_send.html', {'form': form,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2,},
-             context_instance=RequestContext(request))
+            #return render_to_response('emailutility/massemailutility_send.html', {'form': form,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2,},
+            # context_instance=RequestContext(request))
+             return TemplateResponse(request,'emailutility/massemailutility_send.html',  {'form': form,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2,})
+
     else:
         form = MassEmailUtilityMessageForm(instance=MassEmailUtilityMessage())
         f_form =MassEmailUtilityMessageFileFormSet()
       
-    return render_to_response('emailutility/massemailutility_send.html', {'form': form  ,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2,},#'emailcpu':cpu_set,'emailcpi':cpi_set,'emailcpl':cpl_set
-        context_instance=RequestContext(request))
+    #return render_to_response('emailutility/massemailutility_send.html', {'form': form  ,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2,},#'emailcpu':cpu_set,'emailcpi':cpi_set,'emailcpl':cpl_set
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'emailutility/emailutmassemailutility_sendility_send.html',  {'form': form  ,'f_form': f_form,'emailgroups':g_set,'emailcp':cp_set,'emailcp2':cp_set0,'emaile2':emaile2,})
+
 
 
 @login_required
@@ -10823,7 +11052,7 @@ def mergemassemail_send(request):
     users_alliso.append(str(j))
     countriesList=CountryPage.objects.filter(cp_ncp_t_type='CP').exclude(id='-1').order_by('name')
     for cn in countriesList :
-	users_u=[]
+        users_u=[]
         cn_iso3=cn.iso3
         cn_cpid=cn.contact_point_id
         user_obj=User.objects.get(id=cn_cpid)
@@ -10917,14 +11146,16 @@ def mergemassemail_send(request):
            
             return redirect("mass-email-detail",new_emailmessage.id)
         else:
-             return render_to_response('emailutility/mergemassemailutility_send.html', {'form': form,'f_form': f_form,'emailcpiso':cp_set0iso,'emailcp2iso':cp_setiso,},
-             context_instance=RequestContext(request))
+             #return render_to_response('emailutility/mergemassemailutility_send.html', {'form': form,'f_form': f_form,'emailcpiso':cp_set0iso,'emailcp2iso':cp_setiso,},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'emailutility/mergemassemailutility_send.html',  {'form': form,'f_form': f_form,'emailcpiso':cp_set0iso,'emailcp2iso':cp_setiso,})
     else:
         form = MassEmailUtilityMessageForm(instance=MassEmailUtilityMessage())
         f_form =MassEmailUtilityMessageFileFormSet()
       
-    return render_to_response('emailutility/mergemassemailutility_send.html', {'form': form  ,'f_form': f_form,'emailcpiso':cp_set0iso,'emailcp2iso':cp_setiso,},#'emailcpu':cpu_set,'emailcpi':cpi_set,'emailcpl':cpl_set
-        context_instance=RequestContext(request))
+    #return render_to_response('emailutility/mergemassemailutility_send.html', {'form': form  ,'f_form': f_form,'emailcpiso':cp_set0iso,'emailcp2iso':cp_setiso,},#'emailcpu':cpu_set,'emailcpi':cpi_set,'emailcpl':cpl_set
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'emailutility/mergemassemailutility_send.html',  {'form': form  ,'f_form': f_form,'emailcpiso':cp_set0iso,'emailcp2iso':cp_setiso,})    
 
             
 #
@@ -11028,8 +11259,11 @@ def contactus_email_send(request):
              if not(request.POST['captcha'] == request.POST['result_element'] ) and not(request.POST['captcha2'] == request.POST['result2_element'] ) :
                    error_captcha='error'
                   
-             return render_to_response('emailcontact_us/emailcontact_us_send.html', {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'z_element':request.POST['z_element'],'t_element':request.POST['t_element'],'result2_element':request.POST['result2_element'],'error_captcha':error_captcha},
-             context_instance=RequestContext(request))
+             #return render_to_response('emailcontact_us/emailcontact_us_send.html', {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'z_element':request.POST['z_element'],'t_element':request.POST['t_element'],'result2_element':request.POST['result2_element'],'error_captcha':error_captcha},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'emailcontact_us/emailcontact_us_send.html',  {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'z_element':request.POST['z_element'],'t_element':request.POST['t_element'],'result2_element':request.POST['result2_element'],'error_captcha':error_captcha})    
+
+
     else:
          x_element=random.randint(1,50)   
          y_element=random.randint(1,50)
@@ -11042,8 +11276,10 @@ def contactus_email_send(request):
          form = ContactUsEmailMessageForm(instance=ContactUsEmailMessage(emailfrom=emailfrom))
 #
        
-    return render_to_response('emailcontact_us/emailcontact_us_send.html', {'form': form  ,'x_element':x_element,'y_element':y_element,'result_element':result_element,'z_element':z_element,'t_element':t_element,'result2_element':result2_element},
-         context_instance=RequestContext(request))
+#    return render_to_response('emailcontact_us/emailcontact_us_send.html', {'form': form  ,'x_element':x_element,'y_element':y_element,'result_element':result_element,'z_element':z_element,'t_element':t_element,'result2_element':result2_element},
+ #        context_instance=RequestContext(request))
+    return TemplateResponse(request,'emailcontact_us/emailcontact_us_send.html',  {'form': form  ,'x_element':x_element,'y_element':y_element,'result_element':result_element,'z_element':z_element,'t_element':t_element,'result2_element':result2_element})    
+     
 #
 #   
 class AdvancesSearchCNListView(ListView):
@@ -11849,14 +12085,18 @@ def question_create(request):
             #return redirect("answers", pk=new_question.id)
             return HttpResponseRedirect("/qa")
          else:
-             return render_to_response('question/question_create.html', {'form': form,},
-             context_instance=RequestContext(request))
+             #return render_to_response('question/question_create.html', {'form': form,},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'question/question_create.html',  {'form': form })    
+   
        
     else:
         form = QAQuestionForm( instance=QAQuestion())
     
-    return render_to_response('question/question_create.html', {'form': form,},
-        context_instance=RequestContext(request))
+    #return render_to_response('question/question_create.html', {'form': form,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'question/question_create.html',  {'form': form,})    
+       
 
         
 @login_required
@@ -11882,14 +12122,18 @@ def answer_create(request, question_id):
             send_qa_notification_message('QAAnswer',new_answer.id)
             return redirect("answers", pk=q.id)
          else:
-            return render_to_response('question/answer_create.html', {'form': form,"question":q,},
-            context_instance=RequestContext(request))
+            #return render_to_response('question/answer_create.html', {'form': form,"question":q,},
+           #context_instance=RequestContext(request))
+            return TemplateResponse(request,'question/answer_create.html',  {'form': form,"question":q,})    
+ 
        
     else:
         form = QAAnswerForm( instance=QAQuestion())
     
-    return render_to_response('question/answer_create.html', {'form': form,"question":q,},
-        context_instance=RequestContext(request))
+    #return render_to_response('question/answer_create.html', {'form': form,"question":q,},
+        #context_instance=RequestContext(request))
+    return TemplateResponse(request,'question/answer_create.html',  {'form': form,"question":q,})    
+     
 
 
 def vote_answer_up(request,question_id,id=None,):
@@ -12020,14 +12264,18 @@ def faqcategory_create(request):
             info(request, _("Successfully created FAQs Category."))
             return redirect("faqcategory-detail", pk=new_faqcat.id)
          else:
-             return render_to_response('faq/faqcategory_create.html', {'form': form,},
-             context_instance=RequestContext(request))
+            # return render_to_response('faq/faqcategory_create.html', {'form': form,},
+            # context_instance=RequestContext(request))
+              return TemplateResponse(request,'faq/faqcategory_create.html',  {'form': form, })    
+   
        
     else:
         form = FAQsCategoryForm( instance=FAQsCategory())
     
-    return render_to_response('faq/faqcategory_create.html', {'form': form,},
-        context_instance=RequestContext(request))
+    #return render_to_response('faq/faqcategory_create.html', {'form': form,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'faq/faqcategory_create.html',  {'form':form })    
+        
 
 @login_required
 @permission_required('ippc.change_faqcategory', login_url="/accounts/login/")
@@ -12039,7 +12287,7 @@ def faqcategory_edit(request, id=None, template_name='faq/faqcategory_edit.html'
         faqcategory = FAQsCategory()
       
     if request.POST:
-#
+
         form =FAQsCategoryForm(request.POST, instance=faqcategory)
         if form.is_valid():
             form.save()
@@ -12049,9 +12297,11 @@ def faqcategory_edit(request, id=None, template_name='faq/faqcategory_edit.html'
         form = FAQsCategoryForm(instance=faqcategory)
       
         
-    return render_to_response(template_name, {
-        'form': form, "faqcategory": faqcategory
-    }, context_instance=RequestContext(request))
+    #return render_to_response(template_name, {
+    #    'form': form, "faqcategory": faqcategory
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {  'form': form, "faqcategory": faqcategory })    
+   
     
         
 @login_required
@@ -12067,14 +12317,17 @@ def faq_create(request):
             info(request, _("Successfully added new faq."))
             return redirect("faq-detail", pk=new_faq.id)
          else:
-            return render_to_response('faq/faq_create.html', {'form': form,},
-            context_instance=RequestContext(request))
-       
+            #return render_to_response('faq/faq_create.html', {'form': form,},
+            #context_instance=RequestContext(request))
+            return TemplateResponse(request,'faq/faq_create.html',  {  'form': form,  })    
+   
     else:
         form = FAQsItemForm( instance=FAQsItem())
     
-    return render_to_response('faq/faq_create.html', {'form': form,},
-        context_instance=RequestContext(request))
+    #return render_to_response('faq/faq_create.html', {'form': form,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'faq/faq_create.html',  {  'form': form,  })    
+       
     
 @login_required
 @permission_required('ippc.change_faqitem', login_url="/accounts/login/")
@@ -12094,10 +12347,11 @@ def faq_edit(request, id=None,template_name='faq/faq_edit.html'):
         form = FAQsItemForm(instance=faq)
       
         
-    return render_to_response(template_name, {
-        'form': form, "faq": faq, 
-    }, context_instance=RequestContext(request))
-
+    #return render_to_response(template_name, {
+    #    'form': form, "faq": faq, 
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {   'form': form, "faq": faq, })    
+    
 
 class UserAutoRegistrationListView(ListView):
     """    UserAutoRegistration List view """
@@ -12131,17 +12385,21 @@ def auto_register(request):
             if not(request.POST['captcha'] == request.POST['result_element'] ) :
                 error_captcha='error'
                   
-            return render_to_response('accounts_auto/autoregister_create.html', {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha},
-            context_instance=RequestContext(request))
+            #return render_to_response('accounts_auto/autoregister_create.html', {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha},
+            #context_instance=RequestContext(request))
+            return TemplateResponse(request,'accounts_auto/autoregister_create.html',  {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha })    
+    
     else:
          x_element=random.randint(1,10)   
          y_element=random.randint(1,10)
          result_element=x_element+y_element
      
          form = UserAutoRegistrationForm()
-# 
-    return render_to_response('accounts_auto/autoregister_create.html', {'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element},
-        context_instance=RequestContext(request))
+ 
+    #return render_to_response('accounts_auto/autoregister_create.html', {'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element},
+     #   context_instance=RequestContext(request))
+    return TemplateResponse(request,'accounts_auto/autoregister_create.html',  {'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element})    
+        
      
     
 @login_required
@@ -12193,7 +12451,7 @@ def auto_register_approve(request, id=None):
                subtext+=" News"
             if newuser.subscribe_announcement == 1:
                 subtext+="Announcements"
-	    if newuser.subscribe_calls == 1:
+            if newuser.subscribe_calls == 1:
                 subtext+=" Calls"
 	
             subject='Your subscription to IPPC '+subtext+' has been approved.' 
@@ -12255,17 +12513,21 @@ def auto_registerresources(request):
             if not(request.POST['captcha'] == request.POST['result_element'] ) :
                 error_captcha='error'
                   
-            return render_to_response('accounts_auto/autoregisterresources_create.html', {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha},
-            context_instance=RequestContext(request))
+           # return render_to_response('accounts_auto/autoregisterresources_create.html', {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha},
+            #context_instance=RequestContext(request))
+            return TemplateResponse(request,'accounts_auto/autoregisterresources_create.html',  {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha })    
+    
     else:
          x_element=random.randint(1,10)   
          y_element=random.randint(1,10)
          result_element=x_element+y_element
      
          form = UserAutoRegistrationResourcesForm()
-# 
-    return render_to_response('accounts_auto/autoregisterresources_create.html', {'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element},
-        context_instance=RequestContext(request))
+ 
+   # return render_to_response('accounts_auto/autoregisterresources_create.html', {'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element},
+   #     context_instance=RequestContext(request))
+    return TemplateResponse(request,'accounts_auto/autoregisterresources_create.html',  {'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element})    
+    
      
     
 @login_required
@@ -12397,8 +12659,10 @@ def irss_activity_create(request):
             info(request, _("Successfully added IRSS Activity."))
             return redirect("irss-activity-detail", pk=new_irssactivity.id)
         else:
-            return render_to_response('irss/irss_activities_create.html', {'form': form,'f_form': f_form,},
-             context_instance=RequestContext(request))
+           # return render_to_response('irss/irss_activities_create.html', {'form': form,'f_form': f_form,},
+           #  context_instance=RequestContext(request))
+            return TemplateResponse(request,'irss/irss_activities_create.html',  {'form': form,'f_form': f_form})    
+   
 
           
         
@@ -12406,9 +12670,10 @@ def irss_activity_create(request):
         form = IRSSActivityForm(instance=IRSSActivity())
         f_form = IRSSActivityFileFormSet()
     
-    return render_to_response('irss/irss_activities_create.html', {'form': form,'f_form': f_form},
-        context_instance=RequestContext(request))
-
+    #return render_to_response('irss/irss_activities_create.html', {'form': form,'f_form': f_form},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'irss/irss_activities_create.html',  {'form': form,'f_form': f_form})    
+  
         
 
 @login_required
@@ -12442,9 +12707,11 @@ def irss_activity_edit(request,  id=None, template_name='irss/irss_activities_ed
         f_form = IRSSActivityFileFormSet(instance=irssactivity)
        
       
-    return render_to_response(template_name, {
-        'form': form, 'f_form':f_form,"irssactivity": irssactivity
-    }, context_instance=RequestContext(request))            
+    #return render_to_response(template_name, {
+     #   'form': form, 'f_form':f_form,"irssactivity": irssactivity
+    #}, context_instance=RequestContext(request))     
+    return TemplateResponse(request,template_name,  {  'form': form, 'f_form':f_form,"irssactivity": irssactivitym})    
+  
             
 
 
@@ -12501,14 +12768,22 @@ def usermembershiphistory_create(request):
             
             return redirect("usermembershiphistory-detail", pk=new_usermembershiphistory.id)
         else:
-             return render_to_response('accounts/user_membership_create.html', {'form': form,},
-             context_instance=RequestContext(request))
+             #return render_to_response('accounts/user_membership_create.html', {'form': form,},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'accounts/user_membership_create.html',  {  'form': form, })    
+  
+            
+
     else:
         form = UserMembershipHistoryForm(instance= UserMembershipHistory())
      
 
-    return render_to_response('accounts/user_membership_create.html', {'form': form },
-        context_instance=RequestContext(request))
+    #return render_to_response('accounts/user_membership_create.html', {'form': form },
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'accounts/user_membership_create.html',  {  'form': form, })    
+  
+            
+    
 
   
 @login_required
@@ -12531,10 +12806,11 @@ def usermembershiphistory_edit(request, id=None, template_name='accounts/user_me
     else:
         form = UserMembershipHistoryForm(instance=usermembership)
        #print(usermembership.user)
-    return render_to_response(template_name, {
-        'form': form, "usermembership": usermembership,"username":usermembership.user,
-    }, context_instance=RequestContext(request))
-
+    #return render_to_response(template_name, {
+    #    'form': form, "usermembership": usermembership,"username":usermembership.user,
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {  'form': form, "usermembership": usermembership,"username":usermembership.user, })    
+  
 
 
 class MediaKitDocumentListView(ListView):
@@ -12725,8 +13001,9 @@ def phytosanitarytreatment_create(request):
             info(request, _("Successfully created Phytosanitary Treatment."))
             return redirect("phytosanitary-treatment-detail",  slug=new_phytotreatment.slug)
         else:
-             return render_to_response('phytotreatment/phytotreatment_create.html', {'form': form,'pestform': pestform,'commodityform':commodityform,},
-             context_instance=RequestContext(request))
+             #return render_to_response('phytotreatment/phytotreatment_create.html', {'form': form,'pestform': pestform,'commodityform':commodityform,},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'phytotreatment/phytotreatment_create.html',  {  'form': form,'pestform': pestform,'commodityform':commodityform, })    
        
     else:
         form = PhytosanitaryTreatmentForm(instance=PhytosanitaryTreatment())
@@ -12734,9 +13011,10 @@ def phytosanitarytreatment_create(request):
         commodityform = PhytosanitaryTreatmentCommodityIdentityFormSet()
      
       
-    return render_to_response('phytotreatment/phytotreatment_create.html', {'form': form,'pestform': pestform,'commodityform':commodityform,},
-        context_instance=RequestContext(request))
-		
+    #return render_to_response('phytotreatment/phytotreatment_create.html', {'form': form,'pestform': pestform,'commodityform':commodityform,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'phytotreatment/phytotreatment_create.html',  {  'form': form,'pestform': pestform,'commodityform':commodityform, })    
+       		
 
 
 @login_required
@@ -12775,10 +13053,11 @@ def phytosanitarytreatment_edit(request,  id=None, template_name='phytotreatment
         commodityform = PhytosanitaryTreatmentCommodityIdentityFormSet(instance=phytotreatment)
      
        
-    return render_to_response(template_name, {
-        'form': form, "phytotreatment": phytotreatment,"pestform":pestform,"commodityform":commodityform
-    }, context_instance=RequestContext(request))
-		
+    #return render_to_response(template_name, {
+    #    'form': form, "phytotreatment": phytotreatment,"pestform":pestform,"commodityform":commodityform
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {  'form': form, "phytotreatment": phytotreatment,"pestform":pestform,"commodityform":commodityform })    
+  		
     
     
 @login_required
@@ -13196,14 +13475,18 @@ def generate_certificatesnew(request):
             info(request, _("Certificates generated."))
             return redirect("certificatestool-detail",new_certificatestool.id)
         else:
-             return render_to_response('certificates/certificatestool_create.html', {'form': form,'emailgroups':g_set,'img':"TemplateCertificate2017_XiaBrent_example.jpg",'zip_all':zip_all,},
-             context_instance=RequestContext(request))
+             #return render_to_response('certificates/certificatestool_create.html', {'form': form,'emailgroups':g_set,'img':"TemplateCertificate2017_XiaBrent_example.jpg",'zip_all':zip_all,},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'certificates/certificatestool_create.html',  {  'form': form,'emailgroups':g_set,'img':"TemplateCertificate2017_XiaBrent_example.jpg",'zip_all':zip_all,})    
+  
     else:
         form = CertificatesToolForm(instance=CertificatesTool())
         
       
-    return render_to_response('certificates/certificatestool_create.html', {'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':"TemplateCertificate2017_XiaBrent_example.jpg" ,},
-        context_instance=RequestContext(request))
+    #return render_to_response('certificates/certificatestool_create.html', {'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':"TemplateCertificate2017_XiaBrent_example.jpg" ,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'certificates/certificatestool_create.html',  { 'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':"TemplateCertificate2017_XiaBrent_example.jpg" ,})    
+      
         
         
 
@@ -13433,14 +13716,17 @@ def generate_certificates(request):
             info(request, _("Certificates generated."))
             return redirect("certificatestool-detail",new_certificatestool.id)
         else:
-             return render_to_response('certificates/certificatestool_create.html', {'form': form,'fontfile':img_template,'emailgroups':g_set,'img':"TemplateCertificate2017_XiaBrent_example.jpg",'zip_all':zip_all,},
-             context_instance=RequestContext(request))
+             #return render_to_response('certificates/certificatestool_create.html', {'form': form,'fontfile':img_template,'emailgroups':g_set,'img':"TemplateCertificate2017_XiaBrent_example.jpg",'zip_all':zip_all,},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'certificates/certificatestool_create.html',  {'form': form,'fontfile':img_template,'emailgroups':g_set,'img':"TemplateCertificate2017_XiaBrent_example.jpg",'zip_all':zip_all,})        
+    
     else:
         form = CertificatesToolForm(instance=CertificatesTool())
         
       
-    return render_to_response('certificates/certificatestool_create.html', {'form': form,'fontfile':img_template,'emailgroups':g_set,'zip_all':zip_all,'img':"TemplateCertificate2017_XiaBrent_example.jpg" ,},
-        context_instance=RequestContext(request))
+    #return render_to_response('certificates/certificatestool_create.html', {'form': form,'fontfile':img_template,'emailgroups':g_set,'zip_all':zip_all,'img':"TemplateCertificate2017_XiaBrent_example.jpg" ,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'certificates/certificatestool_create.html',  { 'form': form,'fontfile':img_template,'emailgroups':g_set,'zip_all':zip_all,'img':"TemplateCertificate2017_XiaBrent_example.jpg" ,})        
 
 class B_CertificatesToolListView(ListView):
     """   B_CertificatesTool List view """
@@ -13503,11 +13789,7 @@ def generate_b_certificatesnew(request):
             new_certificatestool = form.save(commit=False)
             new_certificatestool.creation_date = timezone.now()
             new_certificatestool.author =  request.user
-            try: 
-                os.makedirs(MEDIA_ROOT+'files/b_certificates')
-            except OSError:
-                if not os.path.isdir(MEDIA_ROOT+'files/b_certificates'):
-                    raise
+            
             date = timezone.now().strftime('%Y%m%d%H%M%S')
             certificatedir_new = MEDIA_ROOT+'files/b_certificates/'+date
             zip_all1 ="/static/media/files/b_certificates/certificates_"+ date+".zip"
@@ -13618,14 +13900,18 @@ def generate_b_certificatesnew(request):
             info(request, _("Certificates generated."))
             return redirect("b-certificatestool-detail",new_certificatestool.id)
         else:
-             return render_to_response('certificates/b_certificatestool_create.html', {'form': form,'emailgroups':g_set,'img':img_template_example,'zip_all':zip_all,},
-             context_instance=RequestContext(request))
+             #return render_to_response('certificates/b_certificatestool_create.html', {'form': form,'emailgroups':g_set,'img':img_template_example,'zip_all':zip_all,},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'certificates/b_certificatestool_create.html',  {'form': form,'emailgroups':g_set,'img':img_template_example,'zip_all':zip_all,})        
+    
     else:
         form = B_CertificatesToolForm(instance=CertificatesTool())
         
       
-    return render_to_response('certificates/b_certificatestool_create.html', {'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':img_template_example ,},
-        context_instance=RequestContext(request))
+    #return render_to_response('certificates/b_certificatestool_create.html', {'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':img_template_example ,},
+     #   context_instance=RequestContext(request))
+    return TemplateResponse(request,'certificates/b_certificatestool_create.html',  {'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':img_template_example ,})        
+    
 
    
 
@@ -13676,12 +13962,6 @@ def generate_b_certificates(request):
             new_certificatestool.creation_date = timezone.now()
             new_certificatestool.author =  request.user
             
-            try: 
-                os.makedirs(MEDIA_ROOT+'files/b_certificates')
-            except OSError:
-                if not os.path.isdir(MEDIA_ROOT+'files/b_certificates'):
-                    raise
-                
             date = timezone.now().strftime('%Y%m%d%H%M%S')
             certificatedir_new = MEDIA_ROOT+'files/b_certificates/'+date
             zip_all1 ="/static/media/files/b_certificates/certificates_"+ date+".zip"
@@ -13773,14 +14053,18 @@ def generate_b_certificates(request):
             info(request, _("Certificates generated."))
             return redirect("b-certificatestool-detail",new_certificatestool.id)
         else:
-             return render_to_response('certificates/b_certificatestool_create.html', {'form': form,'emailgroups':g_set,'img':img_template_example,'zip_all':zip_all,},
-             context_instance=RequestContext(request))
+    #         return render_to_response('certificates/b_certificatestool_create.html', {'form': form,'emailgroups':g_set,'img':img_template_example,'zip_all':zip_all,},
+    #         context_instance=RequestContext(request))
+             return TemplateResponse(request,'certificates/certificatestool_create.html',  {'form': form,'emailgroups':g_set,'img':img_template_example,'zip_all':zip_all,})        
+    
     else:
         form = B_CertificatesToolForm(instance=CertificatesTool())
         
       
-    return render_to_response('certificates/b_certificatestool_create.html', {'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':img_template_example ,},
-        context_instance=RequestContext(request))
+    #return render_to_response('certificates/b_certificatestool_create.html', {'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':img_template_example ,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'certificates/b_certificatestool_create.html',  {'form': form,'emailgroups':g_set,'zip_all':zip_all,'img':img_template_example ,})        
+       
 
 class WorkshopCertificatesToolListView(ListView):
     """    WorkshopCertificatesTool List view """
@@ -13897,14 +14181,18 @@ def generate_workshopcertificates(request):
             info(request, _("Workshop Certificates generated."))
             return redirect("w-certificatestool-detail",new_wcertificatestool.id)
         else:
-             return render_to_response('certificates/w_certificatestool_create.html', {'form': form,'events_set':events_set,'imga':imgA,'imgb':imgB,'zip_all':zip_all,'fontfile':fontfile},
-             context_instance=RequestContext(request))
+             #return render_to_response('certificates/w_certificatestool_create.html', {'form': form,'events_set':events_set,'imga':imgA,'imgb':imgB,'zip_all':zip_all,'fontfile':fontfile},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'certificates/w_certificatestool_create.html',  {'form': form,'events_set':events_set,'imga':imgA,'imgb':imgB,'zip_all':zip_all,'fontfile':fontfile})        
+    
     else:
         form = WorkshopCertificatesToolForm(instance=WorkshopCertificatesTool())
         
       
-    return render_to_response('certificates/w_certificatestool_create.html', {'form': form,'zip_all':zip_all,'events_set':events_set,'imga':imgA,'imgb':imgB,},
-        context_instance=RequestContext(request))
+    #return render_to_response('certificates/w_certificatestool_create.html', {'form': form,'zip_all':zip_all,'events_set':events_set,'imga':imgA,'imgb':imgB,},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'certificates/w_certificatestool_create.html',  {'form': form,'zip_all':zip_all,'events_set':events_set,'imga':imgA,'imgb':imgB,})        
+        
 
 class MembershipListView(ListView):
     """    Membership List view """
@@ -14033,17 +14321,20 @@ def topic_create(request):
             info(request, _("Successfully created Topic."))
             return redirect("topic-detail",  slug=new_topic.slug)
         else:
-             return render_to_response('topic/topic_create.html', {'form': form,'tl_form':tl_form,'ta_form':ta_form},
-             context_instance=RequestContext(request))
+           #  return render_to_response('topic/topic_create.html', {'form': form,'tl_form':tl_form,'ta_form':ta_form},
+           #  context_instance=RequestContext(request))
+            return TemplateResponse(request,'topic/topic_create.html',  {'form': form,'tl_form':tl_form,'ta_form':ta_form})        
+  
     else:
         form = TopicForm(instance=Topic())
         tl_form = TopicLeadsFormSet()
         ta_form = TopicAssistantsFormSet()
   
       
-    return render_to_response('topic/topic_create.html', {'form': form,'tl_form':tl_form,'ta_form':ta_form},
-        context_instance=RequestContext(request))
-		
+    #return render_to_response('topic/topic_create.html', {'form': form,'tl_form':tl_form,'ta_form':ta_form},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'topic/w_certificatestool_create.html',  {'form': form,'tl_form':tl_form,'ta_form':ta_form})        
+  		
 
 
 @login_required
@@ -14161,10 +14452,11 @@ def topic_edit(request,  id=None, template_name='topic/topic_edit.html'):
         ta_form = TopicAssistantsFormSet(instance=topic)
   
        
-    return render_to_response(template_name, {
-        'form': form,'tl_form':tl_form,'ta_form':ta_form, "topic": topic,
-    }, context_instance=RequestContext(request))
-		
+    #return render_to_response(template_name, {
+    #    'form': form,'tl_form':tl_form,'ta_form':ta_form, "topic": topic,
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {'form': form,'tl_form':tl_form,'ta_form':ta_form, "topic": topic,})        
+  		
       
 
 # http://stackoverflow.com/a/1854453/412329
@@ -14191,9 +14483,11 @@ def topic_translate(request,lang, id=None, template_name='topic/topic_translate.
     else:
         transform = TransTopicForm(instance=t_topic)
         
-    return render_to_response(template_name, {
-        'transform':transform,'lang':lang,"topic":topic,"t_topic": t_topic,
-    }, context_instance=RequestContext(request))
+    #return render_to_response(template_name, {
+    #    'transform':transform,'lang':lang,"topic":topic,"t_topic": t_topic,
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request,template_name,  {  'transform':transform,'lang':lang,"topic":topic,"t_topic": t_topic,})        
+  
 #
 #
 #
@@ -17119,13 +17413,16 @@ def my_tool(request):
             
             return redirect("my_toolres", pk=new_mytool.id)
          else:
-             return render_to_response('certificates/mytool.html', {'form': form,},
-             context_instance=RequestContext(request))
-       
+    #         return render_to_response('certificates/mytool.html', {'form': form,},
+     #        context_instance=RequestContext(request))
+             return TemplateResponse(request,'certificates/mytool.html',  { 'form': form,})        
+    
     else:
         form = MyToolForm()
-    return render_to_response('certificates/mytool.html', {'form': form},
-        context_instance=RequestContext(request))
+    #return render_to_response('certificates/mytool.html', {'form': form},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'certificates/mytool.html',  { 'form': form,})        
+      
 
 from django.core.files.storage import FileSystemStorage
 import sys
@@ -17277,14 +17574,19 @@ def nro_stats_files(request):
         
         
         
-        return render_to_response('countries/countries_stats_nros.html', {'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir,'read':read},
-             context_instance=RequestContext(request))
+        # return render_to_response('countries/countries_stats_nros.html', {'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir,'read':read},
+        #      context_instance=RequestContext(request))
+        return TemplateResponse(request,'countries/countries_stats_nros.html',  { 'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir,'read':read})        
+         
     else:
-           return render_to_response('countries/countries_stats_nros.html', {'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir},
-           context_instance=RequestContext(request))
-    return render_to_response('countries/countries_stats_nros.html', {'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir},
-        context_instance=RequestContext(request))
-
+          #  return render_to_response('countries/countries_stats_nros.html', {'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir},
+         #   context_instance=RequestContext(request))
+            return TemplateResponse(request,'countries/countries_stats_nros.html',  { 'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir})        
+    
+    # return render_to_response('countries/countries_stats_nros.html', {'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir},
+    #     context_instance=RequestContext(request))
+    return TemplateResponse(request,'countries/countries_stats_nros.html',  { 'list_files':list_files,'list_files1':list_files1,'prj_dir':prj_dir})        
+    
 
 class  MyToolDetailView(DetailView):
     """  MyTool detail page """
@@ -17425,18 +17727,25 @@ def nro_stats3_files(request):
             msg+='filename: '+filename+' saved <br>'
             info(request, _("Successfully done file!!"))
         
-            return render_to_response('countries/countries_stats_nros3.html', {'prj_dir':prj_dir,'msg':msg},
-                context_instance=RequestContext(request))
+           # return render_to_response('countries/countries_stats_nros3.html', {'prj_dir':prj_dir,'msg':msg},
+            #    context_instance=RequestContext(request))
+            return TemplateResponse(request,'countries/countries_stats_nros3.html',  {'prj_dir':prj_dir,'msg':msg})        
+        
         else:        
             msg='NOT selected pages!'
-            return render_to_response('countries/countries_stats_nros3.html', {'prj_dir':prj_dir,'msg':msg},
-                context_instance=RequestContext(request))
+           #return render_to_response('countries/countries_stats_nros3.html', {'prj_dir':prj_dir,'msg':msg},
+          #     context_instance=RequestContext(request))
+            return TemplateResponse(request,'countries/countries_stats_nros3.html',  { 'prj_dir':prj_dir,'msg':msg})        
+    
     else:
-        return render_to_response('countries/countries_stats_nros3.html', {'prj_dir':prj_dir,'msg':msg},
-        context_instance=RequestContext(request))
-    return render_to_response('countries/countries_stats_nros3.html', {'prj_dir':prj_dir,'msg':msg},
-        context_instance=RequestContext(request))
-
+        #return render_to_response('countries/countries_stats_nros3.html', {'prj_dir':prj_dir,'msg':msg},
+        #context_instance=RequestContext(request))
+        return TemplateResponse(request,'countries/countries_stats_nros3.html',  { 'prj_dir':prj_dir,'msg':msg})        
+    
+    #return render_to_response('countries/countries_stats_nros3.html', {'prj_dir':prj_dir,'msg':msg},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'countries/countries_stats_nros3.html',  { 'prj_dir':prj_dir,'msg':msg})        
+    
     
             
 def my_toolres(request,sel=None):
@@ -17484,13 +17793,17 @@ def my_tool2(request):
             
             return redirect("my_tool2res", pk=new_mytool2.id)
          else:
-             return render_to_response('certificates/mytool2.html', {'form': form,'infoaaa':infoaaa},
-             context_instance=RequestContext(request))
+             #return render_to_response('certificates/mytool2.html', {'form': form,'infoaaa':infoaaa},
+             #context_instance=RequestContext(request))
+             return TemplateResponse(request,'certificates/mytool2.html',  { 'form': form,'infoaaa':infoaaa})        
+  
        
     else:
         form = MyTool2Form()
-    return render_to_response('certificates/mytool2.html', {'form': form,'infoaaa':infoaaa},
-        context_instance=RequestContext(request))
+    #return render_to_response('certificates/mytool2.html', {'form': form,'infoaaa':infoaaa},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'certificates/mytool2.html',  { 'form': form,'infoaaa':infoaaa})        
+          
 
 
 class  MyTool2DetailView(DetailView):
@@ -17768,8 +18081,10 @@ def contribuitedresource_create(request):
                 return HttpResponseRedirect("core-activities/capacity-development/guides-and-training-materials/contributed-resource-list/")
        
         else:
-            return render_to_response('pages/contributed_resource_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'p_form':p_form,'issueform':issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user },
-             context_instance=RequestContext(request))
+           # return render_to_response('pages/contributed_resource_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'p_form':p_form,'issueform':issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user },
+           #  context_instance=RequestContext(request))
+            return TemplateResponse(request,'pages/contributed_resource_create.html',  {'form': form,'f_form': f_form,'u_form': u_form,'p_form':p_form,'issueform':issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user })        
+  
     else:
         form = ContributedResourceForm(instance= ContributedResource())
         issueform =IssueKeywordsRelateForm()
@@ -17778,8 +18093,10 @@ def contribuitedresource_create(request):
         u_form = ContributedResourceUrlFormSet()
         p_form =  ContributedResourcePhotoFormSet()
     
-    return render_to_response('pages/contributed_resource_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'p_form':p_form,'issueform':issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user },
-        context_instance=RequestContext(request))
+    #return render_to_response('pages/contributed_resource_create.html', {'form': form,'f_form': f_form,'u_form': u_form,'p_form':p_form,'issueform':issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user },
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'pages/contributed_resource_create.html',  {'form': form,'f_form': f_form,'u_form': u_form,'p_form':p_form,'issueform':issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user})        
+         
 
 @login_required
 @permission_required('ippc.change_contributedresource', login_url="/accounts/login/")
@@ -17859,10 +18176,12 @@ def contribuitedresource_edit(request,id=None, template_name='pages/contributed_
         f_form = ContributedResourceFileFormSet(instance=resource)
         u_form = ContributedResourceUrlFormSet( instance=resource)
         p_form = ContributedResourcePhotoFormSet(instance=resource)
-    return render_to_response(template_name, {
-        'form': form, 'f_form':f_form,'u_form': u_form,'p_form': p_form,   "resource": resource,"issueform":issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user
+    #return render_to_response(template_name, {
+    #    'form': form, 'f_form':f_form,'u_form': u_form,'p_form': p_form,   "resource": resource,"issueform":issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user
         
-    }, context_instance=RequestContext(request))  
+    #}, context_instance=RequestContext(request))  
+    return TemplateResponse(request,template_name,  { 'form': form, 'f_form':f_form,'u_form': u_form,'p_form': p_form,   "resource": resource,"issueform":issueform,'cr_admin':cr_admin,'cr_reviewer': cr_reviewer,'cr_user':  cr_user})        
+    
     
     
 class AdvancesSearchResourcesListView(ListView):
@@ -17915,7 +18234,83 @@ class AdvancesSearchResourcesListView(ListView):
            
          
         return context   
+class NamesAutocomplete(dal_select2.views.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user:
+            return Names.objects.none()
 
+        qs = Names.objects.all()
+
+        if self.q:
+            qs = qs.filter(codename__icontains=self.q)
+
+        return qs
+    
+class IssueKeywordAutocomplete(dal_select2.views.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user:
+            return IssueKeyword.objects.none()
+
+        qs = IssueKeyword.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+
+        return qs
+class CommodityKeywordAutocomplete(dal_select2.views.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user:
+            return CommodityKeyword.objects.none()
+
+        qs = CommodityKeyword.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+
+        return qs
+    
+
+class PhytosanitaryTreatmentTypeAutocomplete(dal_select2.views.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user:
+            return PhytosanitaryTreatmentType.objects.none()
+
+        qs = PhytosanitaryTreatmentType.objects.all()
+
+        if self.q:
+            qs = qs.filter(typefullname__icontains=self.q)
+
+        return qs  
+    
+class UserAutocomplete(dal_select2.views.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user:
+            return User.objects.none()
+
+        qs = User.objects.all()
+
+        if self.q:
+            qs = qs.filter(last_name__icontains=self.q ) | qs.filter( first_name__icontains=self.q )
+
+        return qs     
+    
+class TopicAutocomplete(dal_select2.views.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user:
+            return Topic.objects.none()
+
+        qs = Topic.objects.all()
+
+        if self.q:
+            qs = qs.filter(topicnumber__icontains=self.q)
+
+        return qs    
 
 class PhytosystemPageView(ListView):
     """ 
@@ -17927,3 +18322,4 @@ class PhytosystemPageView(ListView):
         context = super(PhytosystemPageView, self).get_context_data(**kwargs)
 
         return context
+    

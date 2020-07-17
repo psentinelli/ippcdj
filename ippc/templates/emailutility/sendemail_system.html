@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles %}
+{% load pages_tags mezzanine_tags i18n static %}
 
 {% block meta_title %}{% trans "Automatic Send e-mail system " %}{% endblock %}
 
@@ -17,13 +17,13 @@
 <table class="table table-condensed table-striped" id="publications">
   <thead>
     <tr>
-      <th>{% trans "aa" %}:{{aa|richtext_filter|safe}}</th>
+      <th>{% trans "aa" %}:{{aa|richtext_filters|safe}}</th>
      </tr> 
   </thead>
   <tbody>
     {% for object in textmessages %}
     <tr>
-      <td>{{object|richtext_filter|safe }}</td>
+      <td>{{object|richtext_filters|safe }}</td>
     </tr>
 
     {% endfor %}

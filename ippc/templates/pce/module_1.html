@@ -1,21 +1,20 @@
 {% extends "pce/basepce.html" %}
 
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
 {% if context == 'View' or context == 'Edit'%}
-    {% block meta_title %}{% trans "Module 1  - Country Profile" %} - {{ user.get_profile.country.name}} {% endblock %}
+    {% block meta_title %}{% trans "Module 1  - Country Profile" %} - {{ userprofile.country.name}} {% endblock %}
 
     {% block body_class %}wide{% endblock %}
 
     {% block breadcrumb_menu %}
         <li>
-            <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name }}/sessions">{% trans "PCE Home" %}</a>
-            <span class="divider">/</span>
+            <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name }}/sessions">{% trans "PCE Home" %}</a>
+            
         </li>
         <li>
-            <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/session/dashboard/{{sessionid}}">  {% trans "PCE Dashboard for" %} {{ user.get_profile.country.name }}</a>
-            <span class="divider">/</span>
-        <li>
+            <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/session/dashboard/{{sessionid}}">  {% trans "PCE Dashboard for" %} {{ userprofile.country.name }}</a>
+         </li>
         <li class="active">{% trans "Module 1  - Country Profile" %}</li>
     {% endblock %}
 
@@ -36,7 +35,7 @@
      {% if can_edit and context == 'Edit' or can_see and context == 'View' or can_see and context == 'Pdf' %}
   
         {% if context == 'View' or context == 'Edit'%}
-            <p><a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/session/{{sessionid}}/modules"><< {% trans "Back to Module List" %}</a></p>
+            <p><a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/session/{{sessionid}}/modules"><< {% trans "Back to Module List" %}</a></p>
  
             <div class="row-fluid">
                <div class="span8">
@@ -53,7 +52,7 @@
                     <h6 class="panel-title"> {% trans "COUNTRY PROFILE" %}</h6>
                     {% if context == 'View' and can_edit  and id != ''%}  
                         <span  class="pull-right">
-                          <a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/{{sessionid}}/module1/edit/{{id}}">Edit Module</a>
+                          <a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/{{sessionid}}/module1/edit/{{id}}">Edit Module</a>
                         </span>
                     {%endif%} 
                 </div>

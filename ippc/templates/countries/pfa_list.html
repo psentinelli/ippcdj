@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}
   {% trans "Pest Free Areas" %}: 
@@ -40,7 +40,7 @@
 
 <p class="pull-right">
   <a href="javascript:history.go(-1)">{% trans "« Go back" %}</a>
-  {% if perms.ippc.add_pestfreearea and request.user.get_profile.country.name == page.title %}
+  {% if perms.ippc.add_pestfreearea and userprofile.country.name == page.title %}
   <br>
   <small><a class="btn btn-small btn-info" href="{% url 'pfa-create' page.title|slugify %}">+ {% trans "Add new pest free area" %}</a></small>
   <br>
@@ -74,10 +74,10 @@
       <td>{{ object.modify_date|date:"d M Y" }}
 
         {% if user.is_superuser %} 
-            <a class="small pull-right" href="/admin/ippc/pestfreearea/{{ object.id }}"><i class="icon-edit"></i> Edit as Admin</a><br>
+            <a class="small pull-right" href="/admin/ippc/pestfreearea/{{ object.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br>
         {% endif %}
 
-        {% if perms.ippc.change_pestfreearea and request.user.get_profile.country.name == page.title %}
+        {% if perms.ippc.change_pestfreearea and userprofile.country.name == page.title %}
             <a class="small pull-right" href="{% url 'pfa-edit' object.country.country_slug object.id %}"><i class="icon-edit"></i> {% trans "Edit" %}</a>
             {# <a class="btn" href="{% url 'pfa-edit' pfa.id %}"><i class="icon-edit"></i> Edit</a> #}
         {% else %}

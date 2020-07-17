@@ -1,7 +1,7 @@
 {# https://github.com/samwillis/pagedown-bootstrap #}
 {# http://stackoverflow.com/a/5930179 #}
 
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %} {# accounts_tags #}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %} {# accounts_tags #}
 
 {% if form.non_field_errors or form.errors %}
 <div class="alert alert-error">{% trans "Please correct the errors below." %}

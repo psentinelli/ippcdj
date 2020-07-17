@@ -1,9 +1,9 @@
-{% load i18n future grp_tags %}
+{% load i18n %}
 
 <div id="header">
     <div class="branding">&nbsp;</div>
     <!-- Title -->
-    <div class="admin-title"><a style="color:#fff;" href="/">{% get_admin_title %}</a></div>
+    <div class="admin-title">Mezzanine</div>
     {% if user.is_authenticated and user.is_staff %}
     <!-- Bookmarks (temporary) -->
     <ul id="user-tools">
@@ -36,7 +36,3 @@
     </ul>
     {% endif %}
 </div>
-
-{# I Needed to remove this to get page reordering to work again #}
-
-{# {% include 'autocomplete_light/static.html' %} #}

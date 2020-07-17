@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
-{% block meta_title %}{% trans "Edit news" %} - {{ user.get_profile.partner.name}} {% endblock %}
+{% block meta_title %}{% trans "Edit news" %} - {{ userprofile.partner.name}} {% endblock %}
 
 {% block body_class %}wide{% endblock %}
 
@@ -11,13 +11,13 @@
   <span class="divider">/</span>
 </li>
 <li>
-  <a href="/partners/{{ user.get_profile.partner.name|slugify }}/">
-    {{ user.get_profile.partner.name }}
+  <a href="/partners/{{ userprofile.partner.name|slugify }}/">
+    {{ userprofile.partner.name }}
   </a>
   <span class="divider">/</span>
 </li>
 <li class="active">
-    {{ user.get_profile.partner.name }} {% trans "News" %}: {% trans "Editing" %} {{ partnernews.title }}
+    {{ userprofile.partner.name }} {% trans "News" %}: {% trans "Editing" %} {{ partnernews.title }}
 </li>
 
 

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Edit Publication" %} - {{ partnerspublication.country}} {% endblock %}
 
@@ -15,7 +15,7 @@
   <span class="divider">/</span>
 </li>
 <li>
-    {{ user.get_profile.partner.name }} {% trans "Publication" %}
+    {{ userprofile.partner.name }} {% trans "Publication" %}
   <span class="divider">/</span>
 </li>
 <li class="active">{% trans "Editing" %} {{ partnerspublication.title }}</li>

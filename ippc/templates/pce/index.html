@@ -1,5 +1,5 @@
 {% extends "pce/basepce.html" %}
-{% load i18n mezzanine_tags translate_tags  pages_tags   future staticfiles accounts_tags %}
+{% load i18n mezzanine_tags translate_tags  pages_tags   static accounts_tags %}
 
 {% block meta_title %}{% trans "IPPC" %}{% endblock %}
 {# {% block title %}{% trans "Welcome to IPPC" %}{% endblock %} #}
@@ -9,12 +9,12 @@
 {% endblock %}
 
 {% block main %}
-
+ 
 
 
 <!--div class="row-fluid" style="margin:0; font-weight:bold; padding:3px 5px; background:#FCC; color:#000; width:99% !important; display:block; text-align:left;">IMPORTANTE NOTICE: due to FAO systems maintenance, the website will be unavailable on Saturday 16 May between 8:30 and 12:30 (Rome time).  </div-->
 {% load ippc_tags %}
-
+ {% get_profile_usr user.id as profile_usr %}
 
 
 <!-- or NEWS in BLOCKS ================== -->
@@ -74,15 +74,17 @@ which.style.display="block"
     <h4>{% trans "LOGIN TO PCE" %}</h4>
     <p>
     {% if request.user.is_authenticated %}
-        {% url "profile" request.user.username as profile_url %}
-            {% if profile_url %}
-                <a href="{{ profile_url }}" title="{% trans 'See your IPPC user profile, including contact information.' %}"> {% if request.user.get_profile.first_name or request.user.get_profile.last_name %}{{ request.user.get_profile.first_name }} {{ request.user.get_profile.last_name }}{% else %}{{ request.user.username }}{% endif %}</a>
+        {% url "profile" request.user.username as profile_url1 %}
+            {% if profile_url1 %}
+                <a href="{{ profile_url1 }}" title="{% trans 'See your IPPC user profile, including contact information.' %}"> {% if request.userprofile.first_name or request.userprofile.last_name %}{{ request.userprofile.first_name }} {{ request.userprofile.last_name }}{% else %}{{ request.user.username }}{% endif %}</a>
             {% else %}
                 <a href="{% url "profile_update" %}">{{ request.user|username_or:"email"|capfirst }}</a>!
             {% endif %}
         
-            <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify}}/sessions"
-                class="btn btn-small btn-success btn-account">{% trans "Go to " %}{{ user.get_profile.country.name}}{% trans " Dashboard " %} </a>
+         <p>{% get_profile_usr user.id as profile_usr %}</i></p>
+
+            <a href="/{{ LANGUAGE_CODE }}/pce/{{ profile_usr.country.name|slugify}}/sessions"
+                class="btn btn-small btn-success btn-account">{% trans "Go to " %}{{ profile_usr.country.name}}{% trans " Dashboard " %} </a>
             <br> <br>
             <a href="{% url "logout" %}?next={{ request.path }}"
                 class="btn btn-small btn-info btn-account">{% trans "Log out" %}</a>

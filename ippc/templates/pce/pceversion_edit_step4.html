@@ -1,7 +1,7 @@
 {% extends "pce/basepce.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
-{% block meta_title %}{% trans "Configuration" %} - {{ user.get_profile.country.name}} {% endblock %}
+{% block meta_title %}{% trans "Configuration" %} - {{ userprofile.country.name}} {% endblock %}
 
 
 
@@ -9,11 +9,11 @@
 
 {% block breadcrumb_menu %}
 <li>
-    <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name }}/sessions">{% trans "PCE Home" %}</a>
-    <span class="divider">/</span>
+    <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name }}/sessions">{% trans "PCE Home" %}</a>
+    
 </li>
 <li class="active">
-    {{ user.get_profile.country.name }} - {% trans " PCE Configuration: Finished" %}
+    {{ userprofile.country.name }} - {% trans " PCE Configuration: Finished" %}
 </li>
 
 {% endblock %}
@@ -35,8 +35,8 @@
             </div>
             <div class="panel-body">
                 
-                    {% trans "You can now:" %}<a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/session/{{sessionid}}/modules"> {% trans "Begin work" %} </a><br>
-                    {% trans "Remember you can track your progress at any time in the " %}<a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/session/dashboard/{{sessionid}}"> {% trans "Dashboard" %} </a><br>
+                    {% trans "You can now:" %}<a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/session/{{sessionid}}/modules"> {% trans "Begin work" %} </a><br>
+                    {% trans "Remember you can track your progress at any time in the " %}<a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/session/dashboard/{{sessionid}}"> {% trans "Dashboard" %} </a><br>
                     {% trans "If you are a Manager you can also go back and modify the PCE configuration at any time by click on the Configuration tab on the top navigation bar." %}
                 
             </div>

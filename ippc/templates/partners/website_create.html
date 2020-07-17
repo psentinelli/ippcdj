@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
-{% block meta_title %}{% trans "New website" %} - {{ user.get_profile.partner.name}} {% endblock %}
+{% block meta_title %}{% trans "New website" %} - {{ userprofile.partner.name}} {% endblock %}
 
 {% block body_class %}wide{% endblock %}
 
@@ -11,7 +11,7 @@
   <span class="divider">/</span>
 </li>
 <li class="active">
-    {{ user.get_profile.partner.name }} {% trans "Websites" %}: {% trans "Create New" %}
+    {{ userprofile.partner.name }} {% trans "Websites" %}: {% trans "Create New" %}
 </li>
 {% endblock %}
 
@@ -27,7 +27,7 @@
   <a href="javascript:history.go(-1)">{% trans "« Cancel and go back" %}</a>
 </p>
 
-<h1><span class="normal">{% trans "Create New website for" %}</span> {{ user.get_profile.partner.name }}</h1>
+<h1><span class="normal">{% trans "Create New website for" %}</span> {{ userprofile.partner.name }}</h1>
 
 <form class="customform" method="POST" action="" enctype="multipart/form-data">
     {% csrf_token %}

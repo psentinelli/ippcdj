@@ -1,18 +1,18 @@
 {% extends 'pce/basepce.html' %}
 {% load module_extras %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
-{% block meta_title %}{% trans "PCE Sessions List" %} - {{ user.get_profile.country.name}} {% endblock %}
+{% block meta_title %}{% trans "PCE Sessions List" %} - {{ userprofile.country.name}} {% endblock %}
 
 {% block body_class %}wide{% endblock %}
 
 {% block breadcrumb_menu %}
 <li>
-    <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name }}/sessions">{% trans "PCE Home" %}</a>
-    <span class="divider">/</span>
+    <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name }}/sessions">{% trans "PCE Home" %}</a>
+
 </li>
 <li class="active">
-    {{ user.get_profile.country.name }} {% trans " PCE Sessions" %}
+    {{ userprofile.country.name }} {% trans " PCE Sessions" %}
 </li>
 {% endblock %}
 
@@ -32,14 +32,14 @@
                 <h4 class="panel-title"> {% trans "User Details" %}</h4>
             </div>
             <div class="panel-body">
-                <b>{% trans "User" %}:</b> {{ user.get_profile}}<br>
+                <b>{% trans "User" %}:</b> {{ userprofile.first_name}} {{ userprofile.last_name}}<br>
                 <b>{% trans "Role" %}:</b> 
                 {% for group in request.user.groups.all %}
                 {% if 'PCE' in group.name %}
                 {{group.name}} <br>
                 {% endif %}
                 {% endfor %}
-                <b>{% trans "Country" %}:</b> {{ user.get_profile.country.name }}<br>
+                <b>{% trans "Country" %}:</b> {{ userprofile.country.name }}<br>
             </div>
         </div>
     </div>
@@ -52,7 +52,7 @@
                 <p>{% trans " Click on a PCE Session title below to continue your work" %}
                     {% if  can_edit %}
                     {% if latest_closed  or empty %}
-                    or  <a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify }}/session/create_step1">{% trans "Start new session" %}</a>.</p>
+                    or  <a  class="btn btn-info" href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify }}/session/create_step1">{% trans "Start new session" %}</a>.</p>
                 {% endif %}
                 {% else %}
                 .</p>
@@ -79,8 +79,8 @@
             <tbody>
                 {% for object in latest %}
                 <tr class="warning">
-                    <td>{{ user.get_profile.country.name }}</th>			
-                    <td> <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify}}/session/dashboard/{{object.id}}/">{{ object.version_number}}</td>
+                    <td>{{ userprofile.country.name }}</th>			
+                    <td> <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify}}/session/dashboard/{{object.id}}/">{{ object.version_number}}</td>
                         
                     <td>{% if object.status == 1 %}
                         {% trans "open" %}

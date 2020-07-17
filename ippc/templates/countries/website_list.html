@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}
   {% trans "Pest Reports" %}: 
@@ -40,7 +40,7 @@
 
 <p class="pull-right">
   <a href="javascript:history.go(-1)">{% trans "« Go back" %}</a>
-  {% if perms.ippc.add_website and request.user.get_profile.country.name == page.title %}
+  {% if perms.ippc.add_website and userprofile.country.name == page.title %}
   <br>
   <small><a class="btn btn-small btn-info" href="{% url 'website-create' page.title|slugify %}">+ {% trans "Add new website" %}</a></small>
   <br>
@@ -74,10 +74,10 @@
       <td>{{ object.modify_date|date:"d M Y" }}
 
         {% if user.is_superuser %} 
-            <a class="small pull-right" href="/admin/ippc/website/{{ object.id }}"><i class="icon-edit"></i> Edit as Admin</a><br>
+            <a class="small pull-right" href="/admin/ippc/website/{{ object.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br>
         {% endif %}
 
-        {% if perms.ippc.change_website and request.user.get_profile.country.name == page.title %}
+        {% if perms.ippc.change_website and userprofile.country.name == page.title %}
             <a class="small pull-right" href="{% url 'website-edit' object.country.country_slug object.id %}"><i class="icon-edit"></i> {% trans "Edit" %}</a>
             {# <a class="btn" href="{% url 'website-edit' report.id %}"><i class="icon-edit"></i> Edit</a> #}
         {% else %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags translate_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags translate_tags %}
 
 {% block meta_title %}{% trans "Frequently Asked Questions" %}{% endblock %}
 
@@ -61,7 +61,7 @@
                     {% for f in  faq %}
                     <h3 id="{{f.faq_anchor}}"><a href="#{{f.faq_anchor}}">{{f.title}}</a></h3>
                         <div class="answer">
-                            {{ f.faq_description|richtext_filter|safe }}
+                            {{ f.faq_description|richtext_filters|safe }}
                         </div> 
                     {% endfor %}
                 {% endif %}

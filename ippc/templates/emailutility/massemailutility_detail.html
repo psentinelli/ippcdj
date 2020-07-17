@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Email" %}{% endblock %}
 
@@ -92,7 +92,7 @@
 <dd>{{ massemailmessage.subject }}</dd>
 
 <dt>{% trans "Message" %}</dt>
-<dd>    {{ massemailmessage.messagebody|richtext_filter|safe }}
+<dd>    {{ massemailmessage.messagebody|richtext_filters|safe }}
   </dd>
   
   {% if  massemailmessage.massmerge == 1%}

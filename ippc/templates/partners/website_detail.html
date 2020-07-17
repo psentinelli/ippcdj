@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Latest Websites" %}{% endblock %}
 
@@ -15,9 +15,9 @@
 <div class="well localnav">
   <p><a href="/{{ pageslug}}/">« {% trans "Back to " %}{{pagetitle}}</a></p>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/partnerswebsite/{{ website.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/partnerswebsite/{{ website.id }}/change/">Edit as Admin</a><br>
     {% endif %}
-    {% if perms.ippc.change_partnerswebsite and request.user.get_profile.partner.name == website.partners.name %}
+    {% if perms.ippc.change_partnerswebsite and userprofile.partner.name == website.partners.name %}
         <a class="btn btn-small btn-info" href="{% url 'partner-websites-edit' website.partners.name|slugify website.id %}"><i class="icon-edit icon-white"></i> Edit</a>
     {% else %}
     {% endif %}
@@ -48,7 +48,7 @@
 
  {% if website.short_description %}
   <dt>{% trans "Short Description" %}</dt>
-  <dd>{{ website.short_description|richtext_filter|safe }}</dd>
+  <dd>{{ website.short_description|richtext_filters|safe }}</dd>
   {% endif %}
   
   {% if website.contact_for_more_information %}

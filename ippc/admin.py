@@ -1,13 +1,14 @@
-# https://gist.github.com/renyi/3596248
-from copy import deepcopy
 from django.contrib import admin
+
+from copy import deepcopy
+
 from mezzanine.pages.models import Page, RichTextPage, Link
 from mezzanine.pages.admin import PageAdmin, LinkAdmin
 from mezzanine.conf import settings
 from mezzanine.core.admin import TabularDynamicInlineAdmin, StackedDynamicInlineAdmin,DisplayableAdmin, OwnableAdmin
 from settings import ALLOWED_HOSTS 
 
-from .models import DraftProtocol,PartnersEditorHistory, PartnersContactPointHistory, OCPHistory,CnEditorsHistory,PestStatus, PestReport, CountryPage, PartnersPage, WorkAreaPage, PublicationLibrary, \
+from ippc.models import DraftProtocol,PartnersEditorHistory, PartnersContactPointHistory, OCPHistory,CnEditorsHistory,PestStatus, PestReport, CountryPage, PartnersPage, WorkAreaPage, PublicationLibrary, \
 Publication,PublicationFile,PublicationUrl, ReportingObligation,EventReporting,PestFreeArea,ImplementationISPM, Poll_Choice, Poll,\
 ImplementationISPMVersion, TransPublicationLibraryPage,Website,EventreportingFile,EventreportingUrl,\
 ReportingObligation_File, ReportingObligationUrl,ImplementationISPMUrl,ImplementationISPMFile,\
@@ -28,26 +29,29 @@ from django.contrib.auth.models import User,Group
 from django import forms
 from django.core import mail
 from django.core.mail import send_mail
-from models import TransRichTextPage, TransLinkPage
-from django_markdown.admin import MarkdownModelAdmin
-from mezzanine_pagedown.widgets import PageDownWidget
+from .models import TransRichTextPage, TransLinkPage
+#from django_markdown.admin import MarkdownModelAdmin
+
 from django.shortcuts import get_object_or_404
 
-import autocomplete_light
+#import autocomplete_light
+from dal import autocomplete
 #import autocomplete_light_registry
+from mezzanine_pagedown.widgets import PageDownWidget
 
-from django_markdown.widgets import MarkdownWidget
-
+#from django_markdown.widgets import MarkdownWidget
+#from markdownx.widgets import AdminMarkdownxWidget
 # for login as user
 class IppcUserProfileAdmin(admin.ModelAdmin):
-    change_form_template = 'loginas/change_form.html'
- 
+    #change_form_template = 'loginas/change_form.html'
+    change_form_template = "admin/auth/user/change_form.html"
+    change_list_template = "admin/auth/user/change_list.html"
 class MyQAQuestionAdminForm(forms.ModelForm):
     class Meta:
         model = QAQuestion
-        widgets = { 'short_description':MarkdownWidget() 
-#         # models.TextField: {'widget': },
-}
+        fields = '__all__' 
+        widgets = { 'short_description': PageDownWidget() ,
+        }
 class QAQuestionAdmin(admin.ModelAdmin):
     form = MyQAQuestionAdminForm
     fieldsets = [
@@ -102,8 +106,9 @@ admin.site.register(QAQuestion, QAQuestionAdmin)
 class MyQAAnswerAdminForm(forms.ModelForm):
     class Meta:
         model = QAAnswer
-        widgets = {  'description':MarkdownWidget() 
-}
+        fields = '__all__'  
+      #  widgets = {  'description':MarkdownWidget() 
+#}
 class QAAnswerAdmin(admin.ModelAdmin):
     form = MyQAAnswerAdminForm
     fieldsets = [
@@ -173,9 +178,10 @@ admin.site.register(QAAnswer, QAAnswerAdmin)
 class MyIssueKeywordsRelateAdminForm(forms.ModelForm):
     class Meta:
         model = IssueKeywordsRelate
-        widgets = {
-          'issuename': autocomplete_light.MultipleChoiceWidget ('IssueKeywordAutocomplete'),
-          }
+        fields = '__all__' 
+        #widgets = {
+        #  'issuename': autocomplete.MultipleChoiceWidget ('IssueKeywordAutocomplete'),
+        #  }
 
 
 class IssueKeywordsRelateAdmin(admin.ModelAdmin):
@@ -186,9 +192,10 @@ admin.site.register(IssueKeywordsRelate, IssueKeywordsRelateAdmin)
 class MyCommodityKeywordsRelateAdminForm(forms.ModelForm):
     class Meta:
         model = CommodityKeywordsRelate
-        widgets = {
-          'commname': autocomplete_light.MultipleChoiceWidget ('CommodityKeywordAutocomplete'),
-          }
+        fields = '__all__' 
+        #widgets = {
+        #  'commname': autocomplete.MultipleChoiceWidget ('CommodityKeywordAutocomplete'),
+        #  }
 
 class CommodityKeywordsRelateAdmin(admin.ModelAdmin):
     form = MyCommodityKeywordsRelateAdminForm
@@ -200,20 +207,21 @@ admin.site.register(CommodityKeywordsRelate, CommodityKeywordsRelateAdmin)
 
 class PublicationFileInline(admin.TabularInline):
     model = PublicationFile
-    formset = inlineformset_factory(Publication,  PublicationFile,extra=1)
+     
+    formset = inlineformset_factory(Publication,  PublicationFile,extra=1,fields = '__all__')
     
 class PublicationUrlInline(admin.TabularInline):
     model = PublicationUrl
-    formset = inlineformset_factory(Publication, PublicationUrl,extra=1)
+    formset = inlineformset_factory(Publication, PublicationUrl,extra=1,fields = '__all__')
 
    
 class PublicationAdmin(admin.ModelAdmin):
-    inlines = [PublicationFileInline,PublicationUrlInline]
+    inlines = [PublicationFileInline,PublicationUrlInline,]
     save_on_top = True
-    list_display = ('title',  'modify_date')
-    list_filter = ('title',  'modify_date')
-    prepopulated_fields = { 'slug': ['title']}
-    search_fields = ['title', 'short_description', 'slug', 'file_en', 'file_es', 'file_ar', 'file_ru', 'file_zh', 'file_fr']
+    list_display = ('title',  'modify_date',)
+    list_filter = ('title',  'modify_date',)
+    prepopulated_fields = { 'slug': ['title'],}
+    search_fields = ['title', 'short_description', 'slug', 'file_en', 'file_es', 'file_ar', 'file_ru', 'file_zh', 'file_fr',]
 
     def queryset(self, request):
         qs = super(PublicationAdmin, self).queryset(request)
@@ -224,12 +232,12 @@ admin.site.register(Publication, PublicationAdmin)
 class PublicationInline(StackedDynamicInlineAdmin):
     inlines = [PublicationFileInline,PublicationUrlInline, ]
     model = Publication
-    prepopulated_fields = { 'slug': ['title'] }
+    prepopulated_fields = { 'slug': ['title'], }
     
 
 class TransPublicationLibraryPageAdmin(StackedDynamicInlineAdmin):
     model = TransPublicationLibraryPage
-    fields = ("lang", "title", "content", "side_box")
+    fields = ("lang", "title", "content", "side_box",)
 
 from django.http import HttpResponseRedirect
 
@@ -239,14 +247,16 @@ class CommitteeMeetingInline(StackedDynamicInlineAdmin):
 class CollapseContentForm(forms.ModelForm):
     class Meta:
         model = CollapseContent
+        fields = '__all__' 
+        #widgets = { 'short_description':MarkdownWidget()
         widgets = { 
-        'text_en':MarkdownWidget() ,
-        'text_es':MarkdownWidget() ,
-        'text_fr':MarkdownWidget() ,
-        'text_ar':MarkdownWidget() ,
-        'text_zh':MarkdownWidget() ,
-        'text_ru':MarkdownWidget() 
-}
+        'text_en':PageDownWidget() ,
+        'text_es':PageDownWidget() ,
+        'text_fr':PageDownWidget() ,
+        'text_ar':PageDownWidget() ,
+        'text_zh':PageDownWidget() ,
+        'text_ru':PageDownWidget() ,
+        }
 
     
     
@@ -254,20 +264,22 @@ class CollapseContentInline(StackedDynamicInlineAdmin):
     model = CollapseContent
     form = CollapseContentForm
     
-class PublicationLibraryAdmin(PageAdmin):
+class PublicationLibraryAdmin(admin.ModelAdmin):#PageAdmin):
+    model = PublicationLibrary
     inlines = (PublicationInline, CollapseContentInline,CommitteeMeetingInline,TransPublicationLibraryPageAdmin,)
 admin.site.register(PublicationLibrary, PublicationLibraryAdmin)
 
 class Collapse2ContentForm(forms.ModelForm):
     class Meta:
         model = Collapse2Content
+        fields = '__all__'
         widgets = { 
-        'text_en':MarkdownWidget() ,
-        'text_es':MarkdownWidget() ,
-        'text_fr':MarkdownWidget() ,
-        'text_ar':MarkdownWidget() ,
-        'text_zh':MarkdownWidget() ,
-        'text_ru':MarkdownWidget() 
+        'text_en':PageDownWidget() ,
+        'text_es':PageDownWidget() ,
+        'text_fr':PageDownWidget() ,
+        'text_ar':PageDownWidget() ,
+        'text_zh':PageDownWidget() ,
+        'text_ru':PageDownWidget() 
 }
 
     
@@ -279,13 +291,14 @@ class Collapse2ContentInline(StackedDynamicInlineAdmin):
 class SideBoxContentForm(forms.ModelForm):
     class Meta:
         model = SideBoxContent
+        fields = '__all__'
         widgets = { 
-        'text_en':MarkdownWidget() ,
-        'text_es':MarkdownWidget() ,
-        'text_fr':MarkdownWidget() ,
-        'text_ar':MarkdownWidget() ,
-        'text_zh':MarkdownWidget() ,
-        'text_ru':MarkdownWidget() 
+        'text_en':PageDownWidget() ,
+        'text_es':PageDownWidget() ,
+        'text_fr':PageDownWidget() ,
+        'text_ar':PageDownWidget() ,
+        'text_zh':PageDownWidget() ,
+        'text_ru':PageDownWidget() 
 }
 
     
@@ -323,10 +336,10 @@ def response_change(self, request, obj):
 
 class OCPHistoryInline(admin.TabularInline):
     model = OCPHistory
-    formset = inlineformset_factory(CountryPage,  OCPHistory,extra=1)
+    formset = inlineformset_factory(CountryPage,  OCPHistory,extra=1,fields = '__all__')
 class CnEditorsHistoryInLine(admin.TabularInline):
     model = CnEditorsHistory
-    formset = inlineformset_factory(CountryPage,  CnEditorsHistory,extra=1)
+    formset = inlineformset_factory(CountryPage,  CnEditorsHistory,extra=1,fields = '__all__')
        
 class CountryPageAdmin(PageAdmin):
     fieldsets = deepcopy(PageAdmin.fieldsets) + countrypages_extra_fieldsets
@@ -342,16 +355,16 @@ partnerspages_extra_fieldsets = ((None, {"fields": ("name","content", "short_des
  
 class PartnersContactPointHistoryInline(admin.TabularInline):
     model = PartnersContactPointHistory
-    formset = inlineformset_factory(PartnersPage,  PartnersContactPointHistory,extra=1)
+    formset = inlineformset_factory(PartnersPage,  PartnersContactPointHistory,extra=1,fields = '__all__')
     
 class PartnersEditorHistoryInLine(admin.TabularInline):
     model = PartnersEditorHistory
-    formset = inlineformset_factory(PartnersPage,  PartnersEditorHistory,extra=1)
+    formset = inlineformset_factory(PartnersPage,  PartnersEditorHistory,extra=1,fields = '__all__')
   
 class PartnersPageAdmin(PageAdmin):
     fieldsets = deepcopy(PageAdmin.fieldsets) + partnerspages_extra_fieldsets
     inlines = (PartnersContactPointHistoryInline,PartnersEditorHistoryInLine)
-    prepopulated_fields = { 'partner_slug': ['name'] }
+    prepopulated_fields = { 'partner_slug': ['name'], }
     # list_display = ('continent','name','iso','iso3', 'languages', 'currency_name')
     # list_display_links = ('name',)
 
@@ -365,6 +378,7 @@ class PollChoiceInline(admin.TabularInline):
 class MyPollAdminForm(forms.ModelForm):
     class Meta:
         model = Poll
+        fields = '__all__' 
 #        widgets = {
 #          'polltext':MarkdownWidget() 
 #         # models.TextField: {'widget': },
@@ -383,7 +397,7 @@ class PollAdmin(admin.ModelAdmin):
        
     ]
     
-    list_display = ('question', 'pub_date','closing_date')
+    list_display = ('question', 'pub_date','closing_date',)
     inlines = [PollChoiceInline]
     search_fields = ['question']
     list_filter = ['pub_date','question']
@@ -412,16 +426,17 @@ class PestStatusAdmin(admin.ModelAdmin):
 class MyPestReportAdminForm(forms.ModelForm):
     class Meta:
         model = PestReport
-        widgets = {
-          'pest_identity': autocomplete_light.ChoiceWidget ('EppoCodeAutocomplete'),
-          }
+        fields = '__all__' 
+        #widgets = {
+        #  'pest_identity': autocomplete.ChoiceWidget ('EppoCodeAutocomplete'),
+        #  }
 class PestReportFileInline(admin.TabularInline):
     model = PestReportFile
-    formset = inlineformset_factory(PestReport,  PestReportFile,extra=1)
+    formset = inlineformset_factory(PestReport,  PestReportFile,extra=1,fields = '__all__')
     
 class PestReportUrlInline(admin.TabularInline):
     model = PestReportUrl
-    formset = inlineformset_factory(PestReport, PestReportUrl,extra=1)
+    formset = inlineformset_factory(PestReport, PestReportUrl,extra=1,fields = '__all__')
    
 class PestReportAdmin(admin.ModelAdmin):
     form = MyPestReportAdminForm
@@ -464,11 +479,12 @@ admin.site.register(DraftingBodyType, DraftingBodyTypeAdmin)
 class MyPhytosanitaryTreatmentAdminForm(forms.ModelForm):
     class Meta:
         model = PhytosanitaryTreatment
-        widgets = {
-            'treatment_type': autocomplete_light.ChoiceWidget('PhytosanitaryTreatmentTypeAutocomplete'),
-            'treatment_pestidentity': autocomplete_light.ChoiceWidget('NamesAutocomplete'),
-            'product_commodityidentity': autocomplete_light.ChoiceWidget('NamesAutocomplete'),
-        }
+        fields = '__all__' 
+        #widgets = {
+        #    'treatment_type': autocomplete.ChoiceWidget('PhytosanitaryTreatmentTypeAutocomplete'),
+        #    'treatment_pestidentity': autocomplete.ChoiceWidget('NamesAutocomplete'),
+        #    'product_commodityidentity': autocomplete.ChoiceWidget('NamesAutocomplete'),
+        #}
 
    
 class PhytosanitaryTreatmentAdmin(admin.ModelAdmin):
@@ -520,11 +536,11 @@ admin.site.register(CommodityKeyword, CommodityKeywordAdmin)
    
 class ReportingObligationFileInline(admin.TabularInline):
     model = ReportingObligation_File
-    formset = inlineformset_factory(ReportingObligation,  ReportingObligation_File,extra=1)
+    formset = inlineformset_factory(ReportingObligation,  ReportingObligation_File,extra=1,fields = '__all__')
     
 class ReportingObligationUrlInline(admin.TabularInline):
     model = ReportingObligationUrl
-    formset = inlineformset_factory(ReportingObligation, ReportingObligationUrl,extra=1)
+    formset = inlineformset_factory(ReportingObligation, ReportingObligationUrl,extra=1,fields = '__all__')
  
 class ReportingObligationAdmin(admin.ModelAdmin):
     inlines = [ReportingObligationFileInline,ReportingObligationUrlInline,]# TransReportingObligationAdmin
@@ -538,11 +554,11 @@ admin.site.register(ReportingObligation, ReportingObligationAdmin)
 
 class EventReportingFileInline(admin.TabularInline):
     model = EventreportingFile
-    formset = inlineformset_factory(EventReporting,  EventreportingFile,extra=1)
+    formset = inlineformset_factory(EventReporting,  EventreportingFile,extra=1,fields = '__all__')
     
 class EventReportingUrlInline(admin.TabularInline):
     model = EventreportingUrl
-    formset = inlineformset_factory(EventReporting,  EventreportingUrl,extra=1)
+    formset = inlineformset_factory(EventReporting,  EventreportingUrl,extra=1,fields = '__all__')
       
 class EventReportingAdmin(admin.ModelAdmin):
     inlines = [EventReportingFileInline,EventReportingUrlInline ]
@@ -555,7 +571,7 @@ admin.site.register(EventReporting, EventReportingAdmin)
 
 class WebsiteUrlInline(admin.TabularInline):
     model = WebsiteUrl
-    formset = inlineformset_factory(Website, WebsiteUrl,extra=1)
+    formset = inlineformset_factory(Website, WebsiteUrl,extra=1,fields = '__all__')
 
 class WebsiteAdmin(admin.ModelAdmin):
     inlines = [WebsiteUrlInline ]
@@ -568,7 +584,7 @@ admin.site.register(Website, WebsiteAdmin)
 
 class PartnersWebsiteUrlInline(admin.TabularInline):
     model = PartnersWebsiteUrl
-    formset = inlineformset_factory(PartnersWebsite, PartnersWebsiteUrl,extra=1)
+    formset = inlineformset_factory(PartnersWebsite, PartnersWebsiteUrl,extra=1,fields = '__all__')
 
 class PartnersWebsiteAdmin(admin.ModelAdmin):
     inlines = [PartnersWebsiteUrlInline ]
@@ -581,11 +597,11 @@ admin.site.register(PartnersWebsite, PartnersWebsiteAdmin)
 
 class PestFreeAreaFileInline(admin.TabularInline):
     model = PestFreeAreaFile
-    formset = inlineformset_factory(PestFreeArea,  PestFreeAreaFile,extra=1)
+    formset = inlineformset_factory(PestFreeArea,  PestFreeAreaFile,extra=1,fields = '__all__')
     
 class PestFreeAreaUrlInline(admin.TabularInline):
     model = PestFreeAreaUrl
-    formset = inlineformset_factory(PestFreeArea, PestFreeAreaUrl,extra=1)
+    formset = inlineformset_factory(PestFreeArea, PestFreeAreaUrl,extra=1,fields = '__all__')
     
 class PestFreeAreaAdmin(admin.ModelAdmin):
     inlines = [PestFreeAreaFileInline,PestFreeAreaUrlInline, ]
@@ -598,11 +614,11 @@ admin.site.register(PestFreeArea, PestFreeAreaAdmin)
 
 class CnPublicationFileInline(admin.TabularInline):
     model = CnPublicationFile
-    formset = inlineformset_factory(CnPublication,  CnPublicationFile,extra=1)
+    formset = inlineformset_factory(CnPublication,  CnPublicationFile,extra=1,fields = '__all__')
     
 class CnPublicationUrlInline(admin.TabularInline):
     model = CnPublicationUrl
-    formset = inlineformset_factory(CnPublication, CnPublicationUrl,extra=1)
+    formset = inlineformset_factory(CnPublication, CnPublicationUrl,extra=1,fields = '__all__')
 
 class CnPublicationAdmin(admin.ModelAdmin):
     inlines = [CnPublicationFileInline,CnPublicationUrlInline]
@@ -616,11 +632,11 @@ admin.site.register(CnPublication, CnPublicationAdmin)
 
 class PartnersPublicationFileInline(admin.TabularInline):
     model = PartnersPublicationFile
-    formset = inlineformset_factory(PartnersPublication,  PartnersPublicationFile,extra=1)
+    formset = inlineformset_factory(PartnersPublication,  PartnersPublicationFile,extra=1,fields = '__all__')
     
 class PartnersPublicationUrlInline(admin.TabularInline):
     model = PartnersPublicationUrl
-    formset = inlineformset_factory(PartnersPublication, PartnersPublicationUrl,extra=1)
+    formset = inlineformset_factory(PartnersPublication, PartnersPublicationUrl,extra=1,fields = '__all__')
 
 class PartnersPublicationAdmin(admin.ModelAdmin):
     inlines = [PartnersPublicationFileInline,PartnersPublicationUrlInline]
@@ -637,11 +653,11 @@ admin.site.register(PartnersPublication, PartnersPublicationAdmin)
 
 class ImplementationISPMFileInline(admin.TabularInline):
     model = ImplementationISPMFile
-    formset = inlineformset_factory(ImplementationISPM,  ImplementationISPMFile,extra=1)
+    formset = inlineformset_factory(ImplementationISPM,  ImplementationISPMFile,extra=1,fields = '__all__')
     
 class ImplementationISPMUrlInline(admin.TabularInline):
     model = ImplementationISPMUrl
-    formset = inlineformset_factory(ImplementationISPM, ImplementationISPMUrl,extra=1)    
+    formset = inlineformset_factory(ImplementationISPM, ImplementationISPMUrl,extra=1,fields = '__all__')    
 
 class ImplementationISPMAdmin(admin.ModelAdmin):
     inlines = [ImplementationISPMFileInline,ImplementationISPMUrlInline ]
@@ -659,11 +675,11 @@ admin.site.register(ImplementationISPMVersion, ImplementationISPMVersionAdmin)
 
 class CountryNewsFileInline(admin.TabularInline):
     model =  CountryNewsFile
-    formset = inlineformset_factory( CountryNews,   CountryNewsFile,extra=1)
+    formset = inlineformset_factory( CountryNews,   CountryNewsFile,extra=1,fields = '__all__')
     
 class  CountryNewsUrlInline(admin.TabularInline):
     model =  CountryNewsUrl
-    formset = inlineformset_factory( CountryNews,  CountryNewsUrl,extra=1)
+    formset = inlineformset_factory( CountryNews,  CountryNewsUrl,extra=1,fields = '__all__')
  
 class  CountryNewsAdmin(admin.ModelAdmin):
     inlines = [CountryNewsFileInline,CountryNewsUrlInline, ]
@@ -676,11 +692,11 @@ admin.site.register( CountryNews,  CountryNewsAdmin)
 
 class PartnersNewsFileInline(admin.TabularInline):
     model =  PartnersNewsFile
-    formset = inlineformset_factory( PartnersNews,   PartnersNewsFile,extra=1)
+    formset = inlineformset_factory( PartnersNews,   PartnersNewsFile,extra=1,fields = '__all__')
     
 class  PartnersNewsUrlInline(admin.TabularInline):
     model =  PartnersNewsUrl
-    formset = inlineformset_factory( PartnersNews,  PartnersNewsUrl,extra=1)
+    formset = inlineformset_factory( PartnersNews,  PartnersNewsUrl,extra=1,fields = '__all__')
  
 class  PartnersNewsAdmin(admin.ModelAdmin):
     inlines = [PartnersNewsFileInline,PartnersNewsUrlInline, ]
@@ -695,6 +711,7 @@ admin.site.register( PartnersNews,  PartnersNewsAdmin)
 class MyFAQsCategoryAdminForm(forms.ModelForm):
     class Meta:
         model = FAQsCategory
+        fields = '__all__' 
 
 class TransFAQsCategoryAdmin(StackedDynamicInlineAdmin):
     model = TransFAQsCategory
@@ -716,6 +733,7 @@ admin.site.register(FAQsCategory, FAQsCategoryAdmin)
 class MyFAQsItemAdminForm(forms.ModelForm):
     class Meta:
         model = FAQsItem
+        fields = '__all__' 
         
 class TransFAQsItemAdmin(StackedDynamicInlineAdmin):
     model = TransFAQsItem
@@ -734,7 +752,7 @@ admin.site.register(FAQsItem, FAQsItemAdmin)
 
 class IRSSActivityFileInline(admin.TabularInline):
     model = IRSSActivityFile
-    formset = inlineformset_factory(IRSSActivity,  IRSSActivityFile,extra=1)
+    formset = inlineformset_factory(IRSSActivity,  IRSSActivityFile,extra=1,fields = '__all__')
 
 class IRSSActivityAdmin(admin.ModelAdmin):
     inlines = [IRSSActivityFileInline,]
@@ -778,15 +796,15 @@ admin.site.register(Topic, TopicAdmin)
 
 class ContributedResourceFileInline(admin.TabularInline):
     model = ContributedResourceFile
-    formset = inlineformset_factory(ContributedResource,  ContributedResourceFile,extra=1)
+    formset = inlineformset_factory(ContributedResource,  ContributedResourceFile,extra=1,fields = '__all__')
 
 class ContributedResourcePhotoInline(admin.TabularInline):
     model = ContributedResourcePhoto
-    formset = inlineformset_factory(ContributedResource,  ContributedResourcePhoto,extra=1)
+    formset = inlineformset_factory(ContributedResource,  ContributedResourcePhoto,extra=1,fields = '__all__')
         
 class ContributedResourceUrlInline(admin.TabularInline):
     model = ContributedResourceUrl
-    formset = inlineformset_factory(ContributedResource, ContributedResourceUrl,extra=1)
+    formset = inlineformset_factory(ContributedResource, ContributedResourceUrl,extra=1,fields = '__all__')
    
 class ContributedResourceAdmin(admin.ModelAdmin):
     inlines = [ContributedResourceFileInline,ContributedResourcePhotoInline,ContributedResourceUrlInline]
@@ -845,7 +863,7 @@ if "mezzanine.pages" in settings.INSTALLED_APPS:
 if "mezzanine.forms" in settings.INSTALLED_APPS:
     from mezzanine.forms.models import Form, Field
     from mezzanine.forms.admin import FormAdmin, FieldAdmin
-    from models import TransField, TransForm
+    from .models import TransField, TransForm
 
     #
     # Form
@@ -875,7 +893,7 @@ if "mezzanine.forms" in settings.INSTALLED_APPS:
 if "mezzanine.galleries" in settings.INSTALLED_APPS:
     from mezzanine.galleries.models import Gallery, GalleryImage
     from mezzanine.galleries.admin import GalleryAdmin, GalleryImageInline
-    from models import TransGallery, TransGalleryImage
+    from .models import TransGallery, TransGalleryImage
 
     class TransGalleryInline(TabularDynamicInlineAdmin):
         model  = TransGallery

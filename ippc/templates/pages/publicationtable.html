@@ -1,4 +1,4 @@
-{% load mezzanine_tags staticfiles i18n %}
+{% load mezzanine_tags static i18n %}
  
 
 {%if page.publicationlibrary.id == 346 %}
@@ -56,7 +56,7 @@
                 <input class="toggle-box" id="identifier-{{ publication.id }}" type="checkbox" style="display:none">
                 <label for="identifier-{{ publication.id }}"></label>
                 <div>
-                {{ publication.short_description|richtext_filter|safe }}
+                {{ publication.short_description|richtext_filters|safe }}
                 </div>{% endif %}
             </td>
             <td>{{ publication.publication_date|date:"d M Y"  }}</td>

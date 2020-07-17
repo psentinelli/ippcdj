@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Latest Implementation of ISPM 15" %}{% endblock %}
 
@@ -29,10 +29,10 @@
      {% else %}
        <a href="/countries/{{ implementationispm.country.name|slugify }}/implementationispm/">« {% trans "Back to" %} {% trans "Implementation of ISPM 15" %}</a>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/implementationispm/{{ implementationispm.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/implementationispm/{{ implementationispm.id }}/change/">Edit as Admin</a><br>
     {% endif %}
         
-    {% if perms.ippc.change_implementationispm and request.user.get_profile.country.name == page.title %}
+    {% if perms.ippc.change_implementationispm and userprofile.country.name == page.title %}
         <a class="btn btn-small btn-info" href="{% url 'implementationispm-edit' implementationispm.country.name|slugify implementationispm.id %}"><i class="icon-edit icon-white"></i> Edit</a>
        
     {% endif %}
@@ -136,7 +136,7 @@
 
  {% if implementationispm.short_description %}
   <dt>{% trans "Description of the mark" %}</dt>
-  <dd>{{ implementationispm.short_description|richtext_filter|safe }}</dd>
+  <dd>{{ implementationispm.short_description|richtext_filters|safe }}</dd>
   {% endif %}
    {% if implementationispm.file %}
   <dt>{% trans "Report file" %}</dt>

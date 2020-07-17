@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Latest Publications" %}{% endblock %}
 
@@ -15,10 +15,10 @@
 <div class="well localnav">
   <p><a href="/{{ pageslug}}/">« {% trans "Back to " %}{{pagetitle}}</a></p>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/partnerspublication/{{ partnerspublication.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/partnerspublication/{{ partnerspublication.id }}/change/">Edit as Admin</a><br>
     {% endif %}
         
-    {% if perms.ippc.change_partnerspublication and request.user.get_profile.partner.name == partnerspublication.partners.name %}
+    {% if perms.ippc.change_partnerspublication and userprofile.partner.name == partnerspublication.partners.name %}
         <a class="btn btn-small btn-info" href="{% url 'partner-publication-edit' partnerspublication.partners.name|slugify partnerspublication.id %}"><i class="icon-edit icon-white"></i> Edit</a>
     {% else %}
     {% endif %}
@@ -49,7 +49,7 @@
   
  {% if partnerspublication.short_description %}
   <dt>{% trans "Short Description" %}</dt>
-  <dd>{{ partnerspublication.short_description|richtext_filter|safe }}</dd>
+  <dd>{{ partnerspublication.short_description|richtext_filters|safe }}</dd>
   {% endif %}
   
   {% if partnerspublication.contact_for_more_information %}

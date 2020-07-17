@@ -1,6 +1,6 @@
 {% extends 'pce/basepce.html' %}
 {% load module_extras %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "PCE Training materials" %}{% endblock %}
 
@@ -11,7 +11,7 @@
 {% block breadcrumb_menu %}
 <li>
     <a href="/{{ LANGUAGE_CODE }}/pce/">{% trans "PCE Home" %}</a>
-    <span class="divider">/</span>
+    
 </li>
 <li class="active">
     {% trans "PCE Training materials" %} 

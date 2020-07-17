@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="{{ LANGUAGE_CODE }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
-      {% load pages_tags mezzanine_tags i18n future staticfiles %}
+      {% load pages_tags mezzanine_tags i18n static %}
       <head>
 
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
@@ -24,12 +24,7 @@
               {% if LANGUAGE_BIDI %}
               <link rel="stylesheet" href="{% static "css/rtl.css" %}">
               {% endif %}
-              {% ifinstalled cartridge.shop %}
-              <link rel="stylesheet" href="{% static "css/cartridge.css" %}">
-              {% if LANGUAGE_BIDI %}
-              <link rel="stylesheet" href="{% static "css/cartridge.rtl.css" %}">
-              {% endif %}
-              {% endifinstalled %}
+             
               {% block extra_css %}{% endblock %}
               {% endcompress %}
 
@@ -40,8 +35,8 @@
         <script src="{% static "js/chosen.jquery.min.js" %}"></script>
         <script src="{% static "js/jquery.min.js" %}"></script>
 
-        <script type="text/javascript" src="{% url "django.views.i18n.javascript_catalog" %}"></script>
-        <script type="text/javascript" src="/static/admin/js/core.js"></script>
+     <script type="text/javascript" src="/en/jsi18n/"></script>
+       <script type="text/javascript" src="/static/admin/js/core.js"></script>
 
         <!--script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js">        </script-->
         <script type="tepxt/javascript" src="/static/admin/js/jquery.min.js"></script> 
@@ -52,7 +47,7 @@
         <script type="text/javascript" src="/static/admin/js/admin/DateTimeShortcuts.js"></script>
         <script type="text/javascript" src="/static/js/jsPDF-master/dist/jspdf.min.js"></script>
         <script type="text/javascript" src="/static/js/custom.js"></script>
-        {% include 'autocomplete_light/static.html' %}
+        
         {# 'add another' form field functionality #}
         <script src="{% static "js/jquery.formset.js" %}"></script>
 
@@ -87,15 +82,21 @@
 
                 <div class="container-fluid">
 
-                    {% load localeurl_tags %}
+                   
                     <ul class="nav nav-pills small pull-left languagebar">
-                        {% for lang in LANGUAGES %}
-                        {% ifequal lang.0 LANGUAGE_CODE %}
-                        <li class="active"><a href="#">{{ lang.1 }}</a></li>
-                        {% else %}
-                        <li><a href="{{ request.path|chlocale:lang.0 }}">{{ lang.1 }}</a></li>
-                        {% endifequal %}
-                        {% endfor %}
+                      {% get_available_languages as languages %}
+
+            {% for lang_code, lang_name in languages %}
+             {% language lang_code %}
+                {% ifequal lang_code LANGUAGE_CODE %}
+                    <a class="btn-small btn-langs" href="#">{{ lang_name }}</a> 
+                {% else %}
+                    <a href="/{{ lang_code }}{{ request.get_full_path|slice:'3:' }}">{{ lang_name }}</a><!-- request.path|chlocale:lang.0-->
+                {% endifequal %}{% if forloop.counter == 6 %}
+                                   {% else %}  |
+                                {% endif %}
+                 {% endlanguage %}               
+            {% endfor %}
                     </ul>
 
                   

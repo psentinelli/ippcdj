@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles %}
+{% load pages_tags mezzanine_tags i18n static %}
 
 {% block meta_title %}{% trans "Polls" %}{% endblock %}
 
@@ -17,7 +17,7 @@
         {% trans "Publication date" %}: {{ poll.pub_date|date:"d M Y" }}<br>
         {% trans "Closing date" %}:  {{ poll.closing_date |date:"d M Y"}}</small></h1>
 {% if error_message %}<div class="alert alert-error"><p><strong>{{ error_message }}</strong></p></div>{% endif %}
-<p><p>  {{ poll.polltext|richtext_filter|safe }}</p></p>
+<p><p>  {{ poll.polltext|richtext_filters|safe }}</p></p>
 <p><strong>Results:</strong></p>
 <ul>
     {% for choice in poll.poll_choice_set.all %}
@@ -53,7 +53,7 @@
         {% trans "Publication date" %}: {{ poll.pub_date|date:"d M Y" }}<br>
         {% trans "Closing date" %}:  {{ poll.closing_date |date:"d M Y"}}</small></h1>
 {% if error_message %}<div class="alert alert-error"><p><strong>{{ error_message }}</strong></p></div>{% endif %}
-<p><p>  {{ poll.polltext|richtext_filter|safe }}</p></p>
+<p><p>  {{ poll.polltext|richtext_filters|safe }}</p></p>
 <p><strong>Results:</strong></p>
 <ul>
     {% for choice in poll.poll_choice_set.all %}

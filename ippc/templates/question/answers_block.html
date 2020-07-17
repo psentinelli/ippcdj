@@ -1,4 +1,4 @@
-{% load pages_tags mezzanine_tags i18n future staticfiles %}
+{% load pages_tags mezzanine_tags i18n static %}
 {% if question.status == 2  and question.questionopen == 1 and question.questiondiscard == 2%}
 <div>
   {% else  %}             
@@ -31,7 +31,7 @@
   
     {% if question.short_description %}
        <p><b>{% trans "BACKGROUND INFORMATION" %} </b><br>
-          {{ question.short_description |richtext_filter|safe }}</p>
+          {{ question.short_description |richtext_filters|safe }}</p>
     {% endif %}
    </div>
     
@@ -43,7 +43,7 @@
         {% for answer in  answers%}
         
          {% if answer.4 == 2 and answer.6 == 2 %} 
-            {{answer.0 |richtext_filter|safe }}
+            {{answer.0 |richtext_filters|safe }}
             <br> 
             {{answer.2}} % 
             {% if request.user.is_authenticated %}
@@ -63,7 +63,7 @@
                 {% if answer.4 == 1 and answer.6 == 1 %} 
     
                    <div class="alert alert-error"><p>TO REVISE</p>  <br>
-                       {{answer.0 |richtext_filter|safe }}
+                       {{answer.0 |richtext_filters|safe }}
                     <br> 
                         {{answer.2}} %  <a href="/qa/{{question.id}}/answer/{{answer.1}}/voteup"><i class="icon-large icon-thumbs-up">&#160;&#160;</i></a>&#160;&#160;
                             <a href="/qa/{{question.id}}/answer/{{answer.1}}/votedown" ><i class="large icon-thumbs-down">&#160;&#160;</i></a>  {{answer.3}} %

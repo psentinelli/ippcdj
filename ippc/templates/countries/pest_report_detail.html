@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Latest Pest Reports" %}{% endblock %}
 
@@ -33,22 +33,22 @@
      {% else %}
         <a href="/countries/{{ report.country.name|slugify }}/pestreports/">« {% trans "Back to" %} {% trans "Pest Reports" %}</a></p>
         {% if user.is_superuser %} 
-           <a class="btn btn-small btn-info" href="/admin/ippc/pestreport/{{ report.id }}">Edit as Admin</a><br>
+           <a class="btn btn-small btn-info" href="/admin/ippc/pestreport/{{ report.id }}/change/">Edit as Admin</a><br>
         {% endif %}
         
         
        {% if report.to_verify %}
-            {% if user.is_superuser or perms.ippc.change_pestreport and request.user.get_profile.country.name == page.title %}
+            {% if user.is_superuser or perms.ippc.change_pestreport and userprofile.country.name == page.title %}
               <p><b style="color:red">{% trans "Confirm data or edit to update." %}</b> </p>
             {% endif %}    
-            {% if  perms.ippc.change_pestreport and request.user.get_profile.country.name == page.title %}
+            {% if  perms.ippc.change_pestreport and userprofile.country.name == page.title %}
            <p>  <a class="btn btn-small btn-info" href="{% url 'pest-report-validate' report.country.name|slugify report.id %}"><i class="icon-edit icon-white"></i> {% trans "CONFIRM" %}</a>
              </p>
           {% endif %}
     
       {% endif %}
       
-        {% if perms.ippc.change_pestreport and request.user.get_profile.country.name == page.title %}
+        {% if perms.ippc.change_pestreport and userprofile.country.name == page.title %}
            <a class="btn btn-small btn-info" href="{% url 'pest-report-edit' report.country.name|slugify report.id %}"><i class="icon-edit icon-white"></i> Edit</a>
            {% endif %}
         {% if versions %}
@@ -99,7 +99,7 @@
   <dd style="color:red;">{% trans "Imported from EPPO" %}</dd>
  {% endif %} 
 
-    {% if user.is_superuser  or perms.ippc.change_reportingobligation and request.user.get_profile.country.name == page.title %}
+    {% if user.is_superuser  or perms.ippc.change_reportingobligation and userprofile.country.name == page.title %}
   
 
 {% if report.to_verify == 0 %}
@@ -166,7 +166,7 @@
      
   {% if report.summary %}
   <dt>{% trans "Summary" %}</dt>
-   <dd>{{ report.summary|richtext_filter|safe  }}</dd>
+   <dd>{{ report.summary|richtext_filters|safe  }}</dd>
   {% endif %}
   
 
@@ -180,21 +180,21 @@
   <dd>{{ report.contact_for_more_information }}</dd>
   {% endif %}
   
-   {% if report.pestreportfile_set.all %}   
+
    <dt>{% trans "Report files" %}</dt>
    {% for f in report.pestreportfile_set.all %} 
     
   <dd><a href="{{MEDIA_URL}}{{f.file.name}}">{{ f.description }}</a></dd>
 {% endfor %}
-    {% endif %}
-  {% if report.pestreporturl_set.all %}   
+
+
   <dt>{% trans "Website" %}</dt>
    {% for f in report.pestreporturl_set.all %} 
     
   <dd><a href="{{f.url_for_more_information}}">{{ f.url_for_more_information }}</a></dd>
 {% endfor %}
   
-    {% endif %}
+
   
   
    {% if report.issuename.all %}

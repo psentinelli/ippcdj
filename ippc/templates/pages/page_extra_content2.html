@@ -1,4 +1,4 @@
-{% load mezzanine_tags staticfiles i18n %}
+{% load mezzanine_tags static i18n %}
 
 {%if page.phytosystempage.collapse2content.all %}
 
@@ -83,44 +83,44 @@
                             {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_es|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_es|richtext_filter|safe }}
+                                {{ collapse2content.text_es|richtext_filters|safe }}
                             {% endif %}
                         {% elif LANGUAGE_CODE == 'fr'  and collapse2content.text_fr != '' and collapse2content.text_fr != None%}
                            {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_fr|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_fr|richtext_filter|safe }}
+                                {{ collapse2content.text_fr|richtext_filters|safe }}
                             {% endif %}
                         {% elif LANGUAGE_CODE == 'ru'  and collapse2content.text_ru != '' and collapse2content.text_ru != None%}
                            {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_ru|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_ru|richtext_filter|safe }}
+                                {{ collapse2content.text_ru|richtext_filters|safe }}
                             {% endif %}
                         {% elif LANGUAGE_CODE == 'ar'  and collapse2content.text_ar != '' and collapse2content.text_ar != None%}
                             {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_ar|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_ar|richtext_filter|safe }}
+                                {{ collapse2content.text_ar|richtext_filters|safe }}
                             {% endif %}
                         {% elif LANGUAGE_CODE == 'zh'  and collapse2content.text_zh != '' and collapse2content.text_zh != None%}
                            {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_zh|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_zh|richtext_filter|safe }}
+                                {{ collapse2content.text_zh|richtext_filters|safe }}
                             {% endif %}
                         {% else %}
                            {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_en|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_en|richtext_filter|safe }}
+                                {{ collapse2content.text_en|richtext_filters|safe }}
                             {% endif %}
                         {% endif %}
                     {% else %}
                        {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_en|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_en|richtext_filter|safe }}
+                                {{ collapse2content.text_en|richtext_filters|safe }}
                             {% endif %}
                     {% endif %}   
                           
@@ -156,44 +156,44 @@
                             {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_es|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_es|richtext_filter|safe }}
+                                {{ collapse2content.text_es|richtext_filters|safe }}
                             {% endif %}
                         {% elif LANGUAGE_CODE == 'fr'  and collapse2content.text_fr != '' and collapse2content.text_fr != None%}
                            {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_fr|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_fr|richtext_filter|safe }}
+                                {{ collapse2content.text_fr|richtext_filters|safe }}
                             {% endif %}
                         {% elif LANGUAGE_CODE == 'ru'  and collapse2content.text_ru != '' and collapse2content.text_ru != None%}
                            {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_ru|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_ru|richtext_filter|safe }}
+                                {{ collapse2content.text_ru|richtext_filters|safe }}
                             {% endif %}
                         {% elif LANGUAGE_CODE == 'ar'  and collapse2content.text_ar != '' and collapse2content.text_ar != None%}
                             {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_ar|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_ar|richtext_filter|safe }}
+                                {{ collapse2content.text_ar|richtext_filters|safe }}
                             {% endif %}
                         {% elif LANGUAGE_CODE == 'zh'  and collapse2content.text_zh != '' and collapse2content.text_zh != None%}
                            {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_zh|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_zh|richtext_filter|safe }}
+                                {{ collapse2content.text_zh|richtext_filters|safe }}
                             {% endif %}
                         {% else %}
                            {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_en|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_en|richtext_filter|safe }}
+                                {{ collapse2content.text_en|richtext_filters|safe }}
                             {% endif %}
                         {% endif %}
                     {% else %}
                        {%if  collapse2content.html == 1%}
                                 {% autoescape off %}{{collapse2content.text_en|safe}} {% endautoescape %}
                             {% else %}
-                                {{ collapse2content.text_en|richtext_filter|safe }}
+                                {{ collapse2content.text_en|richtext_filters|safe }}
                             {% endif %}
                     {% endif %}   </div>
               

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% load i18n staticfiles scheduletags %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load i18n static scheduletags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Event" %}{% endblock %}
 
@@ -35,7 +35,7 @@
         <p><b>{% trans "Starts" %} </b>{% blocktrans with event.start|date:"d-m-Y" as start_date %}{{ start_date }}{% endblocktrans %} </p>
         <p><b>{% trans "Ends" %} </b>{% blocktrans with event.end|date:"d-m-Y" as end_date %}{{ end_date }}{% endblocktrans %}</p>
         {% if event.description|length > 2 %}
-            <p><b>{% trans "Description" %} </b>{{event.description|richtext_filter|safe }}</p>
+            <p><b>{% trans "Description" %} </b>{{event.description|richtext_filters|safe }}</p>
         {% endif %}
         {% if event.category_verbose|length > 2%}
             <p><b>{% trans "Category" %} </b> {{event.category_verbose}}</p> 
@@ -152,7 +152,7 @@
                         <p><a href="/year/calendar/" class="more">< {% trans "Back to " %}  {% trans "Calendar" %}</a></p>
                     {% endif %}
                     {% if user.is_superuser %}
-                        <a class="btn btn-small btn-info" href="/admin/schedule/event/{{ event.id }}"><i class="icon-edit icon-white"></i>Edit as Admin</a><br>
+                        <a class="btn btn-small btn-info" href="/admin/schedule/event/{{ event.id }}/change/"><i class="icon-edit icon-white"></i>Edit as Admin</a><br>
                     {% endif %}
                     {% if is_contryeevent %}
                         {% if is_contryeditor or user.is_superuser %}

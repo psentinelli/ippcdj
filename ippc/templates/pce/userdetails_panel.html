@@ -1,4 +1,4 @@
- {% load i18n future mezzanine_tags accounts_tags %}
+ {% load i18n  mezzanine_tags accounts_tags %}
  <div class="span4">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -13,9 +13,9 @@
                         {% endif %}
                     {% endfor %}
                 <br>
-                <b>{% trans "Country" %}:</b> {{ user.get_profile.country.name }}<br>
+                <b>{% trans "Country" %}:</b> {{ userprofile.country.name }}<br>
                 <b>{% trans "Current PCE Session" %}:</b> {{version_number}}<br>
-                <b>{% trans "Closed PCE Session" %}:</b> <a href="/{{ LANGUAGE_CODE }}/pce/{{ user.get_profile.country.name|slugify}}/sessions">{% trans "other sessions ->" %}</a>
+                <b>{% trans "Closed PCE Session" %}:</b> <a href="/{{ LANGUAGE_CODE }}/pce/{{ userprofile.country.name|slugify}}/sessions">{% trans "other sessions ->" %}</a>
                 <br>
                 <b>{% trans "Actual Overall Progress" %}:</b> {{tot_percentage}}% {% trans "Complete" %}<br>
             </div>

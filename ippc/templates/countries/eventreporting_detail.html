@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Latest Event Reportings" %}{% endblock %}
 
@@ -33,22 +33,22 @@
      {% else %}
          <p><a href="/countries/{{eventreporting.country.name|slugify}}/eventreporting/{{eventreporting.event_rep_type}}">« {% trans "Go Back" %}</a></p>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/eventreporting/{{ eventreporting.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/eventreporting/{{ eventreporting.id }}/change/">Edit as Admin</a><br>
     {% endif %}
         
     
        {% if eventreporting.to_verify %}
-            {% if user.is_superuser or perms.ippc.change_eventreporting and request.user.get_profile.country.name == page.title %}
+            {% if user.is_superuser or perms.ippc.change_eventreporting and userprofile.country.name == page.title %}
               <p><b style="color:red">{% trans "Confirm data or edit to update." %}</b> </p>
             {% endif %}    
-            {% if  perms.ippc.change_eventreporting and request.user.get_profile.country.name == page.title %}
+            {% if  perms.ippc.change_eventreporting and userprofile.country.name == page.title %}
            <p>  <a class="btn btn-small btn-info" href="{% url 'event-reporting-validate' eventreporting.country.name|slugify eventreporting.id %}"><i class="icon-edit icon-white"></i> {% trans "CONFIRM" %}</a>
              </p>
           {% endif %}
     
       {% endif %}
       
-    {% if perms.ippc.change_eventreporting and request.user.get_profile.country.name == page.title %}
+    {% if perms.ippc.change_eventreporting and userprofile.country.name == page.title %}
         <a class="btn btn-small btn-info" href="{% url 'event-reporting-edit' eventreporting.country.name|slugify eventreporting.id %}"><i class="icon-edit icon-white"></i> Edit</a>
       
     {% endif %}
@@ -99,7 +99,7 @@
 
 
  
- {% if user.is_superuser  or perms.ippc.change_reportingobligation and request.user.get_profile.country.name == page.title %}
+ {% if user.is_superuser  or perms.ippc.change_reportingobligation and userprofile.country.name == page.title %}
   
 
 
@@ -132,7 +132,7 @@
   
  {% if eventreporting.short_description %}
   <dt>{% trans "Short Description" %}</dt>
-  <dd>{{ eventreporting.short_description|richtext_filter|safe }}</dd>
+  <dd>{{ eventreporting.short_description|richtext_filters|safe }}</dd>
   {% endif %}
   
   {% if eventreporting.contact_for_more_information %}
@@ -173,22 +173,18 @@
   
  
   
-  {% if eventreporting.eventreportingfile_set.all %}
-  
-   
+
   <dt>{% trans "Report files" %}</dt>
    {% for f in eventreporting.eventreportingfile_set.all %} 
     
   <dd><a href="{{MEDIA_URL}}{{f.file.name}}">{{ f.description }}</a></dd>
 {% endfor %}
-  {% endif %}
-    {% if eventreporting.eventreportingurl_set.all %} 
-   
+ 
   <dt>{% trans "Website" %}</dt>
    {% for f in eventreporting.eventreportingurl_set.all %} 
     
   <dd><a href="{{f.url_for_more_information}}">{{ f.url_for_more_information }}</a></dd>
-{% endfor %}  {% endif %}
+{% endfor %}  
 </dl>
 {% endblock %}
 

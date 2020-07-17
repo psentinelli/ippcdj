@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n mezzanine_tags translate_tags %}
-{% load ippc_tags news_tags calls_tags %}
+{% load  news_tags calls_tags %}
 {% load scheduletags i18n %}
 
 {% block meta_title %}{% trans "IPPC" %}{% endblock %}
@@ -20,7 +20,7 @@
      <div style="margin:0;color:black; background-color: #A3A30A;" class="alert alert-warning" >
          <span style="color:black;">
              {% with entry|get_object_translation as translated_page %}
-                {{ translated_page.content|richtext_filter|safe}}
+                {{ translated_page.content|richtext_filters|safe}}
             {% endwith %} 
          </span>
     </div>
@@ -511,12 +511,8 @@
         </div> <!--/.2 column row-->	
     </div>
                    
-    <div class="col-md-4">
-        <div class="card mt-5" style="width: 100%">
-           <ul class="list-group list-group-flush">
-                <li class="list-group-item"><img src="https://www.ippc.int/static/media/uploads/covidicon.jpg" width="45px" class="mr-2 mt-2 float-left"> <h6 class="mt-3"> <a href="https://www.ippc.int/en/covid-19/">{% trans "COVID-19 Related Information" %}</a> </h6></li>
-           </ul>
-        </div>           
+                    <div class="col-md-4">
+                           
         <div class="card mt-5" style="width: 100%">
             <div class="card-header">
                 <h3 class="my-0">{% trans "Tools" %}</h3>

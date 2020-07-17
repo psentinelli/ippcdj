@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles translate_tags accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static translate_tags accounts_tags %}
 
 {% block meta_title %}
   {% trans "Reporting Obligations" %}: 
@@ -41,7 +41,7 @@
  
 <p class="pull-right">
   <a href="javascript:history.go(-1)">{% trans "« Go back" %}</a>
-  {% if perms.ippc.add_reportingobligation and request.user.get_profile.country.name == page.title %}
+  {% if perms.ippc.add_reportingobligation and userprofile.country.name == page.title %}
  <br>
   <small>    <a class="btn btn-small btn-info" href="{% url 'reporting-obligation-create' page.title|slugify current_type %}">+ {% trans "Add new" %}</a>
  </small>
@@ -70,7 +70,7 @@
        <th>{% trans "Report files" %}</th>
        <th>{% trans "Publication Date" %}</th>
        <th>{% trans "Last Updated" %}</th>
-       {% if user.is_superuser  or perms.ippc.change_reportingobligation and request.user.get_profile.country.name == page.title %}
+       {% if user.is_superuser  or perms.ippc.change_reportingobligation and userprofile.country.name == page.title %}
             <th>{% trans "Last confirmed" %}</th>
         {% endif %}
        <th>&#160;</th>
@@ -95,7 +95,7 @@
      </td>
       <td>{{ object.publication_date|date:"d M Y" }}</td>
       <td>{{ object.modify_date|date:"d M Y" }}</td>
-       {% if user.is_superuser  or perms.ippc.change_reportingobligation and request.user.get_profile.country.name == page.title %}
+       {% if user.is_superuser  or perms.ippc.change_reportingobligation and userprofile.country.name == page.title %}
        
        <td>
           {% if object.to_verify %}
@@ -109,10 +109,10 @@
           {% endif %}
       <td>
         {% if user.is_superuser %} 
-            <a class="small pull-right" href="/admin/ippc/reportingobligation/{{ object.id }}"><i class="icon-edit"></i> Edit as Admin</a><br>
+            <a class="small pull-right" href="/admin/ippc/reportingobligation/{{ object.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br>
         {% endif %}
 
-        {% if perms.ippc.change_reportingobligation and request.user.get_profile.country.name == page.title %}
+        {% if perms.ippc.change_reportingobligation and userprofile.country.name == page.title %}
             <a class="small pull-right" href="{% url 'reporting-obligation-edit' object.country.country_slug object.id %}"><i class="icon-edit"></i>{% trans "Edit" %}</a>
             {# <a class="btn" href="{% url 'reporting-obligation-edit' report.id %}"><i class="icon-edit"></i> Edit</a> #}
     {% else %}

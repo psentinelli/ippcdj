@@ -1,12 +1,12 @@
 {% extends "pages/page.html" %}
 
-{% load mezzanine_tags staticfiles %}
+{% load mezzanine_tags static %}
 
 {% block main %}
 {{ block.super }}
 
 {% editable page.medialibrary.content %}
-{{ page.medialibrary.content|richtext_filter|safe }}
+{{ page.medialibrary.content|richtext_filters|safe }}
 {% endeditable %}
 
 {% block medialibrary %}

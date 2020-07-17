@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}
   {% trans "IRSS Activities" %}
@@ -110,7 +110,7 @@
                       <td> 
                           {% if user.is_superuser%}   
                            
-                            <a class="small pull-right" href="/admin/ippc/irssactivity/{{ object.id }}"><i class="icon-edit"></i>{% trans "Edit as Admin" %}</a>&#160;
+                            <a class="small pull-right" href="/admin/ippc/irssactivity/{{ object.id }}/change/"><i class="icon-edit"></i>{% trans "Edit as Admin" %}</a>&#160;
                             {% endif %}
                            {% if  perms.ippc.change_irssactivity %}  &#160;<a class="small pull-right" href="{% url 'irss-activity-edit'  object.id %}"><i class="icon-edit"></i>{% trans "Edit" %} </a>&#160;
                           
@@ -136,7 +136,7 @@
                       <td> 
                           {% if user.is_superuser%}   
                            
-                            <a class="small pull-right" href="/admin/ippc/irssactivity/{{ object.id }}"><i class="icon-edit"></i> {% trans "Edit as Admin" %}</a>&#160;
+                            <a class="small pull-right" href="/admin/ippc/irssactivity/{{ object.id }}/change/"><i class="icon-edit"></i> {% trans "Edit as Admin" %}</a>&#160;
                             {% endif %}
                            {% if  perms.ippc.change_irssactivity %}  &#160;<a class="small pull-right" href="{% url 'irss-activity-edit'  object.id %}"><i class="icon-edit"></i> {% trans "Edit" %}</a>&#160;
                           
@@ -166,7 +166,7 @@
                       <td> 
                           {% if user.is_superuser%}   
                            
-                            <a class="small pull-right" href="/admin/ippc/irssactivity/{{ object.id }}"><i class="icon-edit"></i> {% trans "Edit as Admin" %}</a>&#160;
+                            <a class="small pull-right" href="/admin/ippc/irssactivity/{{ object.id }}/change/"><i class="icon-edit"></i> {% trans "Edit as Admin" %}</a>&#160;
                             {% endif %}
                            {% if  perms.ippc.change_irssactivity %}  &#160;<a class="small pull-right" href="{% url 'irss-activity-edit'  object.id %}"><i class="icon-edit"></i> {% trans "Edit" %}</a>&#160;
                           
@@ -192,7 +192,7 @@
                       <td> 
                           {% if user.is_superuser%}   
                            
-                            <a class="small pull-right" href="/admin/ippc/irssactivity/{{ object.id }}"><i class="icon-edit"></i> Edit as Admin</a>&#160;
+                            <a class="small pull-right" href="/admin/ippc/irssactivity/{{ object.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a>&#160;
                             {% endif %}
                            {% if  perms.ippc.change_irssactivity %}  &#160;<a class="small pull-right" href="{% url 'irss-activity-edit'  object.id %}"><i class="icon-edit"></i> {% trans "Edit" %}</a>&#160;
                           
@@ -209,6 +209,6 @@
 {% else %}
 <p>{% trans "No Activities available." %}</p>
 {% endif %}
-
+ 
 {% endblock %}
 

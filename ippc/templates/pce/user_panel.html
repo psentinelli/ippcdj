@@ -1,4 +1,4 @@
-{% load i18n mezzanine_tags translate_tags  pages_tags   future staticfiles accounts_tags %}
+{% load i18n mezzanine_tags translate_tags  pages_tags   static accounts_tags %}
 
    <a href="/{{ LANGUAGE_CODE }}/pce/training_material/">{% trans "Training materials"%}</a>
   
@@ -10,7 +10,7 @@
   
     {% url "profile" request.user.username as profile_url %}
     {% if profile_url %}
-        <a href="{{ profile_url }}" title="{% trans 'See your IPPC user profile, including contact information.' %}"> {% if request.user.get_profile.first_name or request.user.get_profile.last_name %}{{ request.user.get_profile.first_name }} {{ request.user.get_profile.last_name }}{% else %}{{ request.user.username }}{% endif %}</a>
+        <a href="{{ profile_url }}" title="{% trans 'See your IPPC user profile, including contact information.' %}"> {% if request.userprofile.first_name or request.userprofile.last_name %}{{ request.userprofile.first_name }} {{ request.userprofile.last_name }}{% else %}{{ request.user.username }}{% endif %}</a>
     {% else %}
         <a href="{% url "profile_update" %}">{{ request.user|username_or:"email"|capfirst }}</a>!
     {% endif %}

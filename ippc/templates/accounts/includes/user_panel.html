@@ -1,12 +1,15 @@
-{% load i18n future mezzanine_tags accounts_tags %}
+{% load i18n  mezzanine_tags accounts_tags ippc_tags%}
 
 {% if request.user.is_authenticated %}
   {% if user.is_authenticated and user.is_staff %}
         <a href="/admin/" class="btn btn-small btn-admin" style="width: auto">Admin Area</a>
   {% endif %}
   
+         <p>{% get_profile_usr user.id as profile_usr %}</i></p>
+
+ 
   {% if user.is_authenticated and perms.ippc.add_reportingobligation and not user.is_staff %}
-        <a href="/{{ LANGUAGE_CODE }}/countries/{{ user.get_profile.country.name | slugify }}/" class="btn btn-small btn-admin" style="width: auto" title="{% trans 'Go to your country page to upload or update information.' %}"> {% trans "Edit Country Information" %}</a> 
+        <a href="/{{ LANGUAGE_CODE }}/countries/{{ profile_usr.country.name | slugify }}/" class="btn btn-small btn-admin" style="width: auto" title="{% trans 'Go to your country page to upload or update information.' %}"> {% trans "Edit Country Information" %}</a> 
         
   {% endif %}
   

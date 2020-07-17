@@ -1,5 +1,5 @@
 {% extends "blog/blog_post_list.html" %}
-{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n future disqus_tags %}
+{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n disqus_tags %}
 
 {% block meta_title %}{{ blog_post.meta_title }}{% endblock %}
 
@@ -21,23 +21,16 @@
 <li class="active">{{ blog_post.title }}</li>
 {% endblock %}
 
-{# =note: the sidebar is in the filter_panel.html include #}
-
 {% block main %}
-{% if user.is_superuser or perms.blog.add_blogpost  %} 
-    <div class="pull-right">
-        <a class="btn btn-info btn-small" href="/admin/blog/blogpost/{{ blog_post.id }}">Edit as Admin</a><br>
-    </div>
-{% endif %}
+
 {% block blog_post_detail_postedby %}
 {% editable blog_post.publish_date %}
-<h6>
+<h6 class="post-meta">
     {% trans "Posted by" %}:
     {% with blog_post.user as author %}
     <a href="{% url "blog_post_list_author" author %}">{{ author.get_full_name|default:author.username }}</a>
     {% endwith %}
-    {# {% blocktrans with sometime=blog_post.publish_date|timesince %}{{ sometime }} ago{% endblocktrans %} #}
-    {% blocktrans with sometime=blog_post.publish_date|date:"D, d M Y, H:i" %}on {{ sometime }}{% endblocktrans %}    
+    {% blocktrans with sometime=blog_post.publish_date|timesince %}{{ sometime }} ago{% endblocktrans %}
 </h6>
 {% endeditable %}
 {% endblock %}
@@ -59,7 +52,7 @@
 
 {% block blog_post_detail_featured_image %}
 {% if settings.BLOG_USE_FEATURED_IMAGE and blog_post.featured_image %}
-  <p><img src="{{ MEDIA_URL }}{% thumbnail blog_post.featured_image 500 0 %}"></p>
+<p><img class="img-responsive" src="{{ MEDIA_URL }}{% thumbnail blog_post.featured_image 600 0 %}"></p>
 {% endif %}
 {% endblock %}
 
@@ -69,7 +62,7 @@
 
 {% block blog_post_detail_content %}
 {% editable blog_post.content %}
-{{ blog_post.content|richtext_filter|safe }}
+{{ blog_post.content|richtext_filters }}
 {% endeditable %}
 {% endblock %}
 
@@ -77,22 +70,28 @@
 {% keywords_for blog_post as tags %}
 {% if tags %}
 {% spaceless %}
-<ul class="unstyled tags">
+<ul class="list-inline tags">
     <li>{% trans "Tags" %}:</li>
     {% for tag in tags %}
-    <li><a href="{% url "blog_post_list_tag" tag.slug %}">{{ tag }}</a></li>
+    <li><a href="{% url "blog_post_list_tag" tag.slug %}">{{ tag }}</a>{% if not forloop.last %}, {% endif %}</li>
     {% endfor %}
 </ul>
 {% endspaceless %}
 {% endif %}
 {% endblock %}
 
-{# {% rating_for blog_post %} #}
+{% block blog_post_detail_rating %}
+<div class="panel panel-default rating">
+    <div class="panel-body">
+    {% rating_for blog_post %}
+    </div>
+</div>
+{% endblock %}
 
 {% block blog_post_detail_sharebuttons %}
 {% set_short_url_for blog_post %}
-<a class="btn small primary share-twitter" target="_blank" href="http://twitter.com/home?status={{ blog_post.short_url|urlencode }}%20{{ blog_post.title|urlencode }}">{% trans "Share on Twitter" %}</a>
-<a class="btn small primary share-facebook" target="_blank" href="http://facebook.com/sharer.php?u={{ request.build_absolute_uri }}&amp;t={{ blog_post.title|urlencode }}">{% trans "Share on Facebook" %}</a>
+<a class="btn btn-sm share-twitter" target="_blank" href="https://twitter.com/intent/tweet?url={{ blog_post.short_url|urlencode }}&amp;text={{ blog_post.title|urlencode }}">{% trans "Share on Twitter" %}</a>
+<a class="btn btn-sm share-facebook" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">{% trans "Share on Facebook" %}</a>
 {% endblock %}
 
 {% block blog_post_previous_next %}
@@ -115,11 +114,11 @@
 {% endblock %}
 
 {% block blog_post_detail_related_posts %}
-{% if blog_post.related_posts.all %}
+{% if related_posts %}
 <div id="related-posts">
 <h3>{% trans 'Related posts' %}</h3>
-<ul class="unstyled">
-{% for post in blog_post.related_posts.all %}
+<ul class="list-unstyled">
+{% for post in related_posts %}
      <li><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></li>
 {% endfor %}
 </ul>

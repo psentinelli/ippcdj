@@ -1,6 +1,5 @@
-
 from string import punctuation
-from urllib import unquote
+#from urllib import unquote
 
 from django.db import models
 #from django.contrib.gis.db import models as gismodels
@@ -28,9 +27,11 @@ from mezzanine.utils.importing import import_dotted_path
 from mezzanine.utils.models import upload_to
 
 
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.generic import GenericRelation
+from django.contrib.contenttypes import fields
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
+
+
 from django.db.models.signals import post_save
 
 from django.core.exceptions import ValidationError
@@ -41,7 +42,7 @@ from mezzanine.utils.models import get_user_model_name
 from mezzanine.generic.models import ThreadedComment
 from django.shortcuts import  get_object_or_404
 import MySQLdb
-from settings import  DATABASES
+#from settings import  DATABASES
 from t_eppo.models import Names
 
 
@@ -49,7 +50,6 @@ User._meta.ordering=["username"]
 
 def user_unicode_patch(self):
     return '%s %s' % (self.first_name, self.last_name)
-
 
 class PublicationLibrary(Page, RichText):
     """
@@ -65,10 +65,10 @@ class PublicationLibrary(Page, RichText):
     embedded_image_caption = models.CharField(_("Embedded Image Caption"), blank=True, null=True, max_length=250)
     users = models.ManyToManyField(User, 
         verbose_name=_("Users this library is accessible to"), 
-        related_name='publicationlibraryusers', blank=True, null=True)
+        related_name='publicationlibraryusers', blank=True)#, null=True)   , null=True)
     groups = models.ManyToManyField(Group, 
         verbose_name=_("Groups this library is accessible to"), 
-        related_name='publicationlibrarygroups', blank=True, null=True)
+        related_name='publicationlibrarygroups', blank=True)#, null=True)   , null=True)
     old_id = models.CharField(max_length=50, blank=True, null=True)
     show_agenda_colums =  models.BooleanField( verbose_name=_("Show column for 'Agenda number'."),default=True)
     show_doc_colums =  models.BooleanField( verbose_name=_("Show column for 'Document number'."),default=True)
@@ -89,41 +89,36 @@ class PublicationLibrary(Page, RichText):
             ("can_view", "View Publication Library"),
         )
    
-        
-        
 class IssueKeyword(models.Model):
     """ IssueKeyword  """
     name = models.CharField(_("Issue Keyword"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
+    
 class CommodityKeyword(models.Model):
     """ CommodityKeyword """
     name = models.CharField(_("Commodity Keyword"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
+ 
 
-
-
-        
 class IssueKeywordsRelate(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType,on_delete=models.DO_NOTHING,)
     object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = fields.GenericForeignKey('content_type', 'object_id')
     issuename = models.ManyToManyField(IssueKeyword,
         verbose_name=_("Issue Keywords"),
-        blank=True, null=True, 
+        blank=True, 
         help_text=_("Type at least two letters, then select and press enter to input existing keywords, or write new ones separated by a comma."))
 
 class CommodityKeywordsRelate(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType,on_delete=models.DO_NOTHING,)
     object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = fields.GenericForeignKey('content_type', 'object_id')
     commname = models.ManyToManyField(CommodityKeyword,
         verbose_name=_("Commodity Keywords"),
-        blank=True, null=True,
+        blank=True,
         help_text=_("Type at least two letters, then select and press enter to input existing keywords, or write new ones  separated by a comma."))
-
-        
 
 
 
@@ -170,9 +165,9 @@ class CountryPage(Page):
             help_text=_("Leave blank to have the URL auto-generated from "
                         "the title."))
     contact_point = models.OneToOneField("auth.User", 
-            verbose_name=_("Country Chief Contact Point"), blank=True, null=True)
+            verbose_name=_("Country Chief Contact Point"), blank=True, null=True,on_delete=models.DO_NOTHING,)
     editors = models.ManyToManyField(User, verbose_name=_("Country Editors"), 
-        related_name='countryeditors+', blank=True, null=True)
+        related_name='countryeditors+', blank=True)#, null=True)   
     cp_ncp_t_type = models.CharField(_("Contracting or Non-Contracting party"),max_length=3, choices=CP_NCP_TYPE_CHOICES, default=CP_NCP_T_TYPE_0)
     region = models.IntegerField(_("Region"), choices=REGIONS, default=None)
     cn_flag = models.ImageField(_("Country flag"), upload_to="flags/", blank=True)
@@ -191,20 +186,20 @@ class CountryPage(Page):
     # territory_of = foreignkey to other country
     # flag
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s' % (self.name,)
     
 class OCPHistory(models.Model):
-    countrypage = models.ForeignKey(CountryPage)
-   # contact_point = models.OneToOneField("auth.User",             verbose_name=_("Country Chief Contact Point"), blank=True, null=True)
-    contact_point = models.ForeignKey("auth.User",verbose_name=_("Country Chief Contact Point"), blank=True, null=True)
+    countrypage = models.ForeignKey(CountryPage,on_delete=models.DO_NOTHING,)
+   
+    contact_point = models.ForeignKey("auth.User",on_delete=models.DO_NOTHING,verbose_name=_("Country Chief Contact Point"), blank=True, null=True)
     start_date = models.DateTimeField(_("Nomination start date"), blank=True, null=True, editable=True)
     end_date = models.DateTimeField(_("Nomination end date"), blank=True, null=True, editable=True)
     
 class CnEditorsHistory(models.Model):
-    countrypage = models.ForeignKey(CountryPage)
-    editor = models.ForeignKey("auth.User",verbose_name=_("Country Editor"), blank=True, null=True)
-    #editor = models.OneToOneField("auth.User",             verbose_name=_("Country Editor"), blank=True, null=True)
+    countrypage = models.ForeignKey(CountryPage,on_delete=models.DO_NOTHING,)
+    editor = models.ForeignKey("auth.User",on_delete=models.DO_NOTHING,verbose_name=_("Country Editor"), blank=True, null=True)
+   
     start_date = models.DateTimeField(_("Nomination start date"), blank=True, null=True, editable=True)
     end_date = models.DateTimeField(_("Nomination end date"), blank=True, null=True, editable=True)
     
@@ -241,10 +236,10 @@ class PartnersPage(Page, RichText):
             unique=True, blank=True, null=True,
             help_text=_("Leave blank to have the URL auto-generated from "
                         "the title."))
-    contact_point = models.OneToOneField("auth.User", 
+    contact_point = models.OneToOneField("auth.User",on_delete=models.DO_NOTHING, 
             verbose_name=_("RPPO Chief Contact Point"), blank=True, null=True)
     editors = models.ManyToManyField(User, verbose_name=_("RPPO Editors"), 
-        related_name='rppoeditors+', blank=True, null=True)
+        related_name='rppoeditors+', blank=True)#, null=True)   
     modify_date = models.DateTimeField(_("Modify date"), blank=True, null=True, editable=True)
     edituser = models.CharField(max_length=50, unique=True, blank=True, null=True)
     #responsable_sec = models.ManyToManyField(User, verbose_name=_("Responsable IPPC Secretariat"), 
@@ -258,36 +253,36 @@ class PartnersPage(Page, RichText):
  
      
    
-    def __unicode__(self):
+    def __str__(self):
         return u'%s' % (self.name,)
     
     
 class PartnersContactPointHistory(models.Model):
-    partnerspage = models.ForeignKey(PartnersPage)
-    #contact_point = models.OneToOneField("auth.User",    verbose_name=_("RPPO/Organization Contact Point"), blank=True, null=True)
-    contact_point = models.ForeignKey("auth.User",verbose_name=_("RPPO/Organization Contact Point"), blank=True, null=True)
+    partnerspage = models.ForeignKey(PartnersPage,on_delete=models.DO_NOTHING,)
+    
+    contact_point = models.ForeignKey("auth.User",verbose_name=_("RPPO/Organization Contact Point"), blank=True, null=True,on_delete=models.DO_NOTHING,)
    
     start_date = models.DateTimeField(_("Nomination start date"), blank=True, null=True, editable=True)
     end_date = models.DateTimeField(_("Nomination end date"), blank=True, null=True, editable=True)
     
 class PartnersEditorHistory(models.Model):
-    partnerspage = models.ForeignKey(PartnersPage)
+    partnerspage = models.ForeignKey(PartnersPage,on_delete=models.DO_NOTHING,)
     #editor = models.OneToOneField("auth.User",             verbose_name=_("Country Editor"), blank=True, null=True)
-    editor = models.ForeignKey("auth.User",verbose_name=_("RPPO/Organization Editor"), blank=True, null=True)
+    editor = models.ForeignKey("auth.User",verbose_name=_("RPPO/Organization Editor"), blank=True, null=True,on_delete=models.DO_NOTHING,)
     start_date = models.DateTimeField(_("Nomination start date"), blank=True, null=True, editable=True)
     end_date = models.DateTimeField(_("Nomination end date"), blank=True, null=True, editable=True)
           
-        
+
 class NotificationMessageRelate(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType,on_delete=models.DO_NOTHING,)
     object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = fields.GenericForeignKey('content_type', 'object_id')
     countries = models.ManyToManyField(CountryPage,
         verbose_name=_("Country you want to notify"),
-        related_name='notificatiocountries', blank=True, null=True)
+        related_name='notificatiocountries', blank=True)#, null=True)   
     partners = models.ManyToManyField(PartnersPage,
         verbose_name=_("Partners: RPPOs, IOs, Liasons you want to notify"),
-        related_name='notificatiopartners', blank=True, null=True)
+        related_name='notificatiopartners', blank=True)#, null=True)   
     notifysecretariat =  models.BooleanField( verbose_name=_("Notify Secretariat"),help_text=_("check if you want to notify Secretariat"),)
     notify =  models.BooleanField( verbose_name=_("Notify"),help_text=_("check if you want to send out the notification"))
     link = models.CharField(_("Link"), blank=True, null=True, max_length=250)
@@ -321,7 +316,7 @@ class Publication(Orderable):
         verbose_name_plural = _("Publications")
         
     library = models.ForeignKey("PublicationLibrary", 
-        related_name="publications") # related_name=publications...
+        related_name="publications",on_delete=models.DO_NOTHING,) # related_name=publications...
         # ..is used in publicationlibrary template
     title = models.CharField(_("Title"), blank=True, null=True, max_length=250)
     title_es = models.CharField(_("Title ES"), blank=True, null=True, max_length=250)
@@ -369,16 +364,16 @@ class Publication(Orderable):
     publication_date = models.DateTimeField(_("Publication date"), blank=True, null=True, editable=True)
     short_description = models.TextField(_("Short Description"),  blank=True, null=True)
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
     old_id = models.CharField(max_length=50, blank=True, null=True)  
     groups = models.ManyToManyField(Group, 
         verbose_name=_("Groups this publication is NOT accessible to"), 
-        related_name='publicationgroups', blank=True, null=True)
+        related_name='publicationgroups', blank=True)#, null=True)   
     is_version = models.BooleanField(verbose_name=_("oldversion"),
                                          default=False)
     parent_id = models.CharField(max_length=50,blank=True, null=True,)    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -397,7 +392,7 @@ class Publication(Orderable):
             self.title = name
         super(Publication, self).save(*args, **kwargs)
 
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Publication."""
         return ('publication-detail', (), {
@@ -407,11 +402,11 @@ class Publication(Orderable):
                             # 'day': self.pub_date.strftime("%d"),
                             'pk': self.pk})
 class PublicationFile(models.Model):
-    publication = models.ForeignKey(Publication)
+    publication = models.ForeignKey(Publication,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/publication/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -421,10 +416,10 @@ class PublicationFile(models.Model):
         return os.path.splitext(self.file.name)[1]
 
 class PublicationUrl(models.Model):
-    publication = models.ForeignKey(Publication)
+    publication = models.ForeignKey(Publication,on_delete=models.DO_NOTHING,)
     description = models.CharField(_("Description"),max_length=100, blank=True)
     url_for_more_information = models.URLField(blank=True, null=True)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information
@@ -433,10 +428,10 @@ class WorkAreaPage(Page, RichText):
     """ Work Area Pages with definable users and groups """
     users = models.ManyToManyField(User, 
         verbose_name=_("Users this page is accessible to"), 
-        related_name='workareapageusers', blank=True, null=True)
+        related_name='workareapageusers', blank=True)#, null=True)   
     groups = models.ManyToManyField(Group, 
         verbose_name=_("Groups this page is accessible to"), 
-        related_name='workareapagegroups', blank=True, null=True)
+        related_name='workareapagegroups', blank=True)#, null=True)   
 
     class Meta:
         verbose_name = "Work Area Page"
@@ -450,7 +445,7 @@ class PestStatus(models.Model):
     """ Pest Statuses """
     status = models.CharField(_("Pest Status"), max_length=500)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.status
         
     class Meta:
@@ -461,7 +456,7 @@ class PreferredLanguages(models.Model):
     """ PreferredLanguages """
     preferredlanguage = models.CharField(_("Preferred Languages"), max_length=500)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.preferredlanguage
         
     class Meta:
@@ -479,7 +474,7 @@ class EppoCode(models.Model):
     authority = models.CharField(_("Authority"), max_length=250)
     creationdate = models.DateTimeField(_("creationdate"), default=datetime.now, editable=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.codename
 
         
@@ -491,7 +486,9 @@ class ContactType(models.Model):
     """ Contact Types """
     contacttype = models.CharField(_("Contact Type"), max_length=500)
 
-    def __unicode__(self):
+   # def __str__(self):
+    #    return self.contacttype
+    def __str__(self):
         return self.contacttype
         
     class Meta:
@@ -522,7 +519,7 @@ class IppcUserProfile(models.Model):
     )
 
 
-    user = models.OneToOneField("auth.User")
+    user = models.OneToOneField("auth.User",on_delete=models.DO_NOTHING)
     title = models.CharField(_("Professional Title"), blank=True, null=True, max_length=100)
     first_name = models.CharField(_("First Name"), max_length=30)
     last_name = models.CharField(_("Last Name"), max_length=30)
@@ -530,8 +527,7 @@ class IppcUserProfile(models.Model):
     email_address_alt = models.EmailField(_("Alternate Email"), default="", max_length=75, blank=True, null=True)
     contact_type = models.ManyToManyField(ContactType,
         verbose_name=_("Contact Type"),
-        related_name='contact_type+', blank=True, null=True,
-        )
+        related_name='contact_type+', blank=True)#, null=True)   
     gender = models.PositiveSmallIntegerField(_("Prefix"), choices=GENDER_CHOICES, blank=True, null=True)
     profile_photo = models.FileField(_("Profile Photo"), upload_to="profile_photos", blank=True)
     bio = models.TextField(_("Brief Biography"), default="", blank=True, null=True)
@@ -545,8 +541,8 @@ class IppcUserProfile(models.Model):
     #zipcode = models.CharField(_("Zip Code"), blank=True, max_length=20)
     #address_country = CountryField(_("Address Country"), blank=True, null=True)
     # country is the 'tag' marking permissions for Contact Point and Editors
-    country = models.ForeignKey(CountryPage, related_name="user_country_page", blank=True, null=True)
-    partner = models.ForeignKey(PartnersPage, related_name="user_partner_page", blank=True, null=True)
+    country = models.ForeignKey(CountryPage,on_delete=models.DO_NOTHING, related_name="user_country_page", blank=True, null=True)
+    partner = models.ForeignKey(PartnersPage,on_delete=models.DO_NOTHING, related_name="user_partner_page", blank=True, null=True)
 
     phone = models.CharField(_("Phone"), blank=True, max_length=80)
     fax = models.CharField(_("Fax"), blank=True, max_length=80)
@@ -554,8 +550,7 @@ class IppcUserProfile(models.Model):
  
     preferredlanguage = models.ManyToManyField(PreferredLanguages,
         verbose_name=_("Preferred Languages"),
-        related_name='preferredlanguages+', blank=True, null=True,
-        )
+        related_name='preferredlanguages+', blank=True)#, null=True)   
     website = models.URLField(_("Website"),blank=True, null=True)
     date_account_created = models.DateTimeField(_("IPP Member Since"), default=datetime.now, editable=False)
     date_contact_registration = models.DateTimeField(_("Date contact registration"), blank=True, null=True, default=datetime.now, editable=True)
@@ -608,8 +603,8 @@ REPORT_STATUS_CHOICES = (
 
 class PestReport(Displayable, models.Model):
     """ Pest Reports"""
-    country = models.ForeignKey(CountryPage, related_name="pest_report_country_page")
-    author = models.ForeignKey(User, related_name="pest_report_author")
+    country = models.ForeignKey(CountryPage,on_delete=models.DO_NOTHING, related_name="pest_report_country_page")
+    author = models.ForeignKey(User,on_delete=models.DO_NOTHING, related_name="pest_report_author")
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -626,9 +621,9 @@ class PestReport(Displayable, models.Model):
     #file = models.FileField(_("Pest Report Document"), upload_to="pest_reports/%Y/%m/", blank=True)
     pest_status = models.ManyToManyField(PestStatus,
         verbose_name=_("Pest Status"),
-        related_name='pest_status+', blank=True, null=True,
+        related_name='pest_status+', blank=True,
         help_text=_("Under ISPM 8 -"))
-    pest_identity = models.ForeignKey(Names, null=True, blank=True)
+    pest_identity = models.ForeignKey(Names,on_delete=models.DO_NOTHING, null=True, blank=True, )
     #pest_identity = models.ForeignKey(EppoCode, null=True, blank=True)
     #pest_identity = models.TextField(_("Identity of Pest"),    blank=True, null=True)
     hosts = models.TextField(_("Hosts or Articles concerned"),
@@ -641,9 +636,9 @@ class PestReport(Displayable, models.Model):
         blank=True, null=True)
     #url_for_more_information = models.URLField(blank=True, null=True)
     
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    notification=generic.GenericRelation(NotificationMessageRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    notification=fields.GenericRelation(NotificationMessageRelate)
     old_id = models.CharField(max_length=50)
     is_version = models.BooleanField(verbose_name=_("oldversion"),
                                          default=False)
@@ -667,7 +662,7 @@ class PestReport(Displayable, models.Model):
         verbose_name_plural = _("Pest Reports")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def country_code(self):
@@ -678,7 +673,7 @@ class PestReport(Displayable, models.Model):
         
         
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Pest Report."""
         return ('pest-report-detail', (), {
@@ -698,11 +693,11 @@ class PestReport(Displayable, models.Model):
         super(PestReport, self).save(*args, **kwargs)
 
 class PestReportFile(models.Model):
-    pestreport = models.ForeignKey(PestReport)
+    pestreport = models.ForeignKey(PestReport,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/pestreport/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -713,9 +708,9 @@ class PestReportFile(models.Model):
 
 
 class PestReportUrl(models.Model):
-    pestreport = models.ForeignKey(PestReport)
+    pestreport = models.ForeignKey(PestReport,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information
@@ -730,10 +725,10 @@ class DraftProtocol(Displayable, models.Model):
  
     users = models.ManyToManyField(User, 
         verbose_name=_("Users this DP is accessible to"), 
-        related_name='dpusers', blank=True, null=True)
+        related_name='dpusers', blank=True)#, null=True)   
     groups = models.ManyToManyField(Group, 
         verbose_name=_("Groups this DP is accessible to"), 
-        related_name='dpgroups', blank=True, null=True)
+        related_name='dpgroups', blank=True)#, null=True)   
     
     closing_date = models.DateTimeField(_("Closing date"), blank=True, null=True)
     summary = models.TextField(_("Summary or Short Description"), blank=True, null=True)
@@ -749,7 +744,7 @@ class DraftProtocol(Displayable, models.Model):
         verbose_name_plural = _("Draft Protocols")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def filetextname(self):
@@ -764,7 +759,7 @@ class DraftProtocol(Displayable, models.Model):
             return False   
         
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a DraftProtocol."""
         return ('draftprotocol-detail', (), {
@@ -782,11 +777,11 @@ class DraftProtocol(Displayable, models.Model):
         super(DraftProtocol, self).save(*args, **kwargs)
 
 class DraftProtocolFile(models.Model):
-    draftprotocol = models.ForeignKey(DraftProtocol)
+    draftprotocol = models.ForeignKey(DraftProtocol,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload Additional background documents', upload_to='files/dp/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -797,15 +792,15 @@ class DraftProtocolFile(models.Model):
 
 
 class DraftProtocolComments(Displayable, models.Model):
-    author = models.ForeignKey(User, related_name="draftprotocolcomments_author")
-    draftprotocol = models.ForeignKey(DraftProtocol)
+    author = models.ForeignKey(User, related_name="draftprotocolcomments_author",on_delete=models.DO_NOTHING,)
+    draftprotocol = models.ForeignKey(DraftProtocol,on_delete=models.DO_NOTHING,)
     expertise = models.TextField(_("Your Expertise On This Pest"), blank=True, null=True)
     institution = models.TextField(_("Your Institution"), blank=True, null=True)
     comment = models.TextField(_("Your Comment"), blank=True, null=True)
     filetext = models.FileField(_("Attachment (comments on protocol text)"), upload_to="files/dp/comm/%Y/%m/", blank=True)
     filefig = models.FileField(_("Attachment (comments on protocol figures)"), upload_to="files/dp/comm/%Y/%m/", blank=True)
   
-    def __unicode__(self):  
+    def __str__(self):  
         return self.comment  
     def name(self):
         return self.comment    
@@ -841,8 +836,8 @@ BASIC_REP_TYPE_CHOICES = (
       
 class ReportingObligation(Displayable, models.Model):
     """ ReportingObligation"""
-    country = models.ForeignKey(CountryPage, related_name="reporting_obligation_country_page")
-    author = models.ForeignKey(User, related_name="reporting_obligation_author")
+    country = models.ForeignKey(CountryPage, related_name="reporting_obligation_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="reporting_obligation_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -856,9 +851,9 @@ class ReportingObligation(Displayable, models.Model):
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
     #url_for_more_information = models.URLField(max_length=500,blank=True, null=True)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    notification=generic.GenericRelation(NotificationMessageRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    notification=fields.GenericRelation(NotificationMessageRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
   
     
     old_id = models.CharField(max_length=50)
@@ -877,11 +872,11 @@ class ReportingObligation(Displayable, models.Model):
         verbose_name_plural = _("Reporting Obligations")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Pest Report."""
         return ('reporting-obligation-detail', (), {
@@ -907,11 +902,11 @@ class ReportingObligation(Displayable, models.Model):
     
 #c
 class ReportingObligation_File(models.Model):
-    reportingobligation = models.ForeignKey(ReportingObligation)
+    reportingobligation = models.ForeignKey(ReportingObligation,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/reportingobligation/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -921,17 +916,17 @@ class ReportingObligation_File(models.Model):
         return os.path.splitext(self.file.name)[1]
 
 class ReportingObligationUrl(models.Model):
-    reportingobligation = models.ForeignKey(ReportingObligation)
+    reportingobligation = models.ForeignKey(ReportingObligation,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information   
 
 class CnPublication(Displayable, models.Model):
     """ CnPublication"""
-    country = models.ForeignKey(CountryPage, related_name="cnpublication_country_page")
-    author = models.ForeignKey(User, related_name="cnpublicatio_author")
+    country = models.ForeignKey(CountryPage, related_name="cnpublication_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="cnpublicatio_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -944,8 +939,8 @@ class CnPublication(Displayable, models.Model):
     short_description = models.TextField(_("Short Description"),  blank=True, null=True)
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
     old_id = models.CharField(max_length=50)
     # objects = models.Manager()
     objects = SearchableManager()
@@ -955,11 +950,11 @@ class CnPublication(Displayable, models.Model):
         verbose_name_plural = _("Publications from Countries")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a country publication."""
         return ('country-publication', (), {
@@ -980,11 +975,11 @@ class CnPublication(Displayable, models.Model):
  
     
 class CnPublicationFile(models.Model):
-    cnpublication = models.ForeignKey(CnPublication)
+    cnpublication = models.ForeignKey(CnPublication,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/cn_publication/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -994,17 +989,17 @@ class CnPublicationFile(models.Model):
         return os.path.splitext(self.file.name)[1]
 
 class CnPublicationUrl(models.Model):
-    cnpublication = models.ForeignKey(CnPublication)
+    cnpublication = models.ForeignKey(CnPublication,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information   
 
 class PartnersPublication(Displayable, models.Model):
     """ PartnerPublication"""
-    partners = models.ForeignKey(PartnersPage, related_name="partnerspublication_country_page")
-    author = models.ForeignKey(User, related_name="partnerspublication_author")
+    partners = models.ForeignKey(PartnersPage, related_name="partnerspublication_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="partnerspublication_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -1017,8 +1012,8 @@ class PartnersPublication(Displayable, models.Model):
     short_description = models.TextField(_("Short Description"),  blank=True, null=True)
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
     old_id = models.CharField(max_length=50)
     # objects = models.Manager()
     objects = SearchableManager()
@@ -1028,11 +1023,11 @@ class PartnersPublication(Displayable, models.Model):
         verbose_name_plural = _("Publications from Partners")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a partner publication."""
         return ('partner-publication', (), {
@@ -1053,11 +1048,11 @@ class PartnersPublication(Displayable, models.Model):
  
     
 class PartnersPublicationFile(models.Model):
-    partnerspublication = models.ForeignKey(PartnersPublication)
+    partnerspublication = models.ForeignKey(PartnersPublication,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/partner_publication/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1067,9 +1062,9 @@ class PartnersPublicationFile(models.Model):
         return os.path.splitext(self.file.name)[1]
 
 class PartnersPublicationUrl(models.Model):
-    partnerspublication = models.ForeignKey(PartnersPublication)
+    partnerspublication = models.ForeignKey(PartnersPublication,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information   
@@ -1091,8 +1086,8 @@ EVT_REP_TYPE_CHOICES = (
 
 class EventReporting(Displayable, models.Model):
     """ Event Reporting"""
-    country = models.ForeignKey(CountryPage, related_name="event_reporting_country_page")
-    author = models.ForeignKey(User, related_name="event__reporting_author")
+    country = models.ForeignKey(CountryPage, related_name="event_reporting_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="event_reporting_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -1106,9 +1101,9 @@ class EventReporting(Displayable, models.Model):
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
     #url_for_more_information = models.URLField(blank=True, null=True)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
-    notification=generic.GenericRelation(NotificationMessageRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
+    notification=fields.GenericRelation(NotificationMessageRelate)
     old_id = models.CharField(max_length=50)
     is_version = models.BooleanField(verbose_name=_("oldversion"),
                                          default=False)
@@ -1125,11 +1120,11 @@ class EventReporting(Displayable, models.Model):
         verbose_name_plural = _("Contact for Info")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    ##@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     #def get_absolute_url(self): # "view on site" link will be visible in admin interface
     ##    """Construct the absolute URL for a Pest Report."""
     #    return ('event-reporting-detail', (), {
@@ -1155,17 +1150,17 @@ class EventReporting(Displayable, models.Model):
     def event_rep_type_verbose(self):
         return dict(EVT_REP_TYPE_CHOICES)[self.event_rep_type]
   
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         return ('upload-new', )
 
 
 class EventreportingFile(models.Model):
-    eventreporting = models.ForeignKey(EventReporting)
+    eventreporting = models.ForeignKey(EventReporting,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/eventreporting/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1175,12 +1170,13 @@ class EventreportingFile(models.Model):
         return os.path.splitext(self.file.name)[1]
 
 class EventreportingUrl(models.Model):
-    eventreporting = models.ForeignKey(EventReporting)
+    eventreporting = models.ForeignKey(EventReporting,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information
+                
 
 WEB_1 = 1
 WEB_2 = 2
@@ -1197,8 +1193,8 @@ WEB_TYPE_CHOICES = (
      
 class Website(Displayable, models.Model):
     """ Event Reporting"""
-    country = models.ForeignKey(CountryPage, related_name="website_country_page")
-    author = models.ForeignKey(User, related_name="website__reporting_author")
+    country = models.ForeignKey(CountryPage, related_name="website_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="website_reporting_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -1209,8 +1205,8 @@ class Website(Displayable, models.Model):
     short_description = models.TextField(_("Short Description"),  blank=True, null=True)
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
     old_id = models.CharField(max_length=50)
     objects = SearchableManager()
     
@@ -1220,11 +1216,11 @@ class Website(Displayable, models.Model):
         verbose_name_plural = _("Websites")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    ##@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     #def get_absolute_url(self): # "view on site" link will be visible in admin interface
     ##    """Construct the absolute URL for a Pest Report."""
     #    return ('event-reporting-detail', (), {
@@ -1248,24 +1244,24 @@ class Website(Displayable, models.Model):
     def event_rep_type_verbose(self):
         return dict(WEB_TYPE_CHOICES)[self.web_type]
   
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         return ('upload-new', )
 
 
 
 class WebsiteUrl(models.Model):
-    website = models.ForeignKey(Website)
+    website = models.ForeignKey(Website,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information            
 
 class PartnersWebsite(Displayable, models.Model):
     """ Event Reporting"""
-    partners = models.ForeignKey(PartnersPage, related_name="partnerswebsite_partner_page")
-    author = models.ForeignKey(User, related_name="partnerswebsite__reporting_author")
+    partners = models.ForeignKey(PartnersPage, related_name="partnerswebsite_partner_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="partnerswebsite_reporting_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -1276,8 +1272,8 @@ class PartnersWebsite(Displayable, models.Model):
     short_description = models.TextField(_("Short Description"),  blank=True, null=True)
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
     old_id = models.CharField(max_length=50)
     objects = SearchableManager()
     
@@ -1287,11 +1283,11 @@ class PartnersWebsite(Displayable, models.Model):
         verbose_name_plural = _("Websites")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    ##@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     #def get_absolute_url(self): # "view on site" link will be visible in admin interface
     ##    """Construct the absolute URL for a Pest Report."""
     #    return ('event-reporting-detail', (), {
@@ -1315,16 +1311,16 @@ class PartnersWebsite(Displayable, models.Model):
     def event_rep_type_verbose(self):
         return dict(WEB_TYPE_CHOICES)[self.web_type]
   
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         return ('upload-new', )
 
 
 
 class PartnersWebsiteUrl(models.Model):
-    partnerswebsite = models.ForeignKey(PartnersWebsite)
+    partnerswebsite = models.ForeignKey(PartnersWebsite,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information    
@@ -1338,8 +1334,8 @@ PFA_TYPE_1_CHOICES = (
 )
 class PestFreeArea(Displayable, models.Model):
     """ Pest Free Area"""
-    country = models.ForeignKey(CountryPage, related_name="pestfreearea_country_page")
-    author = models.ForeignKey(User, related_name="pestfreearea_author")
+    country = models.ForeignKey(CountryPage, related_name="pestfreearea_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="pestfreearea_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -1356,9 +1352,9 @@ class PestFreeArea(Displayable, models.Model):
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     
     
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
-    notification=generic.GenericRelation(NotificationMessageRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
+    notification=fields.GenericRelation(NotificationMessageRelate)
     old_id = models.CharField(max_length=50)
     is_version = models.BooleanField(verbose_name=_("oldversion"),
                                          default=False)
@@ -1377,11 +1373,11 @@ class PestFreeArea(Displayable, models.Model):
         verbose_name_plural = _("Pest Free Areas")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Pest Report."""
         return ('pfa-detail', (), {
@@ -1406,11 +1402,11 @@ class PestFreeArea(Displayable, models.Model):
         return dict(PFA_TYPE_1_CHOICES)[self.pfa_type]
 
 class PestFreeAreaFile(models.Model):
-    pfa = models.ForeignKey(PestFreeArea)
+    pfa = models.ForeignKey(PestFreeArea,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/pfa/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1420,9 +1416,9 @@ class PestFreeAreaFile(models.Model):
         return os.path.splitext(self.file.name)[1]
 
 class PestFreeAreaUrl(models.Model):
-    pfa = models.ForeignKey(PestFreeArea)
+    pfa = models.ForeignKey(PestFreeArea,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information
@@ -1451,7 +1447,7 @@ class ImplementationISPMVersion(models.Model):
     """ ImplementationISPMVersions """
     version = models.CharField(_("Implementation of ISPM Version"), max_length=4)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.version
         
     class Meta:
@@ -1460,8 +1456,8 @@ class ImplementationISPMVersion(models.Model):
 
 class ImplementationISPM(Displayable, models.Model):
     """ Implementationof ISPM 15"""
-    country = models.ForeignKey(CountryPage, related_name="implementationispm_country_page")
-    author = models.ForeignKey(User, related_name="implementationispm_author")
+    country = models.ForeignKey(CountryPage, related_name="implementationispm_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="implementationispm_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -1471,11 +1467,11 @@ class ImplementationISPM(Displayable, models.Model):
     implementimport_type = models.IntegerField(_("Has your country implemented ISPM 15 for imports?"), choices=YES_NO_CHOICES, default=None)
     implementimport_version = models.ManyToManyField(ImplementationISPMVersion,
         verbose_name=_("If yes, which version (click all that apply): "),
-        related_name='implementimport_version+', blank=True, null=True, default=None)
+        related_name='implementimport_version+', blank=True,  default=None)
     implementexport_type = models.IntegerField(_("  Has your country implemented ISPM 15 for exports?"), choices=YES_NO_CHOICES, default=None)
     implementexport_version = models.ManyToManyField(ImplementationISPMVersion,
         verbose_name=_("If yes, which version (click all that apply): "),
-        related_name='implementexport_version+', blank=True, null=True, default=None)
+        related_name='implementexport_version+', blank=True,  default=None)
     #file = models.FileField(_("Additional information and Documentation"), upload_to="implemenationispm/%Y/%m/", blank=True)
     mark_registered_type = models.IntegerField(_(" Is the ISPM No.15 mark registered as a trade mark in your country??"), choices=YES_NO_DONTKNOW_CHOICES, default=None)
     image = models.ImageField(_("Image of mark"), upload_to="implemenationispm/images/%Y/%m/", blank=True)
@@ -1487,9 +1483,9 @@ class ImplementationISPM(Displayable, models.Model):
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     
     
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
-    notification=generic.GenericRelation(NotificationMessageRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
+    notification=fields.GenericRelation(NotificationMessageRelate)
     old_id = models.CharField(max_length=50)
     is_version = models.BooleanField(verbose_name=_("oldversion"),
                                          default=False)
@@ -1508,11 +1504,11 @@ class ImplementationISPM(Displayable, models.Model):
         verbose_name_plural = _("Implementationof ISPMs")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Pest Report."""
         return ('implementationispm-detail', (), {
@@ -1543,11 +1539,11 @@ class ImplementationISPM(Displayable, models.Model):
         return dict(YES_NO_DONTKNOW_CHOICES)[self.mark_registered_type]
 
 class ImplementationISPMFile(models.Model):
-    implementationispm = models.ForeignKey(ImplementationISPM)
+    implementationispm = models.ForeignKey(ImplementationISPM,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/implementationispm/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1557,17 +1553,17 @@ class ImplementationISPMFile(models.Model):
         return os.path.splitext(self.file.name)[1]
   
 class ImplementationISPMUrl(models.Model):
-    implementationispm = models.ForeignKey(ImplementationISPM)
+    implementationispm = models.ForeignKey(ImplementationISPM,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information
 
 class CountryNews(Displayable, models.Model):
     """ CountryNews"""
-    country = models.ForeignKey(CountryPage, related_name="countrynews_country_page")
-    author = models.ForeignKey(User, related_name="countrynews_author")
+    country = models.ForeignKey(CountryPage, related_name="countrynews_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="countrynews_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -1579,8 +1575,8 @@ class CountryNews(Displayable, models.Model):
     image = models.ImageField(_("Image"), upload_to="countrynews/images/%Y/%m/", blank=True)
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
     objects = SearchableManager()
     search_fields = ("title", "short_description")
     old_id = models.CharField(max_length=50)
@@ -1588,11 +1584,11 @@ class CountryNews(Displayable, models.Model):
         verbose_name_plural = _("Country News")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL """
         return ('country_news-detail', (), {
@@ -1616,11 +1612,11 @@ class CountryNews(Displayable, models.Model):
         return os.path.basename(self.image.name)
 
 class CountryNewsFile(models.Model):
-    countrynews = models.ForeignKey(CountryNews)
+    countrynews = models.ForeignKey(CountryNews,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/countrynews/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1630,9 +1626,9 @@ class CountryNewsFile(models.Model):
         return os.path.splitext(self.file.name)[1]
   
 class CountryNewsUrl(models.Model):
-    countrynews = models.ForeignKey(CountryNews)
+    countrynews = models.ForeignKey(CountryNews,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information
@@ -1640,8 +1636,8 @@ class CountryNewsUrl(models.Model):
     
 class PartnersNews(Displayable, models.Model):
     """ partnersNews"""
-    partners = models.ForeignKey(PartnersPage, related_name="partnersnews_partner_page")
-    author = models.ForeignKey(User, related_name="partnersnews_author")
+    partners = models.ForeignKey(PartnersPage, related_name="partnersnews_partner_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="partnersnews_author",on_delete=models.DO_NOTHING,)
     
     # slug - provided by mezzanine.core.models.slugged (subclassed by displayable)
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
@@ -1653,21 +1649,21 @@ class PartnersNews(Displayable, models.Model):
     image = models.ImageField(_("Image"), upload_to="countrynews/images/%Y/%m/", blank=True)
     contact_for_more_information = models.TextField(_("Contact for more information"), blank=True, null=True)    
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
-    commname=generic.GenericRelation(CommodityKeywordsRelate)
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
+    commname=fields.GenericRelation(CommodityKeywordsRelate)
     old_id = models.CharField(max_length=50)
     objects = SearchableManager()
     search_fields = ("title", "short_description")
      
     class Meta:
-        verbose_name_plural = _("Country News")
+        verbose_name_plural = _("Partners News")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL """
         return ('partnersnews-detail', (), {
@@ -1691,11 +1687,11 @@ class PartnersNews(Displayable, models.Model):
         return os.path.basename(self.image.name)
 
 class PartnersNewsFile(models.Model):
-    partnersnews = models.ForeignKey(PartnersNews)
+    partnersnews = models.ForeignKey(PartnersNews,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/partnersnews/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1705,9 +1701,9 @@ class PartnersNewsFile(models.Model):
         return os.path.splitext(self.file.name)[1]
   
 class PartnersNewsUrl(models.Model):
-    partnersnews = models.ForeignKey(PartnersNews)
+    partnersnews = models.ForeignKey(PartnersNews,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True,max_length=500)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information
@@ -1721,14 +1717,14 @@ class Poll(models.Model):
     
     userspoll = models.ManyToManyField(User,
         verbose_name=_("Users this forum post is accessible to"),
-        related_name='pollusers', blank=True, null=True)
+        related_name='pollusers', blank=True)#, null=True)   
     groupspoll = models.ManyToManyField(Group,
         verbose_name=_("Groups this forum post is accessible to"),
-        related_name='pollgroups', blank=True, null=True)
+        related_name='pollgroups', blank=True)#, null=True)   
     login_required = models.BooleanField(verbose_name=_("Login required"),
                                          default=True)
     
-    def __unicode__(self):  # Python 3: def __str__(self):
+    def __str__(self):  # Python 3: def __str__(self):
         return self.question
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
@@ -1739,10 +1735,10 @@ class Poll(models.Model):
             return False
         
 class CommentFile(models.Model):
-    comment = models.ForeignKey(ThreadedComment)
+    comment = models.ForeignKey(ThreadedComment,on_delete=models.DO_NOTHING,)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/forum/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1753,16 +1749,16 @@ class CommentFile(models.Model):
 
 
 class Poll_Choice(models.Model):
-    poll = models.ForeignKey(Poll)
+    poll = models.ForeignKey(Poll,on_delete=models.DO_NOTHING,)
     choice_text = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
     
-    def __unicode__(self):  # Python 3: def __str__(self):
+    def __str__(self):  # Python 3: def __str__(self):
         return self.choice_text
 
 class PollVotes(models.Model):
-    user = models.ForeignKey(User)
-    poll = models.ForeignKey(Poll)
+    user = models.ForeignKey(User,on_delete=models.DO_NOTHING,)
+    poll = models.ForeignKey(Poll,on_delete=models.DO_NOTHING,)
     choice= models.CharField(max_length=50)
     comment= models.CharField(max_length=200)
   
@@ -1777,19 +1773,19 @@ class EmailUtilityMessage(models.Model):
     #User.__unicode__ = user_unicode_patch
     users = models.ManyToManyField(User,
             verbose_name=_("Send to single users:"),help_text=_("CTRL/Command+mouseclick for more than 1 selection"),
-            related_name='emailusers', blank=True, null=True)
+            related_name='emailusers', blank=True)#, null=True)   
     groups = models.ManyToManyField(Group,
             verbose_name=_("Send to groups:"),help_text=_("CTRL/Command+mouseclick for more than 1 selection"),
-            related_name='emailgroups', blank=True, null=True)
+            related_name='emailgroups', blank=True)#, null=True)   
     
-    def __unicode__(self):  
+    def __str__(self):  
          return self.subject 
     
 class EmailUtilityMessageFile(models.Model):
-    emailmessage = models.ForeignKey(EmailUtilityMessage)
+    emailmessage = models.ForeignKey(EmailUtilityMessage,on_delete=models.DO_NOTHING,)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Attach a file', upload_to='files/email/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1826,7 +1822,7 @@ class MassEmailUtilityMessage(models.Model):
     sentto = models.TextField(_("sent: "),blank=True, null=True)
     not_senttoISO3 = models.TextField(_("notsent: "),blank=True, null=True)
     senttoISO3 = models.TextField(_("sent: "),blank=True, null=True)
-    author = models.ForeignKey(User, related_name="author")
+    author = models.ForeignKey(User, related_name="author",on_delete=models.DO_NOTHING,)
     
     csv_file = models.FileField(_("Attach CSV file conteining the specific entries"), upload_to='files/email/', validators=[validate_csvfile_extension], blank=True,help_text=_("Follow the instructions on top of this page."))
     #mass_merge = models.NullBooleanField(_("Select if this is a MASS or MERGE mail"), choices=BOOL_CHOICES,default=0, help_text=_(" "),)
@@ -1834,21 +1830,21 @@ class MassEmailUtilityMessage(models.Model):
     #User.__unicode__ = user_unicode_patch
     users = models.ManyToManyField(User,
             verbose_name=_("Send to single users:"),help_text=_("CTRL/Command+mouseclick for more than 1 selection"),
-            related_name='massemailusers', blank=True, null=True)
+            related_name='massemailusers', blank=True)#, null=True)   
     groups = models.ManyToManyField(Group,
             verbose_name=_("Send to groups:"),help_text=_("CTRL/Command+mouseclick for more than 1 selection"),
-            related_name='massemailgroups', blank=True, null=True)
-    def __unicode__(self):  
+            related_name='massemailgroups', blank=True)#, null=True)   
+    def __str__(self):  
          return self.subject 
      
      
      
     
 class MassEmailUtilityMessageFile(models.Model):
-    emailmessage = models.ForeignKey(MassEmailUtilityMessage)
+    emailmessage = models.ForeignKey(MassEmailUtilityMessage,on_delete=models.DO_NOTHING,)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Attach a file', upload_to='files/email/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -1878,12 +1874,12 @@ class QAQuestion(Displayable, models.Model):
     questionopen = models.BooleanField(verbose_name=_("Open"), default=True)
     questiondiscard = models.IntegerField(_("Publish or Reject"), choices=QA_STATUS_CHOICES, default=QA_STATUS_1)
  
-    user = models.ForeignKey(User) 
+    user = models.ForeignKey(User,on_delete=models.DO_NOTHING,) 
     class Meta:
         verbose_name_plural = _("QAQuestion")
         # abstract = True
 #
-    def __unicode__(self):
+    def __str__(self):
         return self.title
          
     def save(self, *args, **kwargs):
@@ -1906,8 +1902,8 @@ class QAAnswer(Displayable, models.Model):
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     search_fields = ("title", "short_description")
     #description = models.TextField("OPTIONAL: Provide more background",blank=True, null=True)
-    user = models.ForeignKey(User) 
-    question = models.ForeignKey(QAQuestion)
+    user = models.ForeignKey(User,on_delete=models.DO_NOTHING,) 
+    question = models.ForeignKey(QAQuestion,on_delete=models.DO_NOTHING,)
     bestanswer =  models.BooleanField( verbose_name=_("Best answer"),)
     answertext= models.TextField("",blank=True, null=True)
     answerdiscard = models.IntegerField(_("Publish or Reject"), choices=QA_STATUS_CHOICES, default=QA_STATUS_1)
@@ -1917,7 +1913,7 @@ class QAAnswer(Displayable, models.Model):
         verbose_name_plural = _("QAAnswer")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
          
     def save(self, *args, **kwargs):
@@ -1931,8 +1927,8 @@ class QAAnswer(Displayable, models.Model):
                
  
 class AnswerVotes(models.Model):
-    user = models.ForeignKey(User)
-    answer = models.ForeignKey(QAAnswer)
+    user = models.ForeignKey(User,on_delete=models.DO_NOTHING,)
+    answer = models.ForeignKey(QAAnswer,on_delete=models.DO_NOTHING,)
     up= models.CharField(max_length=50)
 
 class ReminderMessage(models.Model):
@@ -1943,7 +1939,7 @@ class ReminderMessage(models.Model):
     date = models.DateTimeField('date')
     sent =  models.BooleanField()
     
-    def __unicode__(self):  
+    def __str__(self):  
          return self.subject 
 
 
@@ -1980,7 +1976,7 @@ class ContactUsEmailMessage(models.Model):
     date = models.DateTimeField('date')
     sent =  models.BooleanField()
     
-    def __unicode__(self):  
+    def __str__(self):  
          return self.subject 
      
     def contact_us_type_verbose(self):
@@ -1999,7 +1995,7 @@ class FAQsCategory(Displayable, models.Model):
         verbose_name_plural = _("FAQsCategory")
         
 #
-    def __unicode__(self):
+    def __str__(self):
         return self.title
          
     def save(self, *args, **kwargs):
@@ -2016,7 +2012,7 @@ class FAQsItem(Displayable, models.Model):
     # title - provided by mezzanine.core.models.slugged (subclassed by displayable)
 #    # status - provided by mezzanine.core.models.displayable
 #    # publish_date - provided by mezzanine.core.models.displayable
-    faqcategory = models.ForeignKey(FAQsCategory, related_name="faqscategory")
+    faqcategory = models.ForeignKey(FAQsCategory, related_name="faqscategory",on_delete=models.DO_NOTHING,)
     faq_description = models.TextField(_("Description"),  blank=True, null=True)
     faq_anchor = models.CharField(_("Anchor"),max_length=200)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
@@ -2026,7 +2022,7 @@ class FAQsItem(Displayable, models.Model):
         verbose_name_plural = _("FAQsItem")
         #abstract = True
 #
-    def __unicode__(self):
+    def __str__(self):
         return self.title
          
     def save(self, *args, **kwargs):
@@ -2050,7 +2046,7 @@ class UserAutoRegistration(models.Model):
     lastname = models.CharField(_("Last name"), blank=True, null=True,max_length=250,)
     email = models.CharField(_("Email"), blank=True, null=True,max_length=250,)
     organisation = models.CharField(_("Organization"), blank=True, null=True,max_length=250,)
-    country = models.ForeignKey(CountryPage, blank=True, null=True)
+    country = models.ForeignKey(CountryPage, blank=True, null=True,on_delete=models.DO_NOTHING,)
     #summary =  models.CharField(_("describe why you want to subscribe to IPPC News and Calls"), blank=True, null=True,max_length=500,)
     subscribe_news=  models.BooleanField( verbose_name=_("Subscribe to news"),default=False)
     subscribe_announcement=  models.BooleanField( verbose_name=_("Subscribe to announcements"),default=False)
@@ -2060,7 +2056,7 @@ class UserAutoRegistration(models.Model):
     
     
  
-    def __unicode__(self):  
+    def __str__(self):  
         return self.lastname+self.firstname+'.'
     def name(self):
         return self.lastname
@@ -2075,12 +2071,12 @@ class UserAutoRegistrationResources(models.Model):
     lastname = models.CharField(_("Last name"), blank=True, null=True,max_length=250,)
     email = models.CharField(_("Email"), blank=True, null=True,max_length=250,)
     organisation = models.CharField(_("Organization"), blank=True, null=True,max_length=250,)
-    country = models.ForeignKey(CountryPage, blank=True, null=True)
+    country = models.ForeignKey(CountryPage, blank=True, null=True,on_delete=models.DO_NOTHING,)
     summary =  models.CharField(_("Describe why you want to submit Contributed Resources"), blank=True, null=True,max_length=500,)
     publish_date = models.DateTimeField(_("Publish date"), blank=True, null=True, editable=True)
     status = models.IntegerField(_("Publish or Reject"), choices=AUTOREGISTER_CHOICES, default=AUTOREGISTER_1)
     
-    def __unicode__(self):  
+    def __str__(self):  
         return self.lastname+self.firstname+'.'
     def name(self):
         return self.lastname
@@ -2126,7 +2122,7 @@ class IRSSActivity(Displayable, models.Model):
     def irssctivity_type_verbose(self):
         return dict(IRSS_ACT_TYPE_CHOICES)[self.activitytype]
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title
          
     def save(self, *args, **kwargs):
@@ -2138,11 +2134,11 @@ class IRSSActivity(Displayable, models.Model):
         super(IRSSActivity, self).save(*args, **kwargs)
         
 class IRSSActivityFile(models.Model):
-    irssactivity = models.ForeignKey(IRSSActivity)
+    irssactivity = models.ForeignKey(IRSSActivity,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/irss/%Y/%m/%d/', validators=[validate_file_extension])
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -2162,17 +2158,14 @@ FUNDS = (
 
     
 class UserMembershipHistory(models.Model):
-    user = models.ForeignKey("auth.User",verbose_name=_("User"), blank=True, null=True)
-    group = models.ForeignKey(Group,  blank=True, null=True)
+    user = models.ForeignKey("auth.User",verbose_name=_("User"), blank=True, null=True,on_delete=models.DO_NOTHING,)
+    group = models.ForeignKey(Group,  blank=True, null=True,on_delete=models.DO_NOTHING,)
     start_date = models.DateTimeField(_("Nomination start date"), blank=True, null=True, editable=True)
     end_date = models.DateTimeField(_("Nomination end date"), blank=True, null=True, editable=True)
     funding =  models.IntegerField(_("Funding"), choices=FUNDS, default=None,blank=True, null=True)
-    countrypage = models.ForeignKey(CountryPage,blank=True, null=True )
-    partnerpage = models.ForeignKey(PartnersPage,blank=True, null=True)
+    countrypage = models.ForeignKey(CountryPage,blank=True, null=True,on_delete=models.DO_NOTHING, )
+    partnerpage = models.ForeignKey(PartnersPage,blank=True, null=True,on_delete=models.DO_NOTHING,)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/membership/%Y/%m/%d/', validators=[validate_file_extension])
-
-
-
 
 
 
@@ -2203,7 +2196,7 @@ class MediaKitCategory(models.Model):
     """ Participant Role """
     category = models.CharField(_("Category"), max_length=500)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.category
         
     class Meta:
@@ -2221,7 +2214,7 @@ class MediaKitDocument(Orderable):
         
     title = models.CharField(_("Title"), blank=True, null=True, max_length=250)
     #mediakit_type = models.IntegerField(_("MediaKit Document  Type"), choices=MEDIAKIT_TYPE_CHOICES, default=None)
-    mediakit_type = models.ForeignKey(MediaKitCategory,verbose_name=_("Type"), blank=True, null=True,default=-1)
+    mediakit_type = models.ForeignKey(MediaKitCategory,on_delete=models.DO_NOTHING,verbose_name=_("Type"), blank=True, null=True,default=-1)
    
     image = models.ImageField(_("Image of document"), upload_to="files/mediakitdocument/images/%Y/%m/", blank=True)
     file_en = models.FileField(_("File - English"), 
@@ -2266,7 +2259,7 @@ class MediaKitDocument(Orderable):
    
     publication_date = models.DateTimeField(_("Publication date"), blank=True, null=True, editable=True)
     short_description = models.TextField(_("Short Description"),  blank=True, null=True)
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -2285,7 +2278,7 @@ class MediaKitDocument(Orderable):
             self.title = name
         super(MediaKitDocument, self).save(*args, **kwargs)
 
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Publication."""
         return ('mediakitdocument-detail', (), {
@@ -2313,7 +2306,7 @@ class PhytosanitaryTreatmentType(models.Model):
     typename = models.CharField(_("Treatment Full name + Treatment code"), max_length=250)
     typefullname=models.CharField(_("Treatment Full name"), max_length=250)
    
-    def __unicode__(self):
+    def __str__(self):
         return self.typefullname
     
 class PhytosanitaryTreatment(Displayable, models.Model):
@@ -2329,7 +2322,7 @@ class PhytosanitaryTreatment(Displayable, models.Model):
     summary = models.TextField(_("Summary or Short Description"),
         blank=True, null=True)
 
-    treatment_type = models.ForeignKey(PhytosanitaryTreatmentType, null=True, blank=True)
+    treatment_type = models.ForeignKey(PhytosanitaryTreatmentType, null=True, blank=True,on_delete=models.DO_NOTHING,)
     treatment_status =models.IntegerField(_("Treatment status"),
         choices=TREATMENT_STATUS_CHOICES, default=TREATMENT_STATUS_1)
     treatment_pestidentity_other = models.CharField(_("Other pest"),help_text=_("type the text for the pest here if not found in the DB"),max_length=500,  blank=True, null=True)
@@ -2345,7 +2338,7 @@ class PhytosanitaryTreatment(Displayable, models.Model):
         
     countries = models.ManyToManyField(CountryPage, 
         verbose_name=_("Countries"), 
-        related_name='pythotreatment_country_page', blank=True, null=True)
+        related_name='pythotreatment_country_page', blank=True)#, null=True)   
     internationally_approved = models.BooleanField(verbose_name=_("Internationally approved"),help_text=_("click on the checkbox if the Phytosanitary treatment is Internationally approved"),
                                          default=False)
     treatmeant_link = models.URLField(verbose_name=_("Link"), help_text=_("type the correct URL e.g. http://www.test.com"),blank=True, null=True)
@@ -2357,7 +2350,7 @@ class PhytosanitaryTreatment(Displayable, models.Model):
         verbose_name_plural = _("Phytosanitary Treatments")
         # abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def country_code(self):
@@ -2371,7 +2364,7 @@ class PhytosanitaryTreatment(Displayable, models.Model):
         return dict(TREATMENT_STATUS_CHOICES)[self.treatment_status]
       
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Pest Report."""
         return ('pythosanitary-treatment-detail', (), {
@@ -2387,8 +2380,8 @@ class PhytosanitaryTreatment(Displayable, models.Model):
         super(PhytosanitaryTreatment, self).save(*args, **kwargs)
 
 class PhytosanitaryTreatmentPestsIdentity(models.Model):
-    phytosanitarytreatment= models.ForeignKey(PhytosanitaryTreatment)
-    pest = models.ForeignKey(Names, null=True, blank=True)
+    phytosanitarytreatment= models.ForeignKey(PhytosanitaryTreatment,on_delete=models.DO_NOTHING,)
+    pest = models.ForeignKey(Names, null=True, blank=True,on_delete=models.DO_NOTHING,)
     pestidentitydescr = models.CharField(_("pestidentitydescr"), max_length=250, blank=True, null=True)
    
     
@@ -2443,14 +2436,14 @@ class PhytosanitaryTreatmentPestsIdentity(models.Model):
             pestidentity=pestidentity+ "<br>"+ str(code)+"<br><br>"
             self.pestidentitydescr=  pestidentity  
         super(PhytosanitaryTreatmentPestsIdentity, self).save(*args, **kwargs)
-   # def __unicode__(self):  
+   # def __str__(self):  
    #     return self  
 #    def name(self):
 #        return self.pest
 #    
 class PhytosanitaryTreatmentCommodityIdentity(models.Model):
-    phytosanitarytreatment= models.ForeignKey(PhytosanitaryTreatment)
-    commodity = models.ForeignKey(Names, null=True, blank=True)
+    phytosanitarytreatment= models.ForeignKey(PhytosanitaryTreatment,on_delete=models.DO_NOTHING,)
+    commodity = models.ForeignKey(Names, null=True, blank=True,on_delete=models.DO_NOTHING,)
     commoditydescr = models.CharField(_("pestidentitydescr"), max_length=250, blank=True, null=True)
    
     
@@ -2506,7 +2499,7 @@ class PhytosanitaryTreatmentCommodityIdentity(models.Model):
             self.commoditydescr=  commoditydescr  
         super(PhytosanitaryTreatmentCommodityIdentity, self).save(*args, **kwargs)
         
-    def __unicode__(self):  
+    def __str__(self):  
         return self.commodity  
     def name(self):
         return self.commodity
@@ -2523,7 +2516,7 @@ class DraftingBodyType(models.Model):
     draftingbody_ru = models.CharField(_("draftingbody ru"), max_length=500)
     draftingbody_zh = models.CharField(_("draftingbody zh"), max_length=500)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.draftingbody
 #    
 #TOPIC_STATUS_01 = -1
@@ -2844,7 +2837,7 @@ class StratigicObjective(models.Model):
     strategicobj_ar = models.CharField(_("strategicobj ar"), max_length=500)
     strategicobj_ru = models.CharField(_("strategicobj ru"), max_length=500)
     strategicobj_zh = models.CharField(_("strategicobj zh"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.strategicobj
         
     class Meta:
@@ -2871,11 +2864,11 @@ class Topic(Displayable, models.Model):
     
     drafting_body = models.ManyToManyField(DraftingBodyType,
         verbose_name=_("Drafting Body"),
-        related_name='drafting_body+', blank=True, null=True,
+        related_name='drafting_body+', blank=True,
         help_text=_("Select all that apply."))
     priority =models.IntegerField(_("Priority"),choices=TOPIC_PRIORITY_CHOICES, default=TOPIC_PRIORITY_0)
     topicstatus =models.IntegerField(_("Status"), choices=TOPIC_STATUS_CHOICES, default=TOPIC_STATUS_0)
-    strategicobj = models.ManyToManyField(StratigicObjective,verbose_name=_("Stratigic Objectives"), blank=True, null=True,help_text=_("Select all that apply."),)
+    strategicobj = models.ManyToManyField(StratigicObjective,verbose_name=_("Stratigic Objectives"), blank=True, help_text=_("Select all that apply."),)
     addedtolist =models.IntegerField(_("Added to the list at CPM"),  choices=CPMS, default=None)
     addedtolist_sc =models.IntegerField(_("Added to the list at SC"),choices=SC_TYPE_CHOICES, default=SC_TYPE_0)
     
@@ -2895,7 +2888,7 @@ class Topic(Displayable, models.Model):
         verbose_name_plural = _("Topics")
     #abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.topicnumber
        
    
@@ -2912,7 +2905,7 @@ class Topic(Displayable, models.Model):
 
       
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a it."""
         return ('topic-detail', (), {
@@ -2928,10 +2921,10 @@ class Topic(Displayable, models.Model):
         super(Topic, self).save(*args, **kwargs)
         
 class TopicLeads(models.Model):
-    topic = models.ForeignKey(Topic, verbose_name=_("topic"))
+    topic = models.ForeignKey(Topic, verbose_name=_("topic"),on_delete=models.DO_NOTHING,)
     
-    user = models.ForeignKey(User,verbose_name=_("User"), blank=True, null=True)
-    representing_country = models.ForeignKey(CountryPage,  verbose_name=_("Representing Country "), blank=True, null=True )
+    user = models.ForeignKey(User,verbose_name=_("User"), blank=True, null=True,on_delete=models.DO_NOTHING,)
+    representing_country = models.ForeignKey(CountryPage,on_delete=models.DO_NOTHING,  verbose_name=_("Representing Country "), blank=True, null=True )
     meetingassistantassigned = models.CharField(_("Date assigned"), max_length=500,  blank=True, null=True)
   
     class Meta:
@@ -2941,7 +2934,7 @@ class TopicLeads(models.Model):
  
         
     
-    def __unicode__(self):
+    def __str__(self):
         name=''
         if self.user!=None:
             userippc = get_object_or_404(IppcUserProfile, user_id=self.user.id)
@@ -2973,17 +2966,17 @@ class TopicLeads(models.Model):
          
         
 class TopicAssistants(models.Model):
-    topic = models.ForeignKey(Topic, verbose_name=_("topic"))
+    topic = models.ForeignKey(Topic, verbose_name=_("topic"),on_delete=models.DO_NOTHING,)
     
-    user = models.ForeignKey(User,verbose_name=_("User"), blank=True, null=True)
-    representing_country = models.ForeignKey(CountryPage,  verbose_name=_("Representing Country "), blank=True, null=True )
+    user = models.ForeignKey(User,verbose_name=_("User"), blank=True, null=True,on_delete=models.DO_NOTHING,)
+    representing_country = models.ForeignKey(CountryPage,on_delete=models.DO_NOTHING,  verbose_name=_("Representing Country "), blank=True, null=True )
     meetingassistantassigned = models.CharField(_("Date assigned"), max_length=500,  blank=True, null=True)
   
     class Meta:
         verbose_name = _("TopicAssistants")
         verbose_name_plural = _("TopicAssistants")
         
-    def __unicode__(self):
+    def __str__(self):
         name=''
         if self.user!=None:
             userippc = get_object_or_404(IppcUserProfile, user_id=self.user.id)
@@ -3018,7 +3011,7 @@ class WorkshopCertificatesTool(models.Model):
     workshoptitle = models.CharField(_("Workshop title"), max_length=200,help_text=_("Text that will appear in the Certitificate"))
     creation_date = models.DateTimeField('Creation date')
     filezip = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/w_certificates/%Y/%m/%d/', validators=[validate_file_extension])
-    author = models.ForeignKey(User, related_name="authorwcertificate")
+    author = models.ForeignKey(User,on_delete=models.DO_NOTHING, related_name="authorwcertificate")
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
         if not self.id:
@@ -3030,19 +3023,19 @@ class WorkshopCertificatesTool(models.Model):
             
 class CertificatesTool(models.Model):
     title = models.CharField(_("Title"), help_text=_("Text appearing in the certificate in the TITLE place"), blank=True, null=True, max_length=250)
-    topicnumber = models.ForeignKey(Topic,help_text=_("Select from the list the 'Topic' of discussion in meetings"),blank=True, null=True)
+    topicnumber = models.ForeignKey(Topic,on_delete=models.DO_NOTHING,help_text=_("Select from the list the 'Topic' of discussion in meetings"),blank=True, null=True)
     date = models.DateTimeField('date')
     creation_date = models.DateTimeField('creationdate')
     filezip = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/certificates/%Y/%m/%d/', validators=[validate_file_extension])
-    author = models.ForeignKey(User, related_name="authorcertificate")
+    author = models.ForeignKey(User,on_delete=models.DO_NOTHING, related_name="authorcertificate")
     
                
     users = models.ManyToManyField(User,
             verbose_name=_("Select  single users:"),help_text=_("CTRL/Command+mouseclick for more than 1 selection"),
-            related_name='certificatesusers', blank=True, null=True)
+            related_name='certificatesusers', blank=True)#, null=True)   
     groups = models.ManyToManyField(Group,
             verbose_name=_("Select groups:"),help_text=_("CTRL/Command+mouseclick for more than 1 selection"),
-            related_name='certificatesgroups', blank=True, null=True)
+            related_name='certificatesgroups', blank=True)#, null=True)   
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
@@ -3057,7 +3050,7 @@ class B_CertificatesTool(models.Model):
     title = models.CharField(_("Title"), help_text=_("Text appearing in the certificate"), blank=True, null=True, max_length=250)
     date = models.DateTimeField('date')
     filezip = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/b_certificates/%Y/%m/%d/', validators=[validate_file_extension])
-    author = models.ForeignKey(User, related_name="authorbcertificate")
+    author = models.ForeignKey(User,on_delete=models.DO_NOTHING, related_name="authorbcertificate")
 
     user_name = models.CharField(_("User name"), help_text=_("Text of the user appearing in the certificate"), blank=True, null=True, max_length=250)
     role = models.CharField(_("Role"), help_text=_("Text of the role appearing in the certificate"), blank=True, null=True, max_length=250)
@@ -3065,7 +3058,7 @@ class B_CertificatesTool(models.Model):
                
     groups = models.ManyToManyField(Group,
             verbose_name=_("Select groups:"),help_text=_("CTRL/Command+mouseclick for more than 1 selection"),
-            related_name='cbertificatesgroups', blank=True, null=True)
+            related_name='cbertificatesgroups', blank=True)#, null=True)   
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
@@ -3119,7 +3112,7 @@ class ProvidedBy(models.Model):
     """ ProvidedBy """
     provider = models.CharField(_("Provided By"), max_length=500)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.provider
         
     class Meta:
@@ -3131,7 +3124,7 @@ class ProvidedBy(models.Model):
 class ContributedResourceTag(models.Model):
     """ tag """
     tag = models.CharField(_("tag"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.tag
         
     class Meta:
@@ -3158,7 +3151,7 @@ class ContributedResource(Displayable, models.Model):
     # status - provided by mezzanine.core.models.displayable
     # publish_date - provided by mezzanine.core.models.displayable
          
-    owner = models.ForeignKey(User, related_name="resourceowner")
+    owner = models.ForeignKey(User,on_delete=models.DO_NOTHING,related_name="resourceowner")
     
     
     pending_status = models.IntegerField(_("Pending tatus"), choices=PENDINGSTATUS_CHOICES, default=PENDINGSTATUS_0)
@@ -3174,12 +3167,12 @@ class ContributedResource(Displayable, models.Model):
     ippc_resource =  models.BooleanField( verbose_name=_("Resource provided by the IPPC'."),default=False)
     resource_provide_by = models.ManyToManyField(ProvidedBy, 
         verbose_name=_("Resource provided by"), 
-        related_name='resprovidedby', blank=True, null=True)
+        related_name='resprovidedby', blank=True)#, null=True)   
     featured =  models.BooleanField( verbose_name=_("Featured"),default=False)
     tag = models.ManyToManyField(ContributedResourceTag, 
         verbose_name=_("Tags"), 
-        related_name='restags', blank=True, null=True)
-    issuename=generic.GenericRelation(IssueKeywordsRelate)
+        related_name='restags', blank=True)#, null=True)   
+    issuename=fields.GenericRelation(IssueKeywordsRelate)
     submittedby = models.TextField(_("Submitted by"),  blank=True, null=True)
   
    
@@ -3194,10 +3187,10 @@ class ContributedResource(Displayable, models.Model):
     def type_of_contact_verbose(self):
         return dict(TYPE_CONTACT_CHOICES)[self.type_of_contact]
   
-    def __unicode__(self):
+    def __str__(self):
         return self.title
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Resource."""
         return ('resource-detail', (), {
@@ -3213,7 +3206,7 @@ class ContributedResource(Displayable, models.Model):
         super(ContributedResource, self).save(*args, **kwargs)
 
 class ContributedResourceFile(models.Model):
-    resource = models.ForeignKey(ContributedResource)
+    resource = models.ForeignKey(ContributedResource,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='uploads/resources/%Y/%m/%d/', validators=[validate_file_extension])
 
@@ -3221,7 +3214,7 @@ class ContributedResourceFile(models.Model):
         verbose_name = _("ContributedResourceFile")
         verbose_name_plural = _("ContributedResourceFiles")
        
-    def __unicode__(self):  
+    def __str__(self):  
         return self.file.name  
     def name(self):
         return self.file.name
@@ -3231,13 +3224,13 @@ class ContributedResourceFile(models.Model):
         return os.path.splitext(self.file.name)[1]
 
 class ContributedResourcePhoto(models.Model):
-    resource = models.ForeignKey(ContributedResource)
+    resource = models.ForeignKey(ContributedResource,on_delete=models.DO_NOTHING,)
     image = models.ImageField(_("Photo"), upload_to="files/resources/photos/%Y/%m/", blank=True)
     class Meta:
         verbose_name = _("ContributedResourcePhoto")
         verbose_name_plural = _("ContributedResourcePhotos")
         
-    def __unicode__(self):  
+    def __str__(self):  
         return self.image.name  
     def name(self):
         return self.image.name
@@ -3248,13 +3241,13 @@ class ContributedResourcePhoto(models.Model):
 
 
 class ContributedResourceUrl(models.Model):
-    resource = models.ForeignKey(ContributedResource)
+    resource = models.ForeignKey(ContributedResource,on_delete=models.DO_NOTHING,)
     url_for_more_information = models.URLField(blank=True, null=True)
     class Meta:
         verbose_name = _("ContributedResourceUrl")
         verbose_name_plural = _("ContributedResourceUrls")
         
-    def __unicode__(self):  
+    def __str__(self):  
         return self.url_for_more_information  
     def name(self):
         return self.url_for_more_information
@@ -3270,7 +3263,7 @@ class CommitteeMeeting(Orderable):
         verbose_name_plural = _("CommitteeMeetings")
         
     library = models.ForeignKey("PublicationLibrary", 
-        related_name="committeemeeting") # related_name=committeemeeting...
+        related_name="committeemeeting",on_delete=models.DO_NOTHING,) # related_name=committeemeeting...
         # ..is used in publicationlibrary template
     title = models.CharField(_("Title"), blank=True, null=True, max_length=250)
     title_es = models.CharField(_("Title ES"), blank=True, null=True, max_length=250)
@@ -3280,7 +3273,7 @@ class CommitteeMeeting(Orderable):
     title_zh = models.CharField(_("Title ZH"), blank=True, null=True, max_length=250)
     link_to_page = models.CharField(_("Link to page"), blank=True, null=True,max_length=250)
     city = models.CharField(_("City"), blank=True, null=True, max_length=250)
-    country  = models.ForeignKey(CountryPage)
+    country  = models.ForeignKey(CountryPage,on_delete=models.DO_NOTHING,)
     start_date  = models.DateTimeField(_("From"), blank=True, null=True, editable=True)
     end_date = models.DateTimeField(_("To"), blank=True, null=True, editable=True)
     agenda_link_en = models.CharField(_("Agenda link - English"),blank=True, null=True, max_length=250)
@@ -3318,7 +3311,7 @@ class CommitteeMeeting(Orderable):
     modify_date = models.DateTimeField(_("Modified date"),
         blank=True, null=True, editable=False, auto_now=True)
  
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3337,7 +3330,7 @@ class CommitteeMeeting(Orderable):
             self.title = name
         super(CommitteeMeeting, self).save(*args, **kwargs)
 
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Publication."""
         return ('publication-detail', (), {
@@ -3355,7 +3348,7 @@ class CollapseContent(Orderable):
         verbose_name_plural = _("CollapseContents")
         
     library = models.ForeignKey("PublicationLibrary", 
-        related_name="collapsecontent") # related_name=committeemeeting...
+        related_name="collapsecontent",on_delete=models.DO_NOTHING,) # related_name=committeemeeting...
         # ..is used in publicationlibrary template
     title = models.CharField(_("Title"), blank=True, null=True, max_length=250)
     title_es = models.CharField(_("Title ES"), blank=True, null=True, max_length=250)
@@ -3378,7 +3371,7 @@ class CollapseContent(Orderable):
     modify_date = models.DateTimeField(_("Modified date"),
         blank=True, null=True, editable=False, auto_now=True)
  
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3397,7 +3390,7 @@ class CollapseContent(Orderable):
 #            self.title = name
         super(CollapseContent, self).save(*args, **kwargs)
         
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Publication."""
         return ('publication-detail', (), {
@@ -3434,7 +3427,7 @@ class Collapse2Content(Orderable):
         verbose_name = _("Collapse2Content")
         verbose_name_plural = _("Collapse2Contents")
         
-    library = models.ForeignKey("PhytosystemPage", related_name="collapse2content") 
+    library = models.ForeignKey("PhytosystemPage", related_name="collapse2content",on_delete=models.DO_NOTHING,) 
     title = models.CharField(_("Title"), blank=True, null=True, max_length=250)
     title_es = models.CharField(_("Title ES"), blank=True, null=True, max_length=250)
     title_fr = models.CharField(_("Title FR"), blank=True, null=True, max_length=250)
@@ -3454,7 +3447,7 @@ class Collapse2Content(Orderable):
     modify_date = models.DateTimeField(_("Modified date"),
         blank=True, null=True, editable=False, auto_now=True)
  
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3473,7 +3466,7 @@ class SideBoxContent(Orderable):
         verbose_name = _("SideBoxContent")
         verbose_name_plural = _("SideBoxContents")
         
-    library = models.ForeignKey("PhytosystemPage", related_name="sideboxcontent") # related_name=
+    library = models.ForeignKey("PhytosystemPage", related_name="sideboxcontent",on_delete=models.DO_NOTHING,) # related_name=
     title = models.CharField(_("Title"), blank=True, null=True, max_length=250)
     title_es = models.CharField(_("Title ES"), blank=True, null=True, max_length=250)
     title_fr = models.CharField(_("Title FR"), blank=True, null=True, max_length=250)
@@ -3491,7 +3484,7 @@ class SideBoxContent(Orderable):
     modify_date = models.DateTimeField(_("Modified date"),
         blank=True, null=True, editable=False, auto_now=True)
  
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3500,8 +3493,8 @@ class SideBoxContent(Orderable):
         file name.
         """
         super(SideBoxContent, self).save(*args, **kwargs)
-        
-        
+     
+     
 class Translatable(models.Model):
     """ Translations of user-generated content - https://gist.github.com/renyi/3596248"""
     lang = models.CharField(max_length=5, choices=settings.LANGUAGES)
@@ -3514,7 +3507,7 @@ if "mezzanine.pages" in settings.INSTALLED_APPS:
     from mezzanine.pages.models import RichTextPage, Link
 
     class TransRichTextPage(Translatable, RichText, Slugged):
-        translation = models.ForeignKey(RichTextPage, related_name="translation")
+        translation = models.ForeignKey(RichTextPage,on_delete=models.DO_NOTHING, related_name="translation")
 
         class Meta:
             verbose_name = _("Translated Page")
@@ -3523,7 +3516,7 @@ if "mezzanine.pages" in settings.INSTALLED_APPS:
             unique_together = ("lang", "translation")
 
     class TransLinkPage(Translatable, Slugged):
-        translation = models.ForeignKey(Link, related_name="translation")
+        translation = models.ForeignKey(Link,on_delete=models.DO_NOTHING, related_name="translation")
         
         class Meta:
             verbose_name = _("Translated Link")
@@ -3537,7 +3530,7 @@ if "mezzanine.forms" in settings.INSTALLED_APPS:
     from mezzanine.forms.models import Form, FieldManager, Field
 
     class TransForm(Translatable, RichText, Slugged):
-        translation = models.ForeignKey(Form, related_name="translation")
+        translation = models.ForeignKey(Form,on_delete=models.DO_NOTHING, related_name="translation")
 
         button_text = models.CharField(_("Button text"), max_length=50, default=_("Submit"))
         response = RichTextField(_("Response"))
@@ -3549,9 +3542,9 @@ if "mezzanine.forms" in settings.INSTALLED_APPS:
             unique_together = ("lang", "translation")
 
     class TransField(Translatable):
-        translation = models.ForeignKey(Field, related_name="translation")
-        original    = models.CharField(_("Label (Original)"), max_length=settings.FORMS_LABEL_MAX_LENGTH)
-        label       = models.CharField(_("Label"), max_length=settings.FORMS_LABEL_MAX_LENGTH)
+        translation = models.ForeignKey(Field,on_delete=models.DO_NOTHING, related_name="translation")
+        original    = models.CharField(_("Label (Original)"), max_length=200)#settings.FORMS_LABEL_MAX_LENGTH
+        label       = models.CharField(_("Label"), max_length=200)#settings.FORMS_LABEL_MAX_LENGTH)
 
         choices     = models.CharField(_("Choices"), max_length=1000, blank=True,
                                        help_text=_("Comma separated options where applicable. "
@@ -3569,7 +3562,7 @@ if "mezzanine.galleries" in settings.INSTALLED_APPS:
     from mezzanine.galleries.models import Gallery, GalleryImage
 
     class TransGallery(Translatable, Slugged, RichText):
-        translation = models.ForeignKey(Gallery, related_name="translation")
+        translation = models.ForeignKey(Gallery,on_delete=models.DO_NOTHING, related_name="translation")
 
         class Meta:
             verbose_name = _("Translated Gallery")
@@ -3577,7 +3570,7 @@ if "mezzanine.galleries" in settings.INSTALLED_APPS:
             ordering = ("lang",)
 
     class TransGalleryImage(Translatable, Slugged):
-        translation = models.ForeignKey(GalleryImage, related_name="translation")
+        translation = models.ForeignKey(GalleryImage,on_delete=models.DO_NOTHING, related_name="translation")
         description = models.CharField(max_length=1000, blank=True)
 
         class Meta:
@@ -3587,7 +3580,7 @@ if "mezzanine.galleries" in settings.INSTALLED_APPS:
 
 
 class TransPublicationLibraryPage(Translatable, RichText, Slugged):
-    translation = models.ForeignKey(PublicationLibrary, related_name="translation")
+    translation = models.ForeignKey(PublicationLibrary,on_delete=models.DO_NOTHING, related_name="translation")
     side_box = models.TextField( blank=True, null=True)
     class Meta:
         verbose_name = _("Translated Publication Library")
@@ -3596,7 +3589,7 @@ class TransPublicationLibraryPage(Translatable, RichText, Slugged):
         #unique_together = ("lang", "translation")
 
 class TransFAQsCategory(Translatable, RichText, Slugged):
-    translation = models.ForeignKey(FAQsCategory, related_name="translation")
+    translation = models.ForeignKey(FAQsCategory,on_delete=models.DO_NOTHING, related_name="translation")
 
     class Meta:
         verbose_name = _("Translated FAQsCategory")
@@ -3605,7 +3598,7 @@ class TransFAQsCategory(Translatable, RichText, Slugged):
        
 
 class TransFAQsItem(Translatable, RichText, Slugged):
-    translation = models.ForeignKey(FAQsItem, related_name="translation")
+    translation = models.ForeignKey(FAQsItem,on_delete=models.DO_NOTHING, related_name="translation")
     faq_description = models.TextField(max_length=1000, blank=True)
     faq_anchor= models.CharField(max_length=1000, blank=True)
     
@@ -3617,7 +3610,7 @@ class TransFAQsItem(Translatable, RichText, Slugged):
 
 #
 class TransTopic(Translatable,   Slugged):
-    translation = models.ForeignKey(Topic, related_name="translation")
+    translation = models.ForeignKey(Topic,on_delete=models.DO_NOTHING, related_name="translation")
     topic_under = models.CharField(max_length=1000, blank=True)
     specification_number = models.CharField(max_length=1000, blank=True)
 
@@ -3625,9 +3618,9 @@ class TransTopic(Translatable,   Slugged):
         verbose_name = _("Translated Topic")
         verbose_name_plural = _("Translated Topics")
         ordering = ("lang",)
-        
+
 class TransPhytosystemPage(Translatable, RichText, Slugged):
-    translation = models.ForeignKey(PhytosystemPage, related_name="translation")
+    translation = models.ForeignKey(PhytosystemPage,on_delete=models.DO_NOTHING, related_name="translation")
     class Meta:
         verbose_name = _("Translated PhytosystemPage")
         verbose_name_plural = _("Translated PhytosystemPages")

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}
   {% trans "Publications" %}: 
@@ -35,7 +35,7 @@
 <h1>
   {% trans "Publications" %}
 </h1> 
-
+{{queryset}}
 {% if latest %}
 <table class="table table-condensed table-striped" id="publications">
   <thead>
@@ -45,7 +45,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for publication in latest %}
+    {% for publication in queryset %}
     <tr>
       <td>
         <a href="{% url 'publication-detail' publication.pk %}">{% if LANGUAGE_CODE != 'en' %}
@@ -70,7 +70,7 @@
         {{ publication.modify_date|date:"d M Y" }}
 
         {% if user.is_superuser %} 
-         <a class="small pull-right" href="/admin/ippc/publication/{{ publication.id }}"><i class="icon-edit"></i> Edit as Admin</a><br> 
+         <a class="small pull-right" href="/admin/ippc/publication/{{ publication.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br> 
         {% endif %}
         </td>
     </tr>

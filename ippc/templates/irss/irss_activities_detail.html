@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
 
 {% block meta_title %}{% trans "Latest Publications" %}{% endblock %}
 
@@ -32,7 +32,7 @@
   {% endif %}
    {% if irssactivity.short_description %}
   <dt>{% trans "Description of activity:" %}</dt>
-  <dd>{{ irssactivity.short_description|richtext_filter|safe }}</dd>
+  <dd>{{ irssactivity.short_description|richtext_filters|safe }}</dd>
   {% endif %}
   
   {% if irssactivity.authoreditor %}
@@ -59,7 +59,7 @@
      <div class="well localnav">
   <p><a href="/irss/activities/">« {% trans "Back to" %} {% trans "IRSS Activities" %}</a></p>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/irssactivity/{{ irssactivity.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/irssactivity/{{ irssactivity.id }}/change/">Edit as Admin</a><br>
     {% endif %}
         
     {% if perms.ippc.change_irssactivity %}
@@ -73,5 +73,6 @@
 </div>
 </div>
 
+ 
 {% endblock %}
 

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles %}
+{% load pages_tags mezzanine_tags i18n static %}
 
 {% block meta_title %}{% trans "FAQs Item" %}{% endblock %}
 
@@ -30,14 +30,14 @@
 <dt>{% trans "FAQ description" %}</dt>
   <dd>
     <ul class="unstyled nomargin">
-      <li> {{ faq.faq_description|richtext_filter|safe }}</li>
+      <li> {{ faq.faq_description|richtext_filters|safe }}</li>
     </ul>
   </dd>
   
   <dt>{% trans "FAQ anchor " %}</dt>
   <dd>
     <ul class="unstyled nomargin">
-      <li> {{ faq.faq_anchor|richtext_filter|safe  }}</li>
+      <li> {{ faq.faq_anchor|richtext_filters|safe  }}</li>
     </ul>
   </dd>
   <dt>{% trans "Publication date" %}</dt>
@@ -54,7 +54,7 @@
     <p><a href="/faqnew}">« {% trans "Go Back" %}</a></p>
     <p>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/faqsitem/{{ faq.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/faqsitem/{{ faq.id }}/change/">Edit as Admin</a><br>
     {% endif %}
         
     {% if perms.ippc.change_faqsitem  %}

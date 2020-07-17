@@ -1,6 +1,6 @@
 {% extends "pages/page.html" %}
 
-{% load mezzanine_tags translate_tags staticfiles i18n %}
+{% load mezzanine_tags translate_tags static i18n %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static "css/DT_bootstrap.css" %}">
@@ -23,10 +23,10 @@
       {{ block.super }}
       {# {% editable page.publicationlibrary.content %} #}
       {% with page.publicationlibrary|get_object_translation as translated_page %}
-          {{ translated_page.content|richtext_filter|safe }}
+          {{ translated_page.content|richtext_filters|safe }}
       {% endwith %}
       
-      {# {{ page.publicationlibrary.content|richtext_filter|safe }} #}
+      {# {{ page.publicationlibrary.content|richtext_filters|safe }} #}
 
 
 
@@ -42,14 +42,14 @@
       {# {% editable page.publicationlibrary.content %} #}
 
       {% with page.publicationlibrary|get_object_translation as translated_page %}
-          {{ translated_page.content|richtext_filter|safe }}
+          {{ translated_page.content|richtext_filters|safe }}
       {% endwith %}
 
-      {# {{ page.publicationlibrary.content|richtext_filter|safe }} #}
+      {# {{ page.publicationlibrary.content|richtext_filters|safe }} #}
       {# {% endeditable %} #}
        
 
-{% load mezzanine_tags staticfiles i18n %}
+{% load mezzanine_tags static i18n %}
 <!--h1>{{titlepage}}</h1-->
 <p>You can find in this table the links to download all the files of the page <b>{{titlepage}}</b>.<br>
 You can download the archive containing all the files or a specific language archive.<br>

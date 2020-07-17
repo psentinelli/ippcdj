@@ -1,7 +1,7 @@
-{% load i18n future mezzanine_tags accounts_tags %}
+{% load i18n  mezzanine_tags accounts_tags %}
   {% if user.is_superuser %} 
   <div class="pull-right">
-      <a class="btn btn-small btn-info" href="/admin/auth/user/{{ page.get_content_model.contact_point.get_profile.user_id }}">Edit User as Admin</a><br>
+      <a class="btn btn-small btn-info" href="/admin/auth/user/{{ profile.user_id }}">Edit User as Admin</a><br>
   </div>
   {% endif %}
   
@@ -11,8 +11,8 @@
 		</div>
   {% endif %}
   
-  {% if page.get_content_model.contact_point.get_profile.profile_photo %}
-  <img class="pull-left profile-picture" style="margin:0 0 20px 10px;" src="{{ MEDIA_URL }}{% thumbnail page.get_content_model.contact_point.get_profile.profile_photo 128 128 %}">
+  {% if profile.profile_photo %}
+  <img class="pull-left profile-picture" style="margin:0 0 20px 10px;" src="{{ MEDIA_URL }}{% thumbnail profile.profile_photo 128 128 %}">
   {% else %}
    <span class="pull-left profile-picture" style="font-size:10em; color: #FFF; background-color: #eee;height:128px; width:128px;"><i class="fas fa-user"> </i></span> 
   {% endif %}
@@ -22,43 +22,44 @@
 
 
 <h6>&#160;&#160;
-    {% if page.get_content_model.contact_point.get_profile.get_gender_display %}
-			{{ page.get_content_model.contact_point.get_profile.get_gender_display }}
+       
+    {% if profile.get_gender_display %}
+			{{ profile.get_gender_display }}
     {% endif %}
-    {# {{ page.get_content_model.contact_point.get_full_name }}  #}
-    {{ page.get_content_model.contact_point.get_profile.first_name }} 
-    <span class="caps">{{ page.get_content_model.contact_point.get_profile.last_name }}</span>
+   
+    {{ profile.first_name }} 
+    <span class="caps">{{ profile.last_name }}</span>
   </h6>
-   {% if page.get_content_model.contact_point.get_profile.title %}
+   {% if profile.title %}
   <!--dt>{% trans "Title" %}</dt-->
   <p><i>&#160;&#160;
-    {{ page.get_content_model.contact_point.get_profile.title }} 
+    {{ profile.title }} 
   </i></br>
   {% endif %}
   
-  {% if page.get_content_model.contact_point.get_profile.address1 or page.get_content_model.contact_point.get_profile.address2 %}
+  {% if profile.address1 or profile.address2 %}
   <!--dt>{% trans "Address" %}</dt-->
 
-    {% if page.get_content_model.contact_point.get_profile.address1 %} &#160;&#160;{{ page.get_content_model.contact_point.get_profile.address1 }}<br>{% endif %}
-   {% if page.get_content_model.contact_point.get_profile.address2 %} &#160;&#160;{{ page.get_content_model.contact_point.get_profile.address2 }}<br>{% endif %}
+    {% if profile.address1 %} &#160;&#160;{{ profile.address1 }}<br>{% endif %}
+   {% if profile.address2 %} &#160;&#160;{{ profile.address2 }}<br>{% endif %}
   
   {% endif %}
-  {% if page.get_content_model.contact_point.get_profile.phone %}
+  {% if profile.phone %}
   
  &#160;&#160;<strong>{% trans "Phone" %}:</strong>
-    {{ page.get_content_model.contact_point.get_profile.phone }} 
+    {{ profile.phone }} 
 </br>
   {% endif %}
-   {% if page.get_content_model.contact_point.get_profile.mobile %}
+   {% if profile.mobile %}
 
  &#160;&#160;  <strong>{% trans "Mobile" %}:</strong>
-    {{ page.get_content_model.contact_point.get_profile.mobile }} 
+    {{ profile.mobile }} 
 </br>
   {% endif %}
-  {% if page.get_content_model.contact_point.get_profile.fax %}
+  {% if profile.fax %}
 
  &#160;&#160;  <strong>{% trans "Fax" %}:</strong>
-    {{ page.get_content_model.contact_point.get_profile.fax }} 
+    {{ profile.fax }} 
 </br>
   {% endif %}
   
@@ -66,38 +67,38 @@
  &#160;&#160;<strong>{% trans "Email" %}:</strong> {{ page.get_content_model.contact_point.email }}<br>
   {% endif %}
 	
-  {% if page.get_content_model.contact_point.get_profile.email_address_alt %}
+  {% if profile.email_address_alt %}
  &#160;&#160;<strong>{% trans "Alternate Email" %}:</strong>
-    {{ page.get_content_model.contact_point.get_profile.email_address_alt }} 
+    {{ profile.email_address_alt }} 
 </br>
 
   {% endif %}
-  {% if page.get_content_model.contact_point.get_profile.preferredlanguage.all %}
+  {% if profile.preferredlanguage.all %}
    &#160;&#160;<strong>{% trans "Preferred languages" %}:</strong>
   
-    {% for entry in page.get_content_model.contact_point.get_profile.preferredlanguage.all %}
+    {% for entry in profile.preferredlanguage.all %}
         {{entry}}{% if forloop.last %} {% else %},{% endif %}
       {% endfor %}
     
   </br>
   {% endif %}
-  {% if page.get_content_model.contact_point.get_profile.website %}
+  {% if profile.website %}
     &#160;&#160;<strong>{% trans "Website" %}:</strong>
 
-       <a href="{{ page.get_content_model.contact_point.get_profile.website }} ">{{ page.get_content_model.contact_point.get_profile.website }}</a>
+       <a href="{{ profile.website }} ">{{ profile.website }}</a>
  
     
   </br>
   {% endif %}
-  {% if user.is_superuser and page.get_content_model.contact_point.get_profile.date_account_created %}
+  {% if user.is_superuser and profile.date_account_created %}
  &#160;&#160;<strong>{% trans "IPP Member Since" %}:</strong>
-        {% blocktrans with sometime=page.get_content_model.contact_point.get_profile.date_account_created|date:"d M Y" %}{{ sometime }}{% endblocktrans %}
+        {% blocktrans with sometime=profile.date_account_created|date:"d M Y" %}{{ sometime }}{% endblocktrans %}
 </br>
 	
   {% endif %}
-  {% if  page.get_content_model.contact_point.get_profile.date_contact_registration %}
+  {% if  profile.date_contact_registration %}
  &#160;&#160;<strong>{% trans "Date contact registration" %}:</strong>
-        {% blocktrans with sometime=page.get_content_model.contact_point.get_profile.date_contact_registration|date:"d M Y" %}{{ sometime }}{% endblocktrans %}
+        {% blocktrans with sometime=profile.date_contact_registration|date:"d M Y" %}{{ sometime }}{% endblocktrans %}
 </br>
 	
   {% endif %}
@@ -106,7 +107,7 @@
   
   
   
-  {% if page.get_content_model.contact_point.get_profile.bio %}
+  {% if profile.bio %}
     <script type="text/javascript">
     function toggle_visibility(id) {
        var e = document.getElementById(id);
@@ -119,11 +120,11 @@
 
  &#160;&#160;
    <strong>{% trans "Brief Biography" %}</strong> <a href="#" onclick="javascript:toggle_visibility('bio');"><small>{% trans "Click to display" %}</small></a>
-   <div id="bio" style="display:none;">{{ page.get_content_model.contact_point.get_profile.bio }}</div></dd>
+   <div id="bio" style="display:none;">{{ profile.bio }}</div></dd>
   {% endif %}
   
   
-    {% if page.get_content_model.contact_point.get_profile.expertise %}
+    {% if profile.expertise %}
     <script type="text/javascript">
     function toggle_visibility(id) {
        var e = document.getElementById(id);
@@ -136,17 +137,17 @@
 
  &#160;&#160;
    <strong>{% trans "Description/expertise" %}</strong> <a href="#" onclick="javascript:toggle_visibility('exp');"><small>{% trans "Click to display" %}</small></a>
-   <div id="exp" style="display:none;">{{ page.get_content_model.contact_point.get_profile.expertise }}</div></dd>
+   <div id="exp" style="display:none;">{{ profile.expertise }}</div></dd>
   {% endif %}
   
 
 
   
   
-  {% if page.get_content_model.contact_point.get_profile.country %}
+  {% if profile.country %}
   <!--dt>{% trans "IPPC Country" %}</strong>
   <p>&#160;&#160;
-    {% if page.get_content_model.contact_point.get_profile.country.name %}<b>{{ page.get_content_model.contact_point.get_profile.country.name }}</b>{% endif %}
+    {% if profile.country.name %}<b>{{ profile.country.name }}</b>{% endif %}
   </dd-->
   {% endif %}
   

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load pages_tags mezzanine_tags i18n future staticfiles translate_tags accounts_tags %}
+{% load pages_tags mezzanine_tags i18n static translate_tags accounts_tags %}
 
 
 {% block meta_title %}
@@ -33,7 +33,7 @@
         {% if user.is_superuser or perms.ippc.change_contributedresource  %}
            <p> 
             {% if user.is_superuser %}
-               <a class="btn btn-small btn-info" href="/admin/ippc/contributedresource/{{resource.id}}"><i class="icon-edit icon-white"></i> Edit as admin</a>     
+               <a class="btn btn-small btn-info" href="/admin/ippc/contributedresource/{{resource.id}}/change/"><i class="icon-edit icon-white"></i> Edit as admin</a>     
                <a class="btn btn-small btn-info" href="/core-activities/capacity-development/guides-and-training-materials/contributed-resource-list/edit/{{resource.id}}"><i class="icon-edit icon-white"></i> Edit</a>     
             {% else %}
                {% for group in request.user.groups.all %} 

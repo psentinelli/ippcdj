@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles %}
+{% load pages_tags mezzanine_tags i18n static %}
 
 {% block meta_title %}{% trans "FAQ Category" %}{% endblock %}
 
@@ -50,7 +50,7 @@
     <p><a href="/faqnew}">« {% trans "Go Back" %}</a></p>
     <p>
     {% if user.is_superuser %} 
-        <a class="btn btn-small btn-info" href="/admin/ippc/faqscategory/{{ faqcategory.id }}">Edit as Admin</a><br>
+        <a class="btn btn-small btn-info" href="/admin/ippc/faqscategory/{{ faqcategory.id }}/change/">Edit as Admin</a><br>
     {% endif %}
         
     {% if perms.ippc.change_faqscategory  %}

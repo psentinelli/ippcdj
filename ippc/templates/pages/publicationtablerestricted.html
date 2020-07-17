@@ -1,4 +1,4 @@
-{% load mezzanine_tags staticfiles i18n %}
+{% load mezzanine_tags static i18n %}
 {% if user.is_superuser or perms.ippc.change_publication  %}
 <div class="alert alert-success"><h5>All the publications of this page are visible to:</h5>
 {% for g in page.get_content_model.groups.all %}

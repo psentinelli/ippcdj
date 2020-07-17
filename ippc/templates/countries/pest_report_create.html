@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load pages_tags translate_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% load pages_tags translate_tags mezzanine_tags i18n static accounts_tags %}
 
-{% block meta_title %}{% trans "New Pest Report" %} - {{ user.get_profile.country.name}} {% endblock %}
+{% block meta_title %}{% trans "New Pest Report" %} - {{ userprofile.country.name}} {% endblock %}
 
 {# {% block extra_style %} #}
 {#     <link href="{% static "css/Markdown.Editor.css" %}" rel="stylesheet"> #}
@@ -15,13 +15,13 @@
   <span class="divider">/</span>
 </li>
 <li>
-  <a href="/countries/{{ user.get_profile.country.name|slugify }}/">
-    {{ user.get_profile.country.name }}
+  <a href="/countries/{{ userprofile.country.name|slugify }}/">
+    {{ userprofile.country.name }}
   </a>
   <span class="divider">/</span>
 </li>
 <li>
-  <a href="/countries/{{ user.get_profile.country.name|slugify }}/pestfreeareas/">{% trans "Pest Free Area" %}</a>
+  <a href="/countries/{{ userprofile.country.name|slugify }}/pestfreeareas/">{% trans "Pest Free Area" %}</a>
   <span class="divider">/</span>
 </li>
 <li class="active">{% trans "Create New" %}</li>
@@ -39,7 +39,7 @@
   <a href="javascript:history.go(-1)">{% trans "« Cancel and go back" %}</a>
 </p>
 
-<h1><span class="normal">{% trans "Create New Pest Report for" %}</span> {{ user.get_profile.country.name }}</h1>
+<h1><span class="normal">{% trans "Create New Pest Report for" %}</span> {{ userprofile.country.name }}</h1>
 
 {# {% debug %} #}
 <form class="customform" method="POST" action="" enctype="multipart/form-data">

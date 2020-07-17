@@ -1,4 +1,4 @@
-{% load mezzanine_tags staticfiles i18n %}
+{% load mezzanine_tags static i18n %}
     {% load translate_tags %}
     {% if publication %}
     <h1> {% if LANGUAGE_CODE != 'en' %}
@@ -100,7 +100,7 @@
           {% if publication.short_description %}
         
           <dt>{% trans "Description" %}</dt>
-          <dd>{{ publication.short_description|richtext_filter|safe }}</dd>
+          <dd>{{ publication.short_description|richtext_filters|safe }}</dd>
           {% endif %}
           
           
