@@ -2,7 +2,7 @@ from django import template
 
 register = template.Library()
 
-class CounterNode(template.Node):
+class CounterNode(template.Node): 
 
   def __init__(self):
     self.count = 0

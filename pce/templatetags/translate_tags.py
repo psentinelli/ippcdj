@@ -7,7 +7,7 @@ from mezzanine.conf import settings
 register = template.Library()
 
 @register.filter
-def get_object_translation(obj):
+def get_object_translation(obj): 
     # get current language
     lang = translation.get_language()
 

@@ -1,6 +1,6 @@
-
+ 
 from string import punctuation
-from urllib import unquote
+#from urllib import unquote
 
 from django.db import models
 #from django.contrib.gis.db import models as gismodels
@@ -27,9 +27,13 @@ from mezzanine.utils.importing import import_dotted_path
 from mezzanine.utils.models import upload_to
 
 
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.generic import GenericRelation
+#from django.contrib.contenttypes import generic
+#from django.contrib.contenttypes.generic import GenericRelation
+#from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import fields
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
+
 from django.db.models.signals import post_save
 
 from django.core.exceptions import ValidationError
@@ -93,7 +97,7 @@ BOOL_CHOICESM_M = (
 class Crops(models.Model):
     """ Crops  """
     crop = models.CharField(_("Crop"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.crop
 
 class PceVersion(Orderable):
@@ -103,8 +107,8 @@ class PceVersion(Orderable):
         verbose_name = _("Version")
         verbose_name_plural = _("Versions")
   
-    country = models.ForeignKey(CountryPage, related_name="pceversion_country_page")
-    author = models.ForeignKey(User, related_name="pceversion_author")
+    country = models.ForeignKey(CountryPage, related_name="pceversion_country_page",on_delete=models.DO_NOTHING,)
+    author = models.ForeignKey(User, related_name="pceversion_author",on_delete=models.DO_NOTHING,)
     version_number = models.CharField(_("Session"), blank=True, null=True, max_length=100)
     status = models.IntegerField(_("Status"), choices=PCEVERSION_STATUS_CHOICES, default=CURRENT)
     modify_date = models.DateTimeField(_("Last updated"), blank=True, null=True, editable=False, auto_now=True)
@@ -154,7 +158,7 @@ class PceVersion(Orderable):
     ed8_lastname=models.CharField(_("Last name"), blank=True, null=True, max_length=250)
     ed8_email=models.CharField(_("Email"), blank=True, null=True, max_length=250)
   
-    def __unicode__(self):
+    def __str__(self):
         return self.version_number
  
     def save(self, *args, **kwargs):
@@ -165,7 +169,7 @@ class PceVersion(Orderable):
         super(PceVersion, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -1952,7 +1956,7 @@ FEW=(
 class Membership1(models.Model):
     """ TradePartneners1 """
     partner = models.CharField(_("Partner"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.partner
     class Meta:
         verbose_name_plural = _("Memberships")
@@ -1962,7 +1966,7 @@ class Membership2(models.Model):
     """ TradePartneners1 """
     partner = models.CharField(_("Partner"), max_length=500)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.partner
         
     class Meta:
@@ -1980,9 +1984,9 @@ class Module1(Displayable, models.Model):
         verbose_name = _("Module 1 - Country Profile")
         verbose_name_plural = _("Module 1 - Country Profile")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    country = models.ForeignKey(CountryPage,related_name="mod1_country",help_text=_("Enter the official name of the Country if not already assigned."),)
+    country = models.ForeignKey(CountryPage,on_delete=models.DO_NOTHING,related_name="mod1_country",help_text=_("Enter the official name of the Country if not already assigned."),)
     region = models.IntegerField(_("2. Region"), choices=REGIONS, default=None,help_text=_("FAO has 7 regions defined. Use the FAO country grouping,i.e. Africa, Asia, Latin America and the Caribbean, Europe, Near East, North America and Southwest Pacific. "),)
     m_3 = models.TextField(_("3. Population and year of estimate"), blank=True, null=True,help_text=_("Include the Month and Year e.g. (July 2008 est.) "))
     m_4 = models.TextField(_("4. Total Land Area - sq. km."), blank=True, null=True,help_text=_("Please convert units to sq. km."))
@@ -2003,8 +2007,8 @@ class Module1(Displayable, models.Model):
     m_19 = models.IntegerField(_("19. What percentage of the agricultural labour force is directly employed in the production of plant and plant products (including forestry)?"), choices=VAL_PERCENT, default=None,help_text=_("Enter most recent data "),)
     #m_20
     #m_21
-    m_22 = models.ManyToManyField(Membership1,verbose_name=_("22. Membership / Signatory to:"),related_name='Membership_+', blank=True, null=True,help_text=_("Select all that apply."))
-    m_23 = models.ManyToManyField(Membership2,verbose_name=_("23. Member of Regional Economic Integration/Co-operation Organizations:"),related_name='Membership_+', blank=True, null=True,help_text=_("Tick all that apply."))
+    m_22 = models.ManyToManyField(Membership1,verbose_name=_("22. Membership / Signatory to:"),related_name='Membership_+', blank=True, help_text=_("Select all that apply."))
+    m_23 = models.ManyToManyField(Membership2,verbose_name=_("23. Member of Regional Economic Integration/Co-operation Organizations:"),related_name='Membership_+', blank=True, help_text=_("Tick all that apply."))
     m_24 = models.IntegerField(_("24. Number of bilateral phytosanitary arrangements - Operational"), choices=NUM_BILATERAL, default=None,help_text=_("These are arrangements that have been negotiated and are actively being implemented. "),)
     m_25 = models.IntegerField(_("25. Number of bilateral phytosanitary arrangements - Negotiations in progress"), choices=NUM_BILATERAL, default=None,help_text=_("This refers to ongoing negotiations for establishing phytosanitary arrangements. "),)
     #m_comment = models.TextField(_("Comment"), blank=True, null=True,help_text='Please put your comments here.')
@@ -2035,7 +2039,7 @@ class Module1(Displayable, models.Model):
     c_m_25 = models.TextField(_("Comment"), blank=True, null=True,help_text='')
     c_m_26 = models.TextField(_("Comment"), blank=True, null=True,help_text='')
      
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
  
@@ -2047,7 +2051,7 @@ class Module1(Displayable, models.Model):
         super(Module1, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -2056,20 +2060,20 @@ class Module1(Displayable, models.Model):
                             'session': self.version_number})
             
 class Module1Aid(models.Model):
-    module1 = models.ForeignKey(Module1)
+    module1 = models.ForeignKey(Module1,on_delete=models.DO_NOTHING,)
     donoragency = models.CharField(_("Donor Agency"), blank=True, null=True, max_length=250,)
     titleprj = models.CharField(_("Title of Project"), blank=True, null=True,max_length=250,)
     date = models.CharField(_("Date Commenced"), blank=True, null=True,max_length=250,)
     duration = models.CharField(_("Duration"), blank=True, null=True,max_length=250,)
     amount = models.CharField(_("Amount (US)"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.titleprj
     def name(self):
         return self.titleprj
     
 class Module1MajorCrops(models.Model):
-    module1 = models.ForeignKey(Module1)
+    module1 = models.ForeignKey(Module1,on_delete=models.DO_NOTHING,)
     crops = models.CharField(_("Crops"), blank=True, null=True,max_length=250,)
     propagation = models.BooleanField(verbose_name=_("Propagation"), default=None) 
     germplasm = models.BooleanField(verbose_name=_("Germplasm"), default=None) 
@@ -2078,13 +2082,13 @@ class Module1MajorCrops(models.Model):
     industrial = models.BooleanField(verbose_name=_("Industrial Products"), default=None) 
     other = models.BooleanField(verbose_name=_("Other Uses"), default=None) 
    
-    def __unicode__(self):
+    def __str__(self):
         return self.crops
     def name(self):
         return self.crops
 
 class Module1MajorImports(models.Model):
-    module1 = models.ForeignKey(Module1)
+    module1 = models.ForeignKey(Module1,on_delete=models.DO_NOTHING,)
     crops = models.CharField(_("Crops"), blank=True, null=True,max_length=250,)
     propagation = models.BooleanField(verbose_name=_("Propagation"), default=None) 
     germplasm = models.BooleanField(verbose_name=_("Germplasm"), default=None) 
@@ -2093,13 +2097,13 @@ class Module1MajorImports(models.Model):
     industrial = models.BooleanField(verbose_name=_("ndustrial Products"), default=None) 
     other = models.BooleanField(verbose_name=_("Other Uses"), default=None) 
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.crops
     def name(self):
         return self.crops
     
 class Module1MajorExports(models.Model):
-    module1 = models.ForeignKey(Module1)
+    module1 = models.ForeignKey(Module1,on_delete=models.DO_NOTHING,)
     crops = models.CharField(_("Crops"), blank=True, null=True,max_length=250,)
     propagation = models.BooleanField(verbose_name=_("Propagation"), default=None) 
     germplasm = models.BooleanField(verbose_name=_("Germplasm"), default=None) 
@@ -2108,25 +2112,25 @@ class Module1MajorExports(models.Model):
     industrial = models.BooleanField(verbose_name=_("ndustrial Products"), default=None) 
     other = models.BooleanField(verbose_name=_("Other Uses"), default=None) 
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.crops
     def name(self):
         return self.crops
     
 class Module1MajorPartenerImport(models.Model):
-    module1 = models.ForeignKey(Module1)
+    module1 = models.ForeignKey(Module1,on_delete=models.DO_NOTHING,)
     country = models.CharField(_("country"), blank=True, null=True,max_length=250,)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.country
     def name(self):
         return self.country
     
 class Module1MajorPartenerExport(models.Model):
-    module1 = models.ForeignKey(Module1)
+    module1 = models.ForeignKey(Module1,on_delete=models.DO_NOTHING,)
     country = models.CharField(_("country"), blank=True, null=True,max_length=250,)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.country
     def name(self):
         return self.country
@@ -2142,7 +2146,7 @@ class Module2(Displayable, models.Model):
         verbose_name = _("Module 2 -  National phytosanitary legislation")
         verbose_name_plural = _("Module 2 -  National phytosanitary legislation")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.IntegerField(_("1.1. What is the legal system of the country?"), choices=CIVIL, default=None,help_text=_("Civil legislation system, which has its roots in Roman legislation and which is based on written legal codes. Napoleonic Code: Based on the primacy of statutes enacted by the legislature. These statutes are integrated into a comprehensive code designed to be applied by the courts with a minimum of judicial interpretation. Common Legislation: A system of legislation that is derived from judges' decisions (which arise from the judicial branch of government), rather than statutes or constitutions (which are derived from the legislative branch of government).  Source: <a href='https://www.law.berkeley.edu/library/robbins/pdf/CommonLawCivilLawTraditions.pdf'>click here</a> for Common Legislation. Islamic Legislation, which is derived from the Koran and can be found in the Middle East and in some African countries Source: <a href='http://www.islamicsupremecouncil.org/understanding-islam/legal-rulings/52-understanding-islamic-law.html'>click here</a> for the Islamic legislation."),)
     m_2 = models.TextField(_("1.2. How is legislation and regulations developed and enacted?"), blank=True, null=True,help_text=_("List the major steps (drafting to enactment) for a piece of legislation to be approved nationally for implementation."),)
@@ -2391,7 +2395,7 @@ class Module2(Displayable, models.Model):
     c_m_121= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_122= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_123= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');   
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -2402,7 +2406,7 @@ class Module2(Displayable, models.Model):
         super(Module2, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -2411,14 +2415,14 @@ class Module2(Displayable, models.Model):
                             'session': self.version_number})
                             
 class Module2Weaknesses(models.Model):
-    module2 = models.ForeignKey(Module2)
+    module2 = models.ForeignKey(Module2,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1       
@@ -2436,7 +2440,7 @@ class Module2_1(Displayable, models.Model):
         verbose_name = _("Module 2 -  National phytosanitary legislation Part 1")
         verbose_name_plural = _("Module 2 -  National phytosanitary legislation Part 1")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.IntegerField(_("1.1. What is the legal system of the country?"), choices=CIVIL, default=None,help_text=_("Civil legislation system, which has its roots in Roman legislation and which is based on written legal codes. Napoleonic Code: Based on the primacy of statutes enacted by the legislature. These statutes are integrated into a comprehensive code designed to be applied by the courts with a minimum of judicial interpretation. Common Legislation: A system of legislation that is derived from judges' decisions (which arise from the judicial branch of government), rather than statutes or constitutions (which are derived from the legislative branch of government).  Source: <a href='https://www.law.berkeley.edu/library/robbins/pdf/CommonLawCivilLawTraditions.pdf'>click here</a> for Common Legislation. Islamic Legislation, which is derived from the Koran and can be found in the Middle East and in some African countries Source: <a href='http://www.islamicsupremecouncil.org/understanding-islam/legal-rulings/52-understanding-islamic-law.html'>click here</a> for the Islamic legislation."),)
     m_2 = models.TextField(_("1.2. How is legislation and regulations developed and enacted?"), blank=True, null=True,help_text=_("List the major steps (drafting to enactment) for a piece of legislation to be approved nationally for implementation."),)
@@ -2559,7 +2563,7 @@ class Module2_1(Displayable, models.Model):
     c_m_58= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_59= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
        
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -2570,7 +2574,7 @@ class Module2_1(Displayable, models.Model):
         super(Module2_1, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -2590,7 +2594,7 @@ class Module2_2(Displayable, models.Model):
         verbose_name = _("Module 2 -  National phytosanitary legislation Part 2")
         verbose_name_plural = _("Module 2 -  National phytosanitary legislation Part 2")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_60 = models.NullBooleanField(_("11.1. Does the legislation grant the NPPO the power to prescribe and adopt phytosanitary measures concerning the importation of plants, plant products and other regulated articles, including for example, inspection, prohibition on importation, or treatment?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     m_61 = models.NullBooleanField(_("11.2. Does the legislation specify that the phytosanitary measures shall not be applied for non-regulated pests?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
@@ -2721,7 +2725,7 @@ class Module2_2(Displayable, models.Model):
     c_m_121= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_122= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_123= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');   
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -2732,7 +2736,7 @@ class Module2_2(Displayable, models.Model):
         super(Module2_2, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -2741,14 +2745,14 @@ class Module2_2(Displayable, models.Model):
                             'session': self.version_number})
                             
 class Module2_2Weaknesses(models.Model):
-    module2 = models.ForeignKey(Module2_2)
+    module2 = models.ForeignKey(Module2_2,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1  
@@ -2762,7 +2766,7 @@ class M3_1(models.Model):
     name_ru = models.CharField(_("name ru"), max_length=500)
     name_zh = models.CharField(_("name zh"), max_length=500)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     class Meta:
         verbose_name_plural = _("Name")
@@ -2778,7 +2782,7 @@ class M3_10(models.Model):
     name_ar = models.CharField(_("name ar"), max_length=500)
     name_ru = models.CharField(_("name ru"), max_length=500)
     name_zh = models.CharField(_("name zh"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     class Meta:
         verbose_name_plural = _("Name")
@@ -2793,7 +2797,7 @@ class M3_17(models.Model):
     name_ar = models.CharField(_("name ar"), max_length=500)
     name_ru = models.CharField(_("name ru"), max_length=500)
     name_zh = models.CharField(_("name zh"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
         
     class Meta:
@@ -2888,9 +2892,9 @@ class Module3(Displayable, models.Model):
         verbose_name = _("Module 3 - Environmental forces assessment")
         verbose_name_plural = _("Module 3 - Environmental forces assessment")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
-    m_1 = models.ManyToManyField(M3_1,verbose_name=_("1. What specifically characterizes the country's phytosanitary policy?"),blank=True, null=True,)
+    m_1 = models.ManyToManyField(M3_1,verbose_name=_("1. What specifically characterizes the country's phytosanitary policy?"),blank=True, )
     m_2 = models.IntegerField(_("2. How much support is given to the agricultural and forestry sectors?"), choices=PRIORITY, default=None,help_text=_("Consider at least the aggregated financial, legislative and political aspects. "),)
     #m_3 = models.ManyToManyField(M3_3,verbose_name=_("3. How involved is the NPPO in national or sectoral policies?"), blank=True, null=True,)
     m_3 = models.IntegerField(_("3. How involved is the NPPO in national or sectoral policies?"), choices=VAL_M3_3, default=None,help_text=_(" "),)
@@ -2902,7 +2906,7 @@ class Module3(Displayable, models.Model):
     m_8 = models.TextField(_("6. Which other agricultural related policies contain goals, objectives and priorities of phytosanitary relevance?"), blank=True, null=True,)
     #m_9 = models.ManyToManyField(M3_9,verbose_name=_("7. To what degree have stakeholders been involved in the formulation of phytosanitary aspects of agricultural policies."), blank=True, null=True,help_text=_("Includes phytosanitary policy and others with phytosanitary implications "))
     m_9 = models.IntegerField(_("7. To what degree have stakeholders been involved in the formulation of phytosanitary aspects of agricultural policies?"), choices=VAL_M3_9, default=None,help_text=_("Includes phytosanitary policy and others with phytosanitary implications "),)
-    m_10 = models.ManyToManyField(M3_10,verbose_name=_("8. How have they been involved?"), blank=True, null=True,help_text=_("E.g. as planners, implementers, enforcers, monitors, providers of funding, etc. "))
+    m_10 = models.ManyToManyField(M3_10,verbose_name=_("8. How have they been involved?"), blank=True, help_text=_("E.g. as planners, implementers, enforcers, monitors, providers of funding, etc. "))
     m_11 = models.IntegerField(_("9. To what extent is the country's legislative system stable and functional?"), choices=STABLE, default=None,)
     m_12 = models.TextField(_("10. List the main laws relating to acceptable conditions of work and salary structures in the environment which directly affect the institution"), blank=True, null=True,)
     m_13 = models.IntegerField(_("11. Are the NPPO's conditions of service including salaries competitive to enable staff retention?"), choices=CONDITIONS, default=None,)
@@ -2912,7 +2916,7 @@ class Module3(Displayable, models.Model):
     m_15 = models.IntegerField(_("13. Are decisions about resource allocation heavily politicized?"), choices=VAL_M3_15, default=None,help_text=_("Consider the degree to which the decisions concerning resource allocation to the agriculture and forestry sectors are politically influenced and affect the operation of the NPPO. "),)
     #m_16 = models.ManyToManyField(M3_16,verbose_name=_("14. Is the national trade policy supportive of the improvement of the NPPOs performance?"), blank=True, null=True,)
     m_16 = models.IntegerField(_("14. Is the national trade policy supportive of the improvement of the NPPO's performance?"), choices=VAL_M3_16, default=None,help_text=_(" "),)
-    m_17 = models.ManyToManyField(M3_17,verbose_name=_("15. Do the cultural aspects of the society support the NPPO's activities such as implementation of phytosanitary controls, pest eradication, etc?"), blank=True, null=True,)
+    m_17 = models.ManyToManyField(M3_17,verbose_name=_("15. Do the cultural aspects of the society support the NPPO's activities such as implementation of phytosanitary controls, pest eradication, etc?"), blank=True,)#, null=True)   
     m_18 = models.IntegerField(_("16. Rate the country's human resource capacity to support the technical work of the NPPO."), choices=RATE, default=None,help_text=_("Consider the overall skills needed for core areas such as pest diagnostics, pest risk analysis etc. A more in-depth analysis will be done in corresponding PCE modules concerning core technical activities. "),)
     m_19 = models.IntegerField(_("17. Rate the educational programs capacity to provide the professional skills desired by the NPPO."), choices=RATE1, default=None,help_text=_("This question relates to the in-country educational system in terms of providing basic or advance training on phytosanitary issues, e.g. Agricultural colleges etc. "),)
     m_20 = models.IntegerField(_("18. Are the national research programs of the country supportive of the NPPO's functions?"), choices=SUPPORT, default=None,)
@@ -2966,7 +2970,7 @@ class Module3(Displayable, models.Model):
    
    
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
  
@@ -2978,7 +2982,7 @@ class Module3(Displayable, models.Model):
         super(Module3, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -2986,7 +2990,7 @@ class Module3(Displayable, models.Model):
                             'year': self.publish_date.strftime("%Y"),
                             'session': self.version_number})
 class Module3Grid(models.Model):
-    module3 = models.ForeignKey(Module3)
+    module3 = models.ForeignKey(Module3,on_delete=models.DO_NOTHING,)
     verylow = models.BooleanField(verbose_name=_("Very low"), default=None) 
     low = models.BooleanField(verbose_name=_("Low"), default=None) 
     medium = models.BooleanField(verbose_name=_("Medium"), default=None) 
@@ -2994,20 +2998,20 @@ class Module3Grid(models.Model):
     veryhigh = models.BooleanField(verbose_name=_("Very high"), default=None) 
    
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.verylow
     def name(self):
         return self.verylow       
     
 class Module3Weaknesses(models.Model):
-    module3 = models.ForeignKey(Module3)
+    module3 = models.ForeignKey(Module3,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4= models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5= models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1
@@ -3023,7 +3027,7 @@ class Module4(Displayable, models.Model):
         verbose_name = _("Module 4 - NPPO's mission and strategy")
         verbose_name_plural = _("Module 4 - NPPO's mission and strategy")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     
@@ -3096,7 +3100,7 @@ class Module4(Displayable, models.Model):
     c_m_32= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_33= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_34= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3106,7 +3110,7 @@ class Module4(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module4, self).save(*args, **kwargs)
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -3115,14 +3119,14 @@ class Module4(Displayable, models.Model):
                             'session': self.version_number})    
                             
 class Module4Weaknesses(models.Model):
-    module4 = models.ForeignKey(Module4)
+    module4 = models.ForeignKey(Module4,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1
@@ -3135,7 +3139,7 @@ class M5_3(models.Model):
     name_ar = models.CharField(_("name ar"), max_length=500)
     name_ru = models.CharField(_("name ru"), max_length=500)
     name_zh = models.CharField(_("name zh"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
         
     class Meta:
@@ -3152,11 +3156,11 @@ class Module5(Displayable, models.Model):
         verbose_name = _("Module 5 - NPPO's structure and processes")
         verbose_name_plural = _("Module 5 - NPPO's structure and processes")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.IntegerField(_("1. How easy would it be for the NPPO to achieve its mission and goals within the current organizational structures?"),choices=ACHIEVE, default=None,help_text=_(" "),)
     m_2 = models.IntegerField(_("2. Is the structure of the NPPO based on the required institutional needs to carry out core phytosanitary activities such as surveillance, pest diagnosis, pest eradication, import verification, exports certification, pest risk analysis, risk communication, public awareness programs, international liaison activities, staff training etc?"),choices=CARRY_AC, default=None,help_text=_("Core phytosanitary activities are outputs or functions that are carried out directly or supervised by the NPPO to support its mission/strategy"),)
-    m_3 = models.ManyToManyField(M5_3,verbose_name=_("3. Does the NPPO have an established system for international liaison with:"), blank=True, null=True,help_text=_("Select all that apply."),)
+    m_3 = models.ManyToManyField(M5_3,verbose_name=_("3. Does the NPPO have an established system for international liaison with:"), blank=True, help_text=_("Select all that apply."),)
     m_4 = models.NullBooleanField(_("4. Does the NPPO have a designated unit/manager responsible for progressing and/or supervising PRA?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     m_5 = models.NullBooleanField(_("5. Does the NPPO have a unit/manager responsible for pest surveillance?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     m_6 = models.NullBooleanField(_("6. Does the NPPO have a unit/manager responsible for pest diagnostics?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
@@ -3206,7 +3210,7 @@ class Module5(Displayable, models.Model):
     c_m_24= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_25= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
  
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3216,7 +3220,7 @@ class Module5(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module5, self).save(*args, **kwargs)
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -3225,14 +3229,14 @@ class Module5(Displayable, models.Model):
                             'session': self.version_number})    
                             
 class Module5Weaknesses(models.Model):
-    module5 = models.ForeignKey(Module5)
+    module5 = models.ForeignKey(Module5,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1    
@@ -3248,7 +3252,7 @@ class Module6(Displayable, models.Model):
         verbose_name = _("Module 6 - NPPO's Resourcess")
         verbose_name_plural = _("Module 6 - NPPO's Resources")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.NullBooleanField(_("1. Does the NPPO have sufficient financial resources for meeting its mission and goals?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" <br> <br> <br><i>If answer is <b>No</b> go to question <b>2.</b></i>  "),)
     m_2 = models.NullBooleanField(_("1.1. Does the NPPO have sufficient financial resources for meeting all of its fixed costs?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_("Fixed costs are those expenses or costs that are unvarying. These include staff salaries, rental costs, lease etc.<br> <br> <br><i>If answer is <b>No</b> go to question <b>2.</b></i> "),)
@@ -3325,7 +3329,7 @@ class Module6(Displayable, models.Model):
     c_m_36= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_37= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3335,7 +3339,7 @@ class Module6(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module6, self).save(*args, **kwargs)
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -3344,14 +3348,14 @@ class Module6(Displayable, models.Model):
                             'session': self.version_number})    
 
 class Module6Weaknesses(models.Model):
-    module6 = models.ForeignKey(Module6)
+    module6 = models.ForeignKey(Module6,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1    
@@ -3367,7 +3371,7 @@ class Module7(Displayable, models.Model):
         verbose_name = _("Module 7 - Pest diagnostic capacity")
         verbose_name_plural = _("Module 7 - Pest diagnostic capacity")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     
@@ -3511,7 +3515,7 @@ class Module7(Displayable, models.Model):
     c_m_68= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_69= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
  
     def save(self, *args, **kwargs):
@@ -3521,7 +3525,7 @@ class Module7(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module7, self).save(*args, **kwargs)
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -3530,7 +3534,7 @@ class Module7(Displayable, models.Model):
                             'session': self.version_number})    
                             
 class Module7Grid(models.Model):
-    module7 = models.ForeignKey(Module7)
+    module7 = models.ForeignKey(Module7,on_delete=models.DO_NOTHING,)
     salaries = models.CharField(_("Salaries"), blank=True, null=True, max_length=250,)
     equipment = models.CharField(_("Equipment"), blank=True, null=True, max_length=250,)
     supplies = models.CharField(_("Supplies"), blank=True, null=True, max_length=250,)
@@ -3538,13 +3542,13 @@ class Module7Grid(models.Model):
     fixedcosts = models.CharField(_("Other fixed costs"), blank=True, null=True, max_length=250,)
     operationalcosts = models.CharField(_("Other operational costs"), blank=True, null=True, max_length=250,)
     
-    def __unicode__(self):  
+    def __str__(self):  
         return self.salaries
     def name(self):
         return self.salaries  
     
 class Module7Matrix23(models.Model):
-    module7 = models.ForeignKey(Module7)
+    module7 = models.ForeignKey(Module7,on_delete=models.DO_NOTHING,)
     nstaff = models.IntegerField(_("nstaff"),choices=VAL, default=None,help_text=_(" "),)
     average = models.IntegerField(_("average"),choices=VAL_AV, default=None,help_text=_(" "),)
     nstafflab = models.IntegerField(_("nstafflab"),choices=VAL, default=None,help_text=_(" "),)
@@ -3552,72 +3556,72 @@ class Module7Matrix23(models.Model):
     support = models.IntegerField(_("support"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
     managers = models.IntegerField(_("managers"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.nstaff
     def name(self):
         return self.nstaff    
     
 class Module7Matrix37(models.Model):
-    module7 = models.ForeignKey(Module7)
+    module7 = models.ForeignKey(Module7,on_delete=models.DO_NOTHING,)
     navailable = models.IntegerField(_("navailable"),choices=VAL, default=None,help_text=_(" "),)
     qaulity = models.IntegerField(_("qaulity"),choices=VAL, default=None,help_text=_(" "),)
     required = models.IntegerField(_("required"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
      
-    def __unicode__(self):  
+    def __str__(self):  
         return self.navailable
     def name(self):
         return self.navailable
 
 class Module7Matrix39(models.Model):
-    module7 = models.ForeignKey(Module7)
+    module7 = models.ForeignKey(Module7,on_delete=models.DO_NOTHING,)
     navailable = models.IntegerField(_("navailable"),choices=VAL, default=None,help_text=_(" "),)
     qaulity = models.IntegerField(_("qaulity"),choices=VAL, default=None,help_text=_(" "),)
     required = models.IntegerField(_("required"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
      
-    def __unicode__(self):  
+    def __str__(self):  
         return self.navailable
     def name(self):
         return self.navailable    
     
 class Module7Matrix41(models.Model):
-    module7 = models.ForeignKey(Module7)
+    module7 = models.ForeignKey(Module7,on_delete=models.DO_NOTHING,)
     navailable = models.IntegerField(_("navailable"),choices=VAL, default=None,help_text=_(" "),)
     qaulity = models.IntegerField(_("qaulity"),choices=VAL, default=None,help_text=_(" "),)
     required = models.IntegerField(_("required"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
      
-    def __unicode__(self):  
+    def __str__(self):  
         return self.navailable
     def name(self):
         return self.navailable   
 class Module7Matrix43(models.Model):
-    module7 = models.ForeignKey(Module7)
+    module7 = models.ForeignKey(Module7,on_delete=models.DO_NOTHING,)
     navailable = models.IntegerField(_("navailable"),choices=VAL, default=None,help_text=_(" "),)
     qaulity = models.IntegerField(_("qaulity"),choices=VAL, default=None,help_text=_(" "),)
     required = models.IntegerField(_("required"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
      
-    def __unicode__(self):  
+    def __str__(self):  
         return self.navailable
     def name(self):
         return self.navailable   
 class Module7Matrix45(models.Model):
-    module7 = models.ForeignKey(Module7)
+    module7 = models.ForeignKey(Module7,on_delete=models.DO_NOTHING,)
     navailable = models.IntegerField(_("navailable"),choices=VAL, default=None,help_text=_(" "),)
     qaulity = models.IntegerField(_("qaulity"),choices=VAL, default=None,help_text=_(" "),)
     required = models.IntegerField(_("required"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
      
-    def __unicode__(self):  
+    def __str__(self):  
         return self.navailable
     def name(self):
         return self.navailable          
 class Module7Weaknesses(models.Model):
-    module7 = models.ForeignKey(Module7)
+    module7 = models.ForeignKey(Module7,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1  
@@ -3630,7 +3634,7 @@ class M8_17(models.Model):
     name_ar = models.CharField(_("name ar"), max_length=500)
     name_ru = models.CharField(_("name ru"), max_length=500)
     name_zh = models.CharField(_("name zh"), max_length=500)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
         
     class Meta:
@@ -3648,7 +3652,7 @@ class Module8(Displayable, models.Model):
         verbose_name = _("Module 8 - NPPO pest surveillance and pest reporting capacity")
         verbose_name_plural = _("Module 8 - NPPO pest surveillance and pest reporting capacity")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.NullBooleanField(_("1. Does the NPPO conduct pest surveillance activities in a coordinated manner?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_("It is recommended that NPPOs develop a system whereby appropriate information on the particular pest(s) of concern is collected, verified and compiled (<a href='https://www.ippc.int/en/publications/615/' target='_blank'>ISPM 6</a> Section 1.2). "),)
     m_2 = models.NullBooleanField(_("2. Are there written documents establishing the mandates, functions and responsibilities of the pest surveillance service?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
@@ -3666,7 +3670,7 @@ class Module8(Displayable, models.Model):
     m_14 = models.NullBooleanField(_("14. Does the NPPO engage relevant stakeholders to support and improve the quality of the pest surveillance service?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" <br> <br> <br><i>If answer is <b>No</b> go to question <b>15.</b></i> "),)
     m_15= models.TextField(_("14.1. If so, with which stakeholders and how?"), blank=True, null=True,help_text=_(" "),)
     m_16 = models.NullBooleanField(_("15. Does the NPPO's pest surveillance programs have well developed and compatible data systems to collect, store and report pest surveillance information?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    m_17 = models.ManyToManyField(M8_17,verbose_name=_("16. Is the surveillance responsibilities of the NPPO limited to quarantine pests, regulated non-quarantine pests, and/or regulated pests, or does it also include non-regulated pests of national concern?"), blank=True, null=True,help_text=_(" "),)
+    m_17 = models.ManyToManyField(M8_17,verbose_name=_("16. Is the surveillance responsibilities of the NPPO limited to quarantine pests, regulated non-quarantine pests, and/or regulated pests, or does it also include non-regulated pests of national concern?"), blank=True, help_text=_(" "),)
    #m_18 =
     m_19 = models.NullBooleanField(_("18. Is there a computerized retrieval system for this information in use by the NPPO?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     m_20 = models.NullBooleanField(_("19. Are GIS coordinates used to specify the location of pests detected during pest surveys?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_("GIS - geographic information system (GIS), or geographical information system: Any system that captures, stores, analyzes, manages, and presents data in relation to location (merges cartography and database technology). Coordinates are used in this context to refer to the system of marking geographical locations using a Geographic Positioning System (GPS) tool/device for use in GIS. "),)
@@ -3743,7 +3747,7 @@ class Module8(Displayable, models.Model):
     c_m_44= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_45= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3753,7 +3757,7 @@ class Module8(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module8, self).save(*args, **kwargs)
     
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -3763,20 +3767,20 @@ class Module8(Displayable, models.Model):
                             
                             
 class Module8Grid3(models.Model):
-    module8 = models.ForeignKey(Module8)
+    module8 = models.ForeignKey(Module8,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Specific so that they are clear and easy to understand?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Measurable and able to be quantified so that is possible to measure progress?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Achievable and realistic given the circumstances in which they are set and the resources available?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Relevant to the country's needs and to the NPPO?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c5 = models.NullBooleanField(_("Time bound with realistic deadlines for achievement"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
   
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
 
 class Module8Grid18(models.Model):
-    module8 = models.ForeignKey(Module8)
+    module8 = models.ForeignKey(Module8,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Scientific name of pest"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Scientific name of host,plant part affected and means of collection"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Date and name of collector"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
@@ -3784,14 +3788,14 @@ class Module8Grid18(models.Model):
     c5 = models.NullBooleanField(_("Date and name of verifier"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c6 = models.NullBooleanField(_("Geographical location"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
   
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
     
         
 class Module8Matrix30(models.Model):
-    module8 = models.ForeignKey(Module8)
+    module8 = models.ForeignKey(Module8,on_delete=models.DO_NOTHING,)
     nstaff = models.IntegerField(_("nstaff"),choices=VAL, default=VAL_0,help_text=_(" "),)
     average = models.IntegerField(_("average"),choices=VAL_AV, default=VAL_AV_0,help_text=_(" "),)
     nstafflab = models.IntegerField(_("nstafflab"),choices=VAL, default=VAL_0,help_text=_(" "),)
@@ -3799,20 +3803,20 @@ class Module8Matrix30(models.Model):
     support = models.IntegerField(_("support"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
     managers = models.IntegerField(_("managers"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.nstaff
     def name(self):
         return self.nstaff     
     
 class Module8Weaknesses(models.Model):
-    module8 = models.ForeignKey(Module8)
+    module8 = models.ForeignKey(Module8,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1        
@@ -3828,7 +3832,7 @@ class Module9(Displayable, models.Model):
         verbose_name = _("Module 9- Pest eradication capacity")
         verbose_name_plural = _("Module 9- Pest eradication capacity")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     #m_1 =
     m_2 = models.NullBooleanField(_("2. Is the mandate of the pest eradication programme or service consistent with the NPPO's mission?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
@@ -3926,7 +3930,7 @@ class Module9(Displayable, models.Model):
     c_m_46= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_47= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -3936,7 +3940,7 @@ class Module9(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module9, self).save(*args, **kwargs)
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -3945,43 +3949,43 @@ class Module9(Displayable, models.Model):
                             'session': self.version_number})   
                             
 class Module9Grid1(models.Model):
-    module9 = models.ForeignKey(Module9)
+    module9 = models.ForeignKey(Module9,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("What is the purpose of pest eradication?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("What the pest eradication program seeks to accomplish?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("What services are performed in order to accomplish this purpose?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("What principles (e.g. risk based, science based) and values (e.g. honesty, integrity,<br>technical independence) guide the work of pest eradication program?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
   
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
 class Module9Grid5(models.Model):
-    module9 = models.ForeignKey(Module9)
+    module9 = models.ForeignKey(Module9,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Specific so that they are clear and easy to understand?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Measurable and able to be quantified so that is possible to measure progress?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Achievable and realistic given the circumstances in which they are set and the resources available?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Relevant to the country's needs and to the NPPO?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c5 = models.NullBooleanField(_("Time bound with realistic deadlines for achievement"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
   
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
 class Module9Grid31(models.Model):
-    module9 = models.ForeignKey(Module9)
+    module9 = models.ForeignKey(Module9,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Surveillance: to fully investigate the distribution of the pest?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Containment: to prevent the spread of the pest?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Treatment: to eradicate the pest when it is found?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Verification of eradication"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c5 = models.NullBooleanField(_("Declaration of eradication"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
   
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
 
 class Module9Matrix35(models.Model):
-    module9 = models.ForeignKey(Module9)
+    module9 = models.ForeignKey(Module9,on_delete=models.DO_NOTHING,)
     nstaff = models.IntegerField(_("nstaff"),choices=VAL, default=None,help_text=_(" "),)
     average = models.IntegerField(_("average"),choices=VAL_AV, default=None,help_text=_(" "),)
     nstafflab = models.IntegerField(_("nstafflab"),choices=VAL, default=None,help_text=_(" "),)
@@ -3989,20 +3993,20 @@ class Module9Matrix35(models.Model):
     support = models.IntegerField(_("support"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
     managers = models.IntegerField(_("managers"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.nstaff
     def name(self):
         return self.nstaff    
 
 class Module9Weaknesses(models.Model):
-    module9 = models.ForeignKey(Module9)
+    module9 = models.ForeignKey(Module9,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1   
@@ -4019,7 +4023,7 @@ class Module10(Displayable, models.Model):
         verbose_name = _("Module 10 - Phytosanitary import regulatory system")
         verbose_name_plural = _("Module 10 - Phytosanitary import regulatory system")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.NullBooleanField(_("1. Does the legislation grant authority to the NPPO's inspectors to enter premises, conveyances, and other places where imported commodities, regulated pests or other regulated articles may be present?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     m_2 = models.NullBooleanField(_("2. Does the legislation grant authority to the NPPO's inspectors to inspect or test imported commodities and other regulated articles?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
@@ -4145,7 +4149,7 @@ class Module10(Displayable, models.Model):
     c_m_60= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_61= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -4155,7 +4159,7 @@ class Module10(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module10, self).save(*args, **kwargs)
     
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -4163,38 +4167,38 @@ class Module10(Displayable, models.Model):
                             'year': self.publish_date.strftime("%Y"),
                             'session': self.version_number})    
 class Module10Grid23(models.Model):
-    module10 = models.ForeignKey(Module10)
+    module10 = models.ForeignKey(Module10,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Import permits?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Limitations on the points of entry?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("The requirement that importer notify in advance the arrival of consignments?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Audit of procedures in the exporting country?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c5 = models.NullBooleanField(_("Pre-clearance?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
     
 class Module10Grid31(models.Model):
-    module10 = models.ForeignKey(Module10)
+    module10 = models.ForeignKey(Module10,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Import phytosanitary requirements?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Pest status and geographical distribution?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Operational procedures"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
 class Module10Grid33(models.Model):
-    module10 = models.ForeignKey(Module10)
+    module10 = models.ForeignKey(Module10,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Pest diagnostic"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Inspection and detention facilities"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Treatment"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Pre-clearance"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
 class Module10Grid37(models.Model):
-    module10 = models.ForeignKey(Module10)
+    module10 = models.ForeignKey(Module10,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Documentary checks"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Consignment identity checks"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Phytosanitary inspection"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
@@ -4203,33 +4207,33 @@ class Module10Grid37(models.Model):
     c6 = models.NullBooleanField(_("Instances of non-compliance"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c7 = models.NullBooleanField(_("Action in case of non compliance"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c8 = models.NullBooleanField(_("Emergency actions"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
 class Module10Grid45(models.Model):
-    module10 = models.ForeignKey(Module10)
+    module10 = models.ForeignKey(Module10,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Non-compliance and emergency actions?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Consignments with specific end-uses?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Consignments subject to post-entry quarantine or treatments?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Consignments requiring follow up action (including trace back)"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c5 = models.NullBooleanField(_("Other records as necessary to manage the import regulatory traceability system"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
 class Module10Grid46(models.Model):
-    module10 = models.ForeignKey(Module10)
+    module10 = models.ForeignKey(Module10,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Monitoring the effectiveness of phytosanitary measures?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Internal audit of the NPPO activities and authorized organizations or persons?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Modifying the phytosanitary legislation, regulation and procedures"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
     
 class Module10Matrix_47(models.Model):
-    module10 = models.ForeignKey(Module10)
+    module10 = models.ForeignKey(Module10,on_delete=models.DO_NOTHING,)
     nstaff = models.IntegerField(_("nstaff"),choices=VAL, default=None,help_text=_(" "),)
     average = models.IntegerField(_("average"),choices=VAL_AV, default=None,help_text=_(" "),)
     nstafflab = models.IntegerField(_("nstafflab"),choices=VAL, default=None,help_text=_(" "),)
@@ -4239,20 +4243,20 @@ class Module10Matrix_47(models.Model):
     managers = models.IntegerField(_("managers"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
     support = models.IntegerField(_("support"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.nstaff
     def name(self):
         return self.nstaff    
 
 class Module10Weaknesses(models.Model):
-    module10 = models.ForeignKey(Module10)
+    module10 = models.ForeignKey(Module10,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1   
@@ -4268,7 +4272,7 @@ class Module11(Displayable, models.Model):
         verbose_name = _("Module 11 - Pest risk analysis")
         verbose_name_plural = _("Module 11 - Pest risk analysis")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.NullBooleanField(_("1. Is there a mission statement specifying that all the NPPO's phytosanitary measures shall be technically justified?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" <br> <br> <br><i>If answer is <b>No</b> go to question <b>3.</b></i> "),)
     #m_2  
@@ -4408,7 +4412,7 @@ class Module11(Displayable, models.Model):
     c_m_67= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_68= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -4418,7 +4422,7 @@ class Module11(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module11, self).save(*args, **kwargs)
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -4427,85 +4431,85 @@ class Module11(Displayable, models.Model):
                             'session': self.version_number}) 
                             
 class Module11Grid2(models.Model):
-    module11 = models.ForeignKey(Module11)
+    module11 = models.ForeignKey(Module11,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("What is the purpose of PRA? What the PRA unit seeks to accomplish?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("What services are performed in order to accomplish this purpose?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("What principles (e.g. risk based, science based) and values (e.g. honesty, integrity, technical independence) guide the work of PRA unit?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     
     
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
     
 class Module11Grid3(models.Model):
-    module11 = models.ForeignKey(Module11)
+    module11 = models.ForeignKey(Module11,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Specific so that they are clear and easy to understand?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Measurable and able to be quantified so that is possible to measure progress"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Achievable and realistic given the circumstances in which they are set and the resources available?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Relevant to the country's needs and to the NPPO?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c5 = models.NullBooleanField(_("Time bound with realistic deadlines for achievement?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
     
 class Module11Grid12(models.Model):
-    module11 = models.ForeignKey(Module11)
+    module11 = models.ForeignKey(Module11,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Pathways (including transit)?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c2 = models.NullBooleanField(_("Pests (including weed)?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c3 = models.NullBooleanField(_("Biological Control Agents?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c4 = models.NullBooleanField(_("Living Modified Organisms?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c5 = models.NullBooleanField(_("Invasive Alien Species?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
 
 class Module11Grid14(models.Model):
-    module11 = models.ForeignKey(Module11)
+    module11 = models.ForeignKey(Module11,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("'minimal impact'"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c2 = models.NullBooleanField(_("'equivalence'"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c3 = models.NullBooleanField(_("'non-discrimination'"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c4 = models.NullBooleanField(_("avoidance of undue delay"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c5 = models.NullBooleanField(_("harmonization"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c6 = models.NullBooleanField(_("transparency"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1     
 class Module11Grid33(models.Model):
-    module11 = models.ForeignKey(Module11)
+    module11 = models.ForeignKey(Module11,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("PRA initiation?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c2 = models.NullBooleanField(_("Pest risk assessment?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c3 = models.NullBooleanField(_("Pest risk management?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c4 = models.NullBooleanField(_("PRA documentation?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1      
 class Module11Matrix42(models.Model):
-    module11 = models.ForeignKey(Module11)
+    module11 = models.ForeignKey(Module11,on_delete=models.DO_NOTHING,)
     nstaff = models.IntegerField(_("nstaff"),choices=VAL, default=None,help_text=_(" "),)
     average = models.IntegerField(_("average"),choices=VAL_AV, default=None,help_text=_(" "),)
     nstafflab = models.IntegerField(_("nstafflab"),choices=VAL, default=None,help_text=_(" "),)
     support = models.IntegerField(_("support"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.nstaff
     def name(self):
         return self.nstaff    
  
 
 class Module11Weaknesses(models.Model):
-    module11 = models.ForeignKey(Module11)
+    module11 = models.ForeignKey(Module11,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1   
@@ -4521,7 +4525,7 @@ class Module12(Displayable, models.Model):
         verbose_name = _("Module 12 - Pest free areas, places and sites, low pest prevalence areas")
         verbose_name_plural = _("Module 12 - Pest free areas, places and sites, low pest prevalence areas")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.NullBooleanField(_("1. Is the mandate of the PFA,ALPP,PFPP or PFPS programmes consistent with the NPPO's mission?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" <br> <br> <br><i>If answer is <b>No</b> go to question <b>3.</b></i> "),)
     #m_2
@@ -4593,7 +4597,7 @@ class Module12(Displayable, models.Model):
     c_m_33= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     c_m_34= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -4603,7 +4607,7 @@ class Module12(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module12, self).save(*args, **kwargs)
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -4611,40 +4615,40 @@ class Module12(Displayable, models.Model):
                             'year': self.publish_date.strftime("%Y"),
                             'session': self.version_number})    
 class Module12Grid2(models.Model):
-    module12 = models.ForeignKey(Module12)
+    module12 = models.ForeignKey(Module12,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("What is the purpose of PFA,ALPP,PFPP or PFPS?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("What services are performed in order to accomplish this purpose?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("What principles (e.g. risk based, science based) and values (e.g. honesty, integrity, technical independence) guide the work of PFA,ALPP,PFPP or PFPS program?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
     
 class Module12Grid3(models.Model):
-    module12 = models.ForeignKey(Module12)
+    module12 = models.ForeignKey(Module12,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Specific so that they are clear and easy to understand?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Measurable and able to be quantified so that is possible to measure progress"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Achievable and realistic given the circumstances in which they are set and the resources available?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Relevant to the country's needs and to the NPPO"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c5 = models.NullBooleanField(_("Time bound with realistic deadlines for achievement?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
     
 class Module12Grid_29(models.Model):
-    module12 = models.ForeignKey(Module12)
+    module12 = models.ForeignKey(Module12,on_delete=models.DO_NOTHING,)
     c1 = models.IntegerField(_("PFA"),choices=INSUFF0, default=None,help_text=_(" "),)
     c2 = models.IntegerField(_("ALPP"),choices=INSUFF0, default=None,help_text=_(" "),)
     c3 = models.IntegerField(_("PFPP"),choices=INSUFF0, default=None,help_text=_(" "),)
     c4 = models.IntegerField(_("PFPS"),choices=INSUFF0, default=None,help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
     
 class Module12Matrix22(models.Model):
-    module12 = models.ForeignKey(Module12)
+    module12 = models.ForeignKey(Module12,on_delete=models.DO_NOTHING,)
     nstaff = models.IntegerField(_("nstaff"),choices=VAL, default=None,help_text=_(" "),)
     average = models.IntegerField(_("average"),choices=VAL_AV, default=None,help_text=_(" "),)
     nstafflab = models.IntegerField(_("nstafflab"),choices=VAL, default=None,help_text=_(" "),)
@@ -4652,20 +4656,20 @@ class Module12Matrix22(models.Model):
     managers = models.IntegerField(_("managers"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
     support = models.IntegerField(_("support"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.nstaff
     def name(self):
         return self.nstaff    
 
 class Module12Weaknesses(models.Model):
-    module12 = models.ForeignKey(Module12)
+    module12 = models.ForeignKey(Module12,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1   
@@ -4682,7 +4686,7 @@ class Module13(Displayable, models.Model):
         verbose_name = _("Module 13 - Export certification, re-export, transit")
         verbose_name_plural = _("Module 13 - Export certification, re-export, transit")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     m_1 = models.NullBooleanField(_("1. Is the mandate of the export certification program activities consistent with the NPPO's mission?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_("  <br> <br> <br><i>If answer is <b>No</b> go to question <b>3.</b></i>"),)
     #m_2  
@@ -4819,7 +4823,7 @@ class Module13(Displayable, models.Model):
     c_m_66= models.TextField(_("Comment"), blank=True, null=True,help_text=' ');
     
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
  
     def save(self, *args, **kwargs):
@@ -4829,7 +4833,7 @@ class Module13(Displayable, models.Model):
         self.modify_date = datetime.now()
         super(Module13, self).save(*args, **kwargs)
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -4837,41 +4841,41 @@ class Module13(Displayable, models.Model):
                             'year': self.publish_date.strftime("%Y"),
                             'session': self.version_number})    
 class Module13Grid2(models.Model):
-    module13 = models.ForeignKey(Module13)
+    module13 = models.ForeignKey(Module13,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("What is the purpose of export certification?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("What does the export certification program seek to accomplish?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("What services are performed in order to accomplish this purpose?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("What principles (e.g. risk based, science based) and values (e.g. honesty, integrity, technical independence) guide the work of export certification program?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     
     
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1  
     
 class Module13Grid3(models.Model):
-    module13 = models.ForeignKey(Module13)
+    module13 = models.ForeignKey(Module13,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Specific so that they are clear and easy to understand?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c2 = models.NullBooleanField(_("Measurable and able to be quantified so that is possible to measure progress"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c3 = models.NullBooleanField(_("Achievable and realistic given the circumstances in which they are set and the resources available?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
     c4 = models.NullBooleanField(_("Time bound with realistic deadlines for achievement?"), choices=BOOL_CHOICES,blank=True, null=True, help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
     
 class Module13Grid22(models.Model):
-    module13 = models.ForeignKey(Module13)
+    module13 = models.ForeignKey(Module13,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("importing country phytosanitary requirements?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c2 = models.NullBooleanField(_("pest status and geographical distribution?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c3 = models.NullBooleanField(_("operational procedures?"),choices=BOOL_CHOICES, default=None,help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1 
 
 class Module13Grid29(models.Model):
-    module13 = models.ForeignKey(Module13)
+    module13 = models.ForeignKey(Module13,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Control over issuance (manual or electronic)?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c2 = models.NullBooleanField(_("Identification of issuing officers?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c3 = models.NullBooleanField(_("Inclusion of additional declarations?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
@@ -4884,23 +4888,23 @@ class Module13Grid29(models.Model):
     c10 = models.NullBooleanField(_("Security over official seals/marks?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c11 = models.NullBooleanField(_("Consignment identification, trace ability, and security?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c12 = models.NullBooleanField(_("Record keeping?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1     
 class Module13Grid31(models.Model):
-    module13 = models.ForeignKey(Module13)
+    module13 = models.ForeignKey(Module13,on_delete=models.DO_NOTHING,)
     c1 = models.NullBooleanField(_("Any inspection, testing, treatment or other verification which was conducted on a consignment basis?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c2 = models.NullBooleanField(_("The names of the personnel who undertook these tasks?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c3 = models.NullBooleanField(_("The date on which the activity was undertaken?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c4 = models.NullBooleanField(_("The results obtained?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
     c5 = models.NullBooleanField(_("Any samples taken?"),choices=BOOL_CHOICES,blank=True, null=True,help_text=_(" "),)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.c1
     def name(self):
         return self.c1      
 class Module13Matrix47(models.Model):
-    module13 = models.ForeignKey(Module13)
+    module13 = models.ForeignKey(Module13,on_delete=models.DO_NOTHING,)
     nstaff = models.IntegerField(_("nstaff"),choices=VAL, default=None,help_text=_(" "),)
     average = models.IntegerField(_("average"),choices=VAL_AV, default=None,help_text=_(" "),)
     nstafflab = models.IntegerField(_("nstafflab"),choices=VAL, default=None,help_text=_(" "),)
@@ -4908,21 +4912,21 @@ class Module13Matrix47(models.Model):
     managers = models.IntegerField(_("managers"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
     support = models.IntegerField(_("support"),choices=BOOL_CHOICESM_M,default=None,help_text=_(" "),)
    
-    def __unicode__(self):  
+    def __str__(self):  
         return self.nstaff
     def name(self):
         return self.nstaff    
   
 
 class Module13Weaknesses(models.Model):
-    module13 = models.ForeignKey(Module13)
+    module13 = models.ForeignKey(Module13,on_delete=models.DO_NOTHING,)
     w1 = models.CharField(_("1"), blank=True, null=True, max_length=250,)
     w2 = models.CharField(_("2"), blank=True, null=True,max_length=250,)
     w3 = models.CharField(_("3"), blank=True, null=True,max_length=250,)
     w4 = models.CharField(_("4"), blank=True, null=True,max_length=250,)
     w5 = models.CharField(_("5"), blank=True, null=True,max_length=250,)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.w1
     def name(self):
         return self.w1   
@@ -4938,10 +4942,10 @@ class Stakeholders(Displayable, models.Model):
         verbose_name = _("Stakeholders")
         verbose_name_plural = _("Stakeholders")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     module = models.CharField(_("Module"), blank=True, null=True,max_length=250,)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title+'.'
 
  
@@ -4954,7 +4958,7 @@ class Stakeholders(Displayable, models.Model):
         super(Stakeholders, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -4963,7 +4967,7 @@ class Stakeholders(Displayable, models.Model):
                             'session': self.version_number})
                             
 class StakeholdersFields(models.Model):
-    stakeholder = models.ForeignKey(Stakeholders)
+    stakeholder = models.ForeignKey(Stakeholders,on_delete=models.DO_NOTHING,)
     firstname = models.CharField(_("First name"), blank=True, null=True,max_length=250,)
     lastname = models.CharField(_("Last name"), blank=True, null=True,max_length=250,)
     email = models.CharField(_("Email"), blank=True, null=True,max_length=250,)
@@ -4974,7 +4978,7 @@ class StakeholdersFields(models.Model):
     influence = models.IntegerField(_("Influence"), choices=INTEREST,default=None)
     level = models.IntegerField(_("Level"), choices=LEVEL,default=None)
   
-    def __unicode__(self):  
+    def __str__(self):  
         return self.lastname+self.firstname+'.'
     def name(self):
         return self.lastname
@@ -4993,7 +4997,7 @@ class ProblemAnalysis(Displayable, models.Model):
         verbose_name = _("ProblemAnalysis")
         verbose_name_plural = _("ProblemAnalysis")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     module = models.CharField(_("Module"), blank=True, null=True,max_length=250,)
     
     cause_a_1= models.TextField(_("Primary"), blank=True, null=True,)
@@ -5026,7 +5030,7 @@ class ProblemAnalysis(Displayable, models.Model):
     consequence_a_5= models.TextField(_("Primary"), blank=True, null=True,)
     consequence_b_5= models.TextField(_("Secondary"), blank=True, null=True,)
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
  
@@ -5038,7 +5042,7 @@ class ProblemAnalysis(Displayable, models.Model):
         super(ProblemAnalysis, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -5050,10 +5054,10 @@ class ProblemAnalysis(Displayable, models.Model):
 
                             
 class SwotAnalysis(models.Model):
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     module = models.CharField(_("Module"), blank=True, null=True,max_length=250,)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
  
@@ -5068,7 +5072,7 @@ class SwotAnalysis(models.Model):
         verbose_name = _("SwotAnalysis")
         verbose_name_plural = _("SwotAnalysis")
   
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -5077,7 +5081,7 @@ class SwotAnalysis(models.Model):
                             'session': self.version_number})
                             
 class SwotAnalysis1(models.Model):
-    swotanalysis = models.ForeignKey(SwotAnalysis)
+    swotanalysis = models.ForeignKey(SwotAnalysis,on_delete=models.DO_NOTHING,)
     strengths= models.TextField(_("Strengths"), blank=True, null=True,)
     opportunities= models.TextField(_("Opportunities"), blank=True, null=True,)
     threats= models.TextField(_("Threats"), blank=True, null=True,)	
@@ -5085,11 +5089,11 @@ class SwotAnalysis1(models.Model):
     priority = models.IntegerField(_("Priority"), choices=PRIORITY, default=None)
     type = models.IntegerField(_("Type"), choices=TYPE, default=None)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.weaknesses
 
 class SwotAnalysis2(models.Model):
-    swotanalysis = models.ForeignKey(SwotAnalysis)
+    swotanalysis = models.ForeignKey(SwotAnalysis,on_delete=models.DO_NOTHING,)
     strengths= models.TextField(_("Strengths"), blank=True, null=True,)
     opportunities= models.TextField(_("Opportunities"), blank=True, null=True,)
     threats= models.TextField(_("Threats"), blank=True, null=True,)	
@@ -5097,11 +5101,11 @@ class SwotAnalysis2(models.Model):
     priority = models.IntegerField(_("Priority"), choices=PRIORITY, default=None)
     type = models.IntegerField(_("Type"), choices=TYPE, default=None)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.weaknesses
     
 class SwotAnalysis3(models.Model):
-    swotanalysis = models.ForeignKey(SwotAnalysis)
+    swotanalysis = models.ForeignKey(SwotAnalysis,on_delete=models.DO_NOTHING,)
     strengths= models.TextField(_("Strengths"), blank=True, null=True,)
     opportunities= models.TextField(_("Opportunities"), blank=True, null=True,)
     threats= models.TextField(_("Threats"), blank=True, null=True,)	
@@ -5109,11 +5113,11 @@ class SwotAnalysis3(models.Model):
     priority = models.IntegerField(_("Priority"), choices=PRIORITY, default=None)
     type = models.IntegerField(_("Type"), choices=TYPE, default=None)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.weaknesses
 
 class SwotAnalysis4(models.Model):
-    swotanalysis = models.ForeignKey(SwotAnalysis)
+    swotanalysis = models.ForeignKey(SwotAnalysis,on_delete=models.DO_NOTHING,)
     strengths= models.TextField(_("Strengths"), blank=True, null=True,)
     opportunities= models.TextField(_("Opportunities"), blank=True, null=True,)
     threats= models.TextField(_("Threats"), blank=True, null=True,)	
@@ -5121,11 +5125,11 @@ class SwotAnalysis4(models.Model):
     priority = models.IntegerField(_("Priority"), choices=PRIORITY, default=None)
     type = models.IntegerField(_("Type"), choices=TYPE, default=None)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.weaknesses
     
 class SwotAnalysis5(models.Model):
-    swotanalysis = models.ForeignKey(SwotAnalysis)
+    swotanalysis = models.ForeignKey(SwotAnalysis,on_delete=models.DO_NOTHING,)
     strengths= models.TextField(_("Strengths"), blank=True, null=True,)
     opportunities= models.TextField(_("Opportunities"), blank=True, null=True,)
     threats= models.TextField(_("Threats"), blank=True, null=True,)	
@@ -5133,7 +5137,7 @@ class SwotAnalysis5(models.Model):
     priority = models.IntegerField(_("Priority"), choices=PRIORITY, default=None)
     type = models.IntegerField(_("Type"), choices=TYPE, default=None)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.weaknesses
 
 
@@ -5150,7 +5154,7 @@ class LogicalFramework(Displayable, models.Model):
         verbose_name = _("LogicalFramework")
         verbose_name_plural = _("LogicalFramework")
   
-    session = models.ForeignKey(PceVersion)
+    session = models.ForeignKey(PceVersion,on_delete=models.DO_NOTHING,)
     module = models.CharField(_("Module"), blank=True, null=True,max_length=250,)
     overobjective= models.TextField(_("Overall Objective"), blank=True, null=True,)
     keyindicator0= models.TextField(_("Key Indicator"), blank=True, null=True,)
@@ -5188,7 +5192,7 @@ class LogicalFramework(Displayable, models.Model):
     
    
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
  
@@ -5200,7 +5204,7 @@ class LogicalFramework(Displayable, models.Model):
         super(LogicalFramework, self).save(*args, **kwargs)
         
    
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('pceversion-detail', (), {
@@ -5209,7 +5213,7 @@ class LogicalFramework(Displayable, models.Model):
                             'session': self.version_number})
 
 class LogicalFrameworkAct1(models.Model):
-    logicalframework = models.ForeignKey(LogicalFramework)
+    logicalframework = models.ForeignKey(LogicalFramework,on_delete=models.DO_NOTHING,)
     activity1 = models.TextField(_("Activity 1"), blank=True, null=True,)
     #target= models.TextField(_("Target"), blank=True, null=True,)
     #sourcverification= models.TextField(_("Source of verification"), blank=True, null=True,)	
@@ -5217,11 +5221,11 @@ class LogicalFrameworkAct1(models.Model):
     cost= models.TextField(_("Estimated cost"), blank=True, null=True,)
     responsible= models.TextField(_("Identify a Responsible person"), blank=True, null=True,)
     deadline= models.TextField(_("Specify a deadline"), blank=True, null=True,)
-    def __unicode__(self):
+    def __str__(self):
         return self.activity1
     
 class LogicalFrameworkAct2(models.Model):
-    logicalframework = models.ForeignKey(LogicalFramework)
+    logicalframework = models.ForeignKey(LogicalFramework,on_delete=models.DO_NOTHING,)
     activity2 = models.TextField(_("Activity 2"), blank=True, null=True,)
     #target= models.TextField(_("Target"), blank=True, null=True,)
     #sourcverification= models.TextField(_("Source of verification"), blank=True, null=True,)	
@@ -5229,10 +5233,10 @@ class LogicalFrameworkAct2(models.Model):
     cost= models.TextField(_("Estimated cost"), blank=True, null=True,)
     responsible= models.TextField(_("Identify a Responsible person"), blank=True, null=True,)
     deadline= models.TextField(_("Specify a deadline"), blank=True, null=True,)
-    def __unicode__(self):
+    def __str__(self):
         return self.activity2
 class LogicalFrameworkAct3(models.Model):
-    logicalframework = models.ForeignKey(LogicalFramework)
+    logicalframework = models.ForeignKey(LogicalFramework,on_delete=models.DO_NOTHING,)
     activity3 = models.TextField(_("Activity 3"), blank=True, null=True,)
    # target= models.TextField(_("Target"), blank=True, null=True,)
   #  sourcverification= models.TextField(_("Source of verification"), blank=True, null=True,)	
@@ -5240,10 +5244,10 @@ class LogicalFrameworkAct3(models.Model):
     cost= models.TextField(_("Estimated cost"), blank=True, null=True,)
     responsible= models.TextField(_("Identify a Responsible person"), blank=True, null=True,)
     deadline= models.TextField(_("Specify a deadline"), blank=True, null=True,)
-    def __unicode__(self):
+    def __str__(self):
         return self.activity3    
 class LogicalFrameworkAct4(models.Model):
-    logicalframework = models.ForeignKey(LogicalFramework)
+    logicalframework = models.ForeignKey(LogicalFramework,on_delete=models.DO_NOTHING,)
     activity4 = models.TextField(_("Activity 4"), blank=True, null=True,)
    # target= models.TextField(_("Target"), blank=True, null=True,)
    # sourcverification= models.TextField(_("Source of verification"), blank=True, null=True,)	
@@ -5251,10 +5255,10 @@ class LogicalFrameworkAct4(models.Model):
     cost= models.TextField(_("Estimated cost"), blank=True, null=True,)
     responsible= models.TextField(_("Identify a Responsible person"), blank=True, null=True,)
     deadline= models.TextField(_("Specify a deadline"), blank=True, null=True,)
-    def __unicode__(self):
+    def __str__(self):
         return self.activity4
 class LogicalFrameworkAct5(models.Model):
-    logicalframework = models.ForeignKey(LogicalFramework)
+    logicalframework = models.ForeignKey(LogicalFramework,on_delete=models.DO_NOTHING,)
     activity5 = models.TextField(_("Activity 5"), blank=True, null=True,)
    # target= models.TextField(_("Target"), blank=True, null=True,)
    ## sourcverification= models.TextField(_("Source of verification"), blank=True, null=True,)	
@@ -5262,6 +5266,6 @@ class LogicalFrameworkAct5(models.Model):
     cost= models.TextField(_("Estimated cost"), blank=True, null=True,)
     responsible= models.TextField(_("Identify a Responsible person"), blank=True, null=True,)
     deadline= models.TextField(_("Specify a deadline"), blank=True, null=True,)
-    def __unicode__(self):
+    def __str__(self):
         return self.activity5
    

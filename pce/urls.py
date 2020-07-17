@@ -1,5 +1,5 @@
-
-from django.conf.urls import patterns, url
+ 
+from django.conf.urls import  url
 
 from mezzanine.conf import settings
 from mezzanine.core.views import direct_to_template
@@ -22,7 +22,7 @@ from .views import PceDashboardListView,PceVersionDetailView,PceSessionListView,
     Module9ListPDFView,Module10ListPDFView,Module11ListPDFView,Module12ListPDFView,Module13ListPDFView,Module3ListPDFView
 
 #-------------- PCE ---------------------------------#
-urlpatterns = patterns("pce.views",  
+urlpatterns = [  
     url(r"^$", direct_to_template, {"template": "pce/index.html"}, name="pce"),
  
     #TRAINING MATERIAL
@@ -195,4 +195,4 @@ urlpatterns = patterns("pce.views",
     
    
 
-)
+]

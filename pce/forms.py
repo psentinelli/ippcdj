@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 
 
 #import autocomplete_light_registry
-import autocomplete_light
+from dal import autocomplete
 #autocomplete_light.autodiscover()
 
 from django import forms
@@ -52,9 +52,10 @@ class Module1MajorCropsForm(forms.ModelForm):
             'industrial',
             'other',
         ]
-        exclude = ( 'module1') 
+        exclude = ( 'module1',) 
         widgets = {
          #'crops': autocomplete_light.ChoiceWidget('CropsAutocomplete'),   
+        #'crops': autocomplete_light.ChoiceWidget('CropsAutocomplete'),   
         }
          
 class Module1MajorImportsForm(forms.ModelForm):
@@ -70,7 +71,7 @@ class Module1MajorImportsForm(forms.ModelForm):
             'industrial',
             'other',
         ]
-        exclude = ( 'module1') 
+        exclude = ( 'module1',) 
         widgets = {
         # 'crops': autocomplete_light.ChoiceWidget ('CropsAutocomplete'),   
         }
@@ -87,7 +88,7 @@ class Module1MajorExportsForm(forms.ModelForm):
             'industrial',
             'other',
         ]
-        exclude = ( 'module1') 
+        exclude = ( 'module1',) 
         widgets = {
          #'crops': autocomplete_light.ChoiceWidget ('CropsAutocomplete'),   
         }
@@ -167,7 +168,7 @@ class PceVersionForm1(forms.ModelForm):
             'ed8_lastname',
             'ed8_email',
             ]
-        exclude = (  'publish_date', 'modify_date','completed_date' ,'status','chosen_modules')
+        exclude = (  'publish_date', 'modify_date','completed_date' ,'status','chosen_modules',)
         widgets = {
 
             'country':forms.Select(attrs={'readonly':'true'}),
@@ -342,7 +343,7 @@ class PceVersionForm3(forms.ModelForm):
             'ed8_email',
 
             ]
-        exclude = (  'publish_date', 'modify_date','completed_date' ,'status','file_designation','chosen_modules','version_number','author','projet_date_completation','name_authority','designation','file_designation','name_pcemanager','title_pcemanager','email_pcemanager','is_facilitated','firstname_facilitator','lastname_facilitator','email_facilitator', 'country')
+        exclude = (  'publish_date', 'modify_date','completed_date' ,'status','file_designation','chosen_modules','version_number','author','projet_date_completation','name_authority','designation','file_designation','name_pcemanager','title_pcemanager','email_pcemanager','is_facilitated','firstname_facilitator','lastname_facilitator','email_facilitator', 'country',)
         widgets = {
            
         }
@@ -468,7 +469,7 @@ class Module1FormView(forms.ModelForm):
            'c_m_24',
            'c_m_25',
             'c_m_26',]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session', )
         widgets = {
             'country':forms.Select(attrs={'readonly':'true'}),
             'region':forms.Select(attrs={'readonly':'true','multiple':'multiple','size':'10'}),
@@ -492,12 +493,12 @@ class Module1FormView(forms.ModelForm):
             'm_10': forms.RadioSelect(attrs={'readonly':'true'}),
         
            }    
-Module1AidFormSet  = inlineformset_factory(Module1,  Module1Aid, extra=5,max_num=5)
-Module1MajorCropsFormSet  = inlineformset_factory(Module1,  Module1MajorCrops,Module1MajorCropsForm, extra=10,max_num=10)
-Module1MajorExportsFormSet  = inlineformset_factory(Module1,  Module1MajorExports,Module1MajorExportsForm, extra=10,max_num=10)
+Module1AidFormSet  = inlineformset_factory(Module1,  Module1Aid, extra=5,fields = '__all__',max_num=5)
+Module1MajorCropsFormSet  = inlineformset_factory(Module1,  Module1MajorCrops,Module1MajorCropsForm, extra=10,fields = '__all__',max_num=10)
+Module1MajorExportsFormSet  = inlineformset_factory(Module1,  Module1MajorExports,Module1MajorExportsForm, extra=10,fields = '__all__',max_num=10)
 Module1MajorImportsFormSet  = inlineformset_factory(Module1,  Module1MajorImports,Module1MajorExportsForm, extra=10,max_num=10)
-Module1MajorPartenerImportFormSet  = inlineformset_factory(Module1,  Module1MajorPartenerImport, extra=10,max_num=10)
-Module1MajorPartenerExportFormSet  = inlineformset_factory(Module1,  Module1MajorPartenerExport, extra=10,max_num=10)
+Module1MajorPartenerImportFormSet  = inlineformset_factory(Module1,  Module1MajorPartenerImport, extra=10,fields = '__all__',max_num=10)
+Module1MajorPartenerExportFormSet  = inlineformset_factory(Module1,  Module1MajorPartenerExport, extra=10,fields = '__all__',max_num=10)
 ####
 class Module2_1Form(forms.ModelForm):
     class Meta:
@@ -624,7 +625,7 @@ class Module2_1Form(forms.ModelForm):
             'c_m_58',
             'c_m_59',
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session', )
         widgets = {
         'm_2': forms.Textarea(attrs={'class':'zzz'}),
         'm_3': forms.Textarea(attrs={'class':'zzz'}),
@@ -1212,7 +1213,7 @@ class Module2_2FormView(forms.ModelForm):
             'c_m_122',
             'c_m_123',
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' ,)
         widgets = {
             'm_114':forms.Select(attrs={'readonly':'true','multiple':'multiple','size':'10'}),
           
@@ -1281,7 +1282,7 @@ class Module2_2FormView(forms.ModelForm):
                           
             }
 
-Module2_2WeaknessesFormSet  = inlineformset_factory(Module2_2,  Module2_2Weaknesses, extra=1,max_num=1)
+Module2_2WeaknessesFormSet  = inlineformset_factory(Module2_2,  Module2_2Weaknesses, extra=1,fields = '__all__',max_num=1)
 
 ####
 
@@ -1536,7 +1537,7 @@ class Module2Form(forms.ModelForm):
 'c_m_122',
 'c_m_123',
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session', )
         widgets = {
         'm_2': forms.Textarea(attrs={'class':'zzz'}),
         'm_3': forms.Textarea(attrs={'class':'zzz'}),
@@ -1910,7 +1911,7 @@ class Module2FormView(forms.ModelForm):
 'c_m_122',
 'c_m_123',
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session',)
         widgets = {
             'm_1':forms.Select(attrs={'readonly':'true','multiple':'multiple','size':'10'}),
             'm_11':forms.Select(attrs={'readonly':'true','multiple':'multiple','size':'10'}),
@@ -2040,7 +2041,7 @@ class Module2FormView(forms.ModelForm):
                             
             }
 
-Module2WeaknessesFormSet  = inlineformset_factory(Module2,  Module2Weaknesses, extra=1,max_num=1)
+Module2WeaknessesFormSet  = inlineformset_factory(Module2,  Module2Weaknesses, extra=1,fields = '__all__',max_num=1)
 
 
               
@@ -2114,7 +2115,7 @@ class Module3Form(forms.ModelForm):
             'c_m_31',
             'c_m_32',
             'c_m_33',]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date', 'session' )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date', 'session' ,)
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
              'm_4': forms.RadioSelect,
@@ -2252,8 +2253,8 @@ class Module3FormView(forms.ModelForm):
          
            }       
           
-Module3WeaknessesFormSet  = inlineformset_factory(Module3,  Module3Weaknesses, extra=1,max_num=1)
-Module3GridFormSet  = inlineformset_factory(Module3,  Module3Grid, extra=10,max_num=10)
+Module3WeaknessesFormSet  = inlineformset_factory(Module3,  Module3Weaknesses, extra=1,fields = '__all__',max_num=1)
+Module3GridFormSet  = inlineformset_factory(Module3,  Module3Grid, extra=10,fields = '__all__',max_num=10)
             
 class Module4Form(forms.ModelForm):
     class Meta:
@@ -2327,7 +2328,7 @@ class Module4Form(forms.ModelForm):
 'c_m_31',
 'c_m_32',
 'c_m_34',]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session',  )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
              'm_2': forms.RadioSelect,
@@ -2465,7 +2466,7 @@ class Module4FormView(forms.ModelForm):
              'm_33': forms.RadioSelect(attrs={'readonly':'true'}),
              # 'm_comment': forms.Textarea(attrs={'class':'zzz','readonly':'true'}),
              }          
-Module4WeaknessesFormSet  = inlineformset_factory(Module4,  Module4Weaknesses, extra=1,max_num=1)
+Module4WeaknessesFormSet  = inlineformset_factory(Module4,  Module4Weaknesses, extra=1,fields = '__all__',max_num=1)
  
 class Module5Form(forms.ModelForm):
     class Meta:
@@ -2521,7 +2522,7 @@ class Module5Form(forms.ModelForm):
 'c_m_23',
 'c_m_24',
 'c_m_25',]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session',  )
         widgets = {
              'session':forms.Select(attrs={'readonly':'true'}),
           'm_3': forms.SelectMultiple(attrs={'class':'yyy1','size':'6'}),
@@ -2626,7 +2627,7 @@ class Module5FormView(forms.ModelForm):
               'm_24': forms.RadioSelect(attrs={'readonly':'true'}), 
               #'m_comment': forms.Textarea(attrs={'class':'zzz','readonly':'true'}),
              }         
-Module5WeaknessesFormSet  = inlineformset_factory(Module5,  Module5Weaknesses, extra=1,max_num=1)
+Module5WeaknessesFormSet  = inlineformset_factory(Module5,  Module5Weaknesses, extra=1,fields = '__all__',max_num=1)
          
  
 class Module6Form(forms.ModelForm):
@@ -2707,7 +2708,7 @@ class Module6Form(forms.ModelForm):
 'c_m_35',
 'c_m_36',
 'c_m_37',]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' , )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
              'm_1': forms.RadioSelect,
@@ -2845,7 +2846,7 @@ class Module6FormView(forms.ModelForm):
               'm_17': forms.Textarea(attrs={'readonly':'true','class':'zzz'}),
     #'m_comment': forms.Textarea(attrs={'class':'zzz','readonly':'true'}),
             }        
-Module6WeaknessesFormSet  = inlineformset_factory(Module6,  Module6Weaknesses, extra=1,max_num=1)
+Module6WeaknessesFormSet  = inlineformset_factory(Module6,  Module6Weaknesses, extra=1,fields = '__all__',max_num=1)
          
  
 class Module7Form(forms.ModelForm):
@@ -2985,7 +2986,7 @@ class Module7Form(forms.ModelForm):
 'c_m_68',
 'c_m_69',
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' , )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
              'm_1': forms.RadioSelect,
@@ -3253,7 +3254,7 @@ class Module7Matrix23Form(forms.ModelForm):
             'support',
             'managers',
         ]
-        exclude = ('module7')
+        exclude = ('module7',)
         widgets = {
             'nstaff': forms.Select(attrs={'class':'zzz'}),
             'average': forms.Select(attrs={'class':'zzz'}),
@@ -3271,7 +3272,7 @@ class Module7Matrix37Form(forms.ModelForm):
             'qaulity', 
             'required', 
         ]
-        exclude = ('module7')
+        exclude = ('module7',)
         widgets = {
             'navailable': forms.Select(attrs={'class':'zzz'}),
             'qaulity': forms.Select(attrs={'class':'zzz'}),
@@ -3286,7 +3287,7 @@ class Module7Matrix39Form(forms.ModelForm):
             'qaulity', 
             'required', 
         ]
-        exclude = ('module7')
+        exclude = ('module7',)
         widgets = {
             'navailable': forms.Select(attrs={'class':'zzz'}),
             'qaulity': forms.Select(attrs={'class':'zzz'}),
@@ -3301,7 +3302,7 @@ class Module7Matrix41Form(forms.ModelForm):
             'qaulity', 
             'required', 
         ]
-        exclude = ('module7')
+        exclude = ('module7',)
         widgets = {
             'navailable': forms.Select(attrs={'class':'zzz'}),
             'qaulity': forms.Select(attrs={'class':'zzz'}),
@@ -3316,7 +3317,7 @@ class Module7Matrix43Form(forms.ModelForm):
             'qaulity', 
             'required', 
         ]
-        exclude = ('module7')
+        exclude = ('module7',)
         widgets = {
             'navailable': forms.Select(attrs={'class':'zzz'}),
             'qaulity': forms.Select(attrs={'class':'zzz'}),
@@ -3331,20 +3332,20 @@ class Module7Matrix45Form(forms.ModelForm):
             'qaulity', 
             'required', 
         ]
-        exclude = ('module7')
+        exclude = ('module7',)
         widgets = {
             'navailable': forms.Select(attrs={'class':'zzz'}),
             'qaulity': forms.Select(attrs={'class':'zzz'}),
             'required': forms.Select(attrs={'class':'zzz'}),
         } 
-Module7WeaknessesFormSet  = inlineformset_factory(Module7,  Module7Weaknesses, extra=1,max_num=1)
-Module7GridFormSet  = inlineformset_factory(Module7,  Module7Grid, extra=1,max_num=1)
-Module7Matrix23FormSet  = inlineformset_factory(Module7,  Module7Matrix23,Module7Matrix23Form, extra=52,max_num=52)
-Module7Matrix37FormSet  = inlineformset_factory(Module7,  Module7Matrix37,Module7Matrix37Form, extra=19,max_num=19)
-Module7Matrix39FormSet  = inlineformset_factory(Module7,  Module7Matrix39,Module7Matrix39Form, extra=37,max_num=37)
-Module7Matrix41FormSet  = inlineformset_factory(Module7,  Module7Matrix41, Module7Matrix41Form,extra=34,max_num=34)
-Module7Matrix43FormSet  = inlineformset_factory(Module7,  Module7Matrix43,Module7Matrix43Form, extra=17,max_num=17)
-Module7Matrix45FormSet  = inlineformset_factory(Module7,  Module7Matrix45,Module7Matrix45Form, extra=26,max_num=26)
+Module7WeaknessesFormSet  = inlineformset_factory(Module7,  Module7Weaknesses, extra=1,fields = '__all__',max_num=1)
+Module7GridFormSet  = inlineformset_factory(Module7,  Module7Grid, extra=1,fields = '__all__',max_num=1)
+Module7Matrix23FormSet  = inlineformset_factory(Module7,  Module7Matrix23,Module7Matrix23Form, extra=52,fields = '__all__',max_num=52)
+Module7Matrix37FormSet  = inlineformset_factory(Module7,  Module7Matrix37,Module7Matrix37Form, extra=19,fields = '__all__',max_num=19)
+Module7Matrix39FormSet  = inlineformset_factory(Module7,  Module7Matrix39,Module7Matrix39Form, extra=37,fields = '__all__',max_num=37)
+Module7Matrix41FormSet  = inlineformset_factory(Module7,  Module7Matrix41, Module7Matrix41Form,extra=34,fields = '__all__',max_num=34)
+Module7Matrix43FormSet  = inlineformset_factory(Module7,  Module7Matrix43,Module7Matrix43Form, extra=17,fields = '__all__',max_num=17)
+Module7Matrix45FormSet  = inlineformset_factory(Module7,  Module7Matrix45,Module7Matrix45Form, extra=26,fields = '__all__',max_num=26)
 
         
  
@@ -3440,7 +3441,7 @@ class Module8Form(forms.ModelForm):
 'c_m_44',
 'c_m_45',
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' , )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
              'm_1': forms.RadioSelect,
@@ -3629,7 +3630,7 @@ class Module8Grid3Form(forms.ModelForm):
             'c3',    
             'c4',    
             'c5', ]
-        exclude = ('module8')
+        exclude = ('module8',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -3649,7 +3650,7 @@ class Module8Grid18Form(forms.ModelForm):
             'c5',
              'c6',
         ]
-        exclude = ('module8')
+        exclude = ('module8',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -3670,7 +3671,7 @@ class Module8Matrix30Form(forms.ModelForm):
             'support',
             'managers',
         ]
-        exclude = ('module8')
+        exclude = ('module8',)
         widgets = {
             'nstaff': forms.Select(attrs={'class':'zzz'}),
             'average': forms.Select(attrs={'class':'zzz'}),
@@ -3679,10 +3680,10 @@ class Module8Matrix30Form(forms.ModelForm):
             'support': forms.Select(attrs={'class':'zzz'}),
             'managers':forms.Select(attrs={'class':'zzz'}),
         }        
-Module8WeaknessesFormSet  = inlineformset_factory(Module8,  Module8Weaknesses, extra=1,max_num=1)
-Module8Grid3FormSet  = inlineformset_factory(Module8, Module8Grid3,Module8Grid3Form, extra=1,max_num=1)
-Module8Grid18FormSet  = inlineformset_factory(Module8,  Module8Grid18, Module8Grid18Form,extra=1,max_num=1)
-Module8Matrix30FormSet  = inlineformset_factory(Module8,  Module8Matrix30, Module8Matrix30Form, extra=12,max_num=12)
+Module8WeaknessesFormSet  = inlineformset_factory(Module8,  Module8Weaknesses, extra=1,fields = '__all__',max_num=1)
+Module8Grid3FormSet  = inlineformset_factory(Module8, Module8Grid3,Module8Grid3Form, extra=1,fields = '__all__',max_num=1)
+Module8Grid18FormSet  = inlineformset_factory(Module8,  Module8Grid18, Module8Grid18Form,extra=1,fields = '__all__',max_num=1)
+Module8Matrix30FormSet  = inlineformset_factory(Module8,  Module8Matrix30, Module8Matrix30Form, extra=12,fields = '__all__',max_num=12)
 
       
  
@@ -3781,7 +3782,7 @@ class Module9Form(forms.ModelForm):
 'c_m_46',
 'c_m_47',
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session',  )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
               'm_2': forms.RadioSelect,
@@ -3986,7 +3987,7 @@ class Module9Grid1Form(forms.ModelForm):
             'c4',
             
              ]
-        exclude = ('module9')
+        exclude = ('module9',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4005,7 +4006,7 @@ class Module9Grid5Form(forms.ModelForm):
             'c4', 
             'c5',
              ]
-        exclude = ('module9')
+        exclude = ('module9',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4025,7 +4026,7 @@ class Module9Grid31Form(forms.ModelForm):
             'c4', 
             'c5',
              ]
-        exclude = ('module9')
+        exclude = ('module9',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4046,7 +4047,7 @@ class Module9Matrix35Form(forms.ModelForm):
             'support',
             'managers',
         ]
-        exclude = ('module9')
+        exclude = ('module9',)
         widgets = {
             'nstaff': forms.Select(attrs={'class':'zzz'}),
             'average': forms.Select(attrs={'class':'zzz'}),
@@ -4055,11 +4056,11 @@ class Module9Matrix35Form(forms.ModelForm):
             'support': forms.Select(attrs={'class':'zzz'}),
             'managers':forms.Select(attrs={'class':'zzz'}),
         }       
-Module9WeaknessesFormSet  = inlineformset_factory(Module9,  Module9Weaknesses, extra=1,max_num=1)
-Module9Grid1FormSet  = inlineformset_factory(Module9,  Module9Grid1,Module9Grid1Form, extra=1,max_num=1)
-Module9Grid5FormSet  = inlineformset_factory(Module9,  Module9Grid5, Module9Grid5Form,extra=1,max_num=1)
-Module9Grid31FormSet  = inlineformset_factory(Module9,  Module9Grid31, Module9Grid31Form, extra=1,max_num=1)
-Module9Matrix35FormSet  = inlineformset_factory(Module9,  Module9Matrix35, Module9Matrix35Form,extra=4,max_num=4)
+Module9WeaknessesFormSet  = inlineformset_factory(Module9,  Module9Weaknesses, extra=1,fields = '__all__',max_num=1)
+Module9Grid1FormSet  = inlineformset_factory(Module9,  Module9Grid1,Module9Grid1Form, extra=1,fields = '__all__',max_num=1)
+Module9Grid5FormSet  = inlineformset_factory(Module9,  Module9Grid5, Module9Grid5Form,extra=1,fields = '__all__',max_num=1)
+Module9Grid31FormSet  = inlineformset_factory(Module9,  Module9Grid31, Module9Grid31Form, extra=1,fields = '__all__',max_num=1)
+Module9Matrix35FormSet  = inlineformset_factory(Module9,  Module9Matrix35, Module9Matrix35Form,extra=4,fields = '__all__',max_num=4)
 
 
 
@@ -4191,7 +4192,7 @@ class Module10Form(forms.ModelForm):
 'c_m_59',
 'c_m_60',
 'c_m_61',]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' , )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
               
@@ -4448,7 +4449,7 @@ class Module10Grid23Form(forms.ModelForm):
             'c4', 
             'c5',
              ]
-        exclude = ('module10')
+        exclude = ('module10',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4467,7 +4468,7 @@ class Module10Grid31Form(forms.ModelForm):
             'c3',    
           
              ]
-        exclude = ('module10')
+        exclude = ('module10',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4486,7 +4487,7 @@ class Module10Grid33Form(forms.ModelForm):
             'c4', 
            
              ]
-        exclude = ('module10')
+        exclude = ('module10',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4508,7 +4509,7 @@ class Module10Grid37Form(forms.ModelForm):
             'c7', 
             'c8',
              ]
-        exclude = ('module10')
+        exclude = ('module10',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4530,7 +4531,7 @@ class Module10Grid46Form(forms.ModelForm):
             'c3',    
           
              ]
-        exclude = ('module10')
+        exclude = ('module10',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4549,7 +4550,7 @@ class Module10Grid45Form(forms.ModelForm):
             'c4', 
             'c5',
              ]
-        exclude = ('module10')
+        exclude = ('module10',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -4572,7 +4573,7 @@ class Module10Matrix47Form(forms.ModelForm):
             'managers',
             'support',
         ]
-        exclude = ('module10')
+        exclude = ('module10',)
         widgets = {
             'nstaff': forms.Select(attrs={'class':'zzz'}),
             'average': forms.Select(attrs={'class':'zzz'}),
@@ -4584,14 +4585,14 @@ class Module10Matrix47Form(forms.ModelForm):
             'managers':forms.Select(attrs={'class':'zzz'}),
         }
         
-Module10WeaknessesFormSet  = inlineformset_factory(Module10,  Module10Weaknesses, extra=1,max_num=1)
-Module10Grid23FormSet  = inlineformset_factory(Module10,  Module10Grid23,Module10Grid23Form, extra=1,max_num=1)
-Module10Grid31FormSet  = inlineformset_factory(Module10,  Module10Grid31,Module10Grid31Form, extra=1,max_num=1)
-Module10Grid33FormSet  = inlineformset_factory(Module10,  Module10Grid33, Module10Grid33Form,extra=1,max_num=1)
-Module10Grid37FormSet  = inlineformset_factory(Module10,  Module10Grid37,Module10Grid37Form, extra=1,max_num=1)
-Module10Grid45FormSet  = inlineformset_factory(Module10,  Module10Grid45,Module10Grid45Form, extra=1,max_num=1)
-Module10Grid46FormSet  = inlineformset_factory(Module10,  Module10Grid46,Module10Grid46Form, extra=1,max_num=1)
-Module10Matrix47FormSet  = inlineformset_factory(Module10,  Module10Matrix_47,Module10Matrix47Form, extra=4,max_num=4)
+Module10WeaknessesFormSet  = inlineformset_factory(Module10,  Module10Weaknesses, extra=1,fields = '__all__',max_num=1)
+Module10Grid23FormSet  = inlineformset_factory(Module10,  Module10Grid23,Module10Grid23Form, extra=1,fields = '__all__',max_num=1)
+Module10Grid31FormSet  = inlineformset_factory(Module10,  Module10Grid31,Module10Grid31Form, extra=1,fields = '__all__',max_num=1)
+Module10Grid33FormSet  = inlineformset_factory(Module10,  Module10Grid33, Module10Grid33Form,extra=1,fields = '__all__',max_num=1)
+Module10Grid37FormSet  = inlineformset_factory(Module10,  Module10Grid37,Module10Grid37Form, extra=1,fields = '__all__',max_num=1)
+Module10Grid45FormSet  = inlineformset_factory(Module10,  Module10Grid45,Module10Grid45Form, extra=1,fields = '__all__',max_num=1)
+Module10Grid46FormSet  = inlineformset_factory(Module10,  Module10Grid46,Module10Grid46Form, extra=1,fields = '__all__',max_num=1)
+Module10Matrix47FormSet  = inlineformset_factory(Module10,  Module10Matrix_47,Module10Matrix47Form, extra=4,fields = '__all__',max_num=4)
 
 
 
@@ -4739,7 +4740,7 @@ class Module11Form(forms.ModelForm):
 'c_m_67',
 'c_m_68',
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session' , )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
           
@@ -5014,7 +5015,7 @@ class Module11Grid2Form(forms.ModelForm):
             'c2', 
             'c3',    
              ]
-        exclude = ('module11')
+        exclude = ('module11',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5031,7 +5032,7 @@ class Module11Grid3Form(forms.ModelForm):
             'c4', 
             'c5',
              ]
-        exclude = ('module11')
+        exclude = ('module11',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5051,7 +5052,7 @@ class Module11Grid12Form(forms.ModelForm):
             'c4', 
             'c5',
              ]
-        exclude = ('module11')
+        exclude = ('module11',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5072,7 +5073,7 @@ class Module11Grid14Form(forms.ModelForm):
             'c5',
              'c6',
              ]
-        exclude = ('module11')
+        exclude = ('module11',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5093,7 +5094,7 @@ class Module11Grid33Form(forms.ModelForm):
             'c4', 
         
              ]
-        exclude = ('module11')
+        exclude = ('module11',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5112,7 +5113,7 @@ class Module11Matrix42Form(forms.ModelForm):
             'nstafflab',    
             'support',
         ]
-        exclude = ('module11')
+        exclude = ('module11',)
         widgets = {
             'nstaff': forms.Select(attrs={'class':'zzz'}),
             'average': forms.Select(attrs={'class':'zzz'}),
@@ -5121,13 +5122,13 @@ class Module11Matrix42Form(forms.ModelForm):
         
         }
         
-Module11WeaknessesFormSet  = inlineformset_factory(Module11,  Module11Weaknesses, extra=1,max_num=1)
-Module11Grid2FormSet  = inlineformset_factory(Module11,  Module11Grid2, Module11Grid2Form,extra=1,max_num=1)
-Module11Grid3FormSet  = inlineformset_factory(Module11,  Module11Grid3,Module11Grid3Form ,extra=1,max_num=1)
-Module11Grid12FormSet  = inlineformset_factory(Module11,  Module11Grid12,Module11Grid12Form ,extra=1,max_num=1)
-Module11Grid14FormSet  = inlineformset_factory(Module11,  Module11Grid14,Module11Grid14Form ,extra=1,max_num=1)
-Module11Grid33FormSet  = inlineformset_factory(Module11,  Module11Grid33,Module11Grid33Form ,extra=1,max_num=1)
-Module11Matrix42FormSet  = inlineformset_factory(Module11,  Module11Matrix42,Module11Matrix42Form, extra=52,max_num=52)
+Module11WeaknessesFormSet  = inlineformset_factory(Module11,  Module11Weaknesses, extra=1,fields = '__all__',max_num=1)
+Module11Grid2FormSet  = inlineformset_factory(Module11,  Module11Grid2, Module11Grid2Form,extra=1,fields = '__all__',max_num=1)
+Module11Grid3FormSet  = inlineformset_factory(Module11,  Module11Grid3,Module11Grid3Form ,extra=1,fields = '__all__',max_num=1)
+Module11Grid12FormSet  = inlineformset_factory(Module11,  Module11Grid12,Module11Grid12Form ,extra=1,fields = '__all__',max_num=1)
+Module11Grid14FormSet  = inlineformset_factory(Module11,  Module11Grid14,Module11Grid14Form ,extra=1,fields = '__all__',max_num=1)
+Module11Grid33FormSet  = inlineformset_factory(Module11,  Module11Grid33,Module11Grid33Form ,extra=1,fields = '__all__',max_num=1)
+Module11Matrix42FormSet  = inlineformset_factory(Module11,  Module11Matrix42,Module11Matrix42Form, extra=52,fields = '__all__',max_num=52)
         
 
 class Module12Form(forms.ModelForm):
@@ -5205,7 +5206,7 @@ class Module12Form(forms.ModelForm):
 'c_m_32',
 'c_m_33',
 'c_m_34',]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session',  )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
               
@@ -5358,7 +5359,7 @@ class Module12Grid2Form(forms.ModelForm):
             'c2', 
             'c3',    
             ]
-        exclude = ('module12')
+        exclude = ('module12',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5377,7 +5378,7 @@ class Module12Grid3Form(forms.ModelForm):
             'c5',
            
              ]
-        exclude = ('module12')
+        exclude = ('module12',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5400,7 +5401,7 @@ class Module12Matrix22Form(forms.ModelForm):
             'managers',
             'support',
         ]
-        exclude = ('module12')
+        exclude = ('module12',)
         widgets = {
             'nstaff': forms.Select(attrs={'class':'zzz'}),
             'average': forms.Select(attrs={'class':'zzz'}),
@@ -5411,11 +5412,11 @@ class Module12Matrix22Form(forms.ModelForm):
         }            
             
             
-Module12WeaknessesFormSet  = inlineformset_factory(Module12,  Module12Weaknesses, extra=1,max_num=1)
-Module12Grid2FormSet  = inlineformset_factory(Module12,  Module12Grid2,Module12Grid2Form, extra=1,max_num=1)
-Module12Grid3FormSet  = inlineformset_factory(Module12,  Module12Grid3, Module12Grid3Form,extra=1,max_num=1)
-Module12Grid29FormSet  = inlineformset_factory(Module12,  Module12Grid_29, extra=1,max_num=1)
-Module12Matrix22FormSet  = inlineformset_factory(Module12,  Module12Matrix22,Module12Matrix22Form, extra=4,max_num=4)
+Module12WeaknessesFormSet  = inlineformset_factory(Module12,  Module12Weaknesses, extra=1,fields = '__all__',max_num=1)
+Module12Grid2FormSet  = inlineformset_factory(Module12,  Module12Grid2,Module12Grid2Form, extra=1,fields = '__all__',max_num=1)
+Module12Grid3FormSet  = inlineformset_factory(Module12,  Module12Grid3, Module12Grid3Form,extra=1,fields = '__all__',max_num=1)
+Module12Grid29FormSet  = inlineformset_factory(Module12,  Module12Grid_29, extra=1,fields = '__all__',max_num=1)
+Module12Matrix22FormSet  = inlineformset_factory(Module12,  Module12Matrix22,Module12Matrix22Form, extra=4,fields = '__all__',max_num=4)
          
    
 
@@ -5563,7 +5564,7 @@ class Module13Form(forms.ModelForm):
 'c_m_66',
 
 ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session',  )
         widgets = {
             'session':forms.Select(attrs={'readonly':'true'}),
             'm_1': forms.RadioSelect,
@@ -5837,7 +5838,7 @@ class Module13Matrix47Form(forms.ModelForm):
             'managers',
             'support',
         ]
-        exclude = ('module13')
+        exclude = ('module13',)
         widgets = {
             'nstaff': forms.Select(attrs={'class':'zzz'}),
             'average': forms.Select(attrs={'class':'zzz'}),
@@ -5858,7 +5859,7 @@ class Module13Grid2Form(forms.ModelForm):
         'c3',    
         'c4', 
         ]
-        exclude = ('module13')
+        exclude = ('module13',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5875,7 +5876,7 @@ class Module13Grid3Form(forms.ModelForm):
         'c3',    
         'c4', 
         ]
-        exclude = ('module13')
+        exclude = ('module13',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5892,7 +5893,7 @@ class Module13Grid22Form(forms.ModelForm):
         'c3',    
        
         ]
-        exclude = ('module13')
+        exclude = ('module13',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5916,7 +5917,7 @@ class Module13Grid29Form(forms.ModelForm):
         'c11', 
         'c12',
         ]
-        exclude = ('module13')
+        exclude = ('module13',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5944,7 +5945,7 @@ class Module13Grid31Form(forms.ModelForm):
         'c5', 
       
         ]
-        exclude = ('module13')
+        exclude = ('module13',)
         widgets = {
             'c1': forms.RadioSelect,
             'c2': forms.RadioSelect,
@@ -5954,13 +5955,13 @@ class Module13Grid31Form(forms.ModelForm):
           
             
         }                 
-Module13WeaknessesFormSet  = inlineformset_factory(Module13,  Module13Weaknesses, extra=1,max_num=1)
-Module13Grid2FormSet  = inlineformset_factory(Module13,  Module13Grid2,Module13Grid2Form, extra=1,max_num=1)
-Module13Grid3FormSet  = inlineformset_factory(Module13,  Module13Grid3,Module13Grid3Form, extra=1,max_num=1)
-Module13Grid22FormSet  = inlineformset_factory(Module13,  Module13Grid22,Module13Grid22Form, extra=1,max_num=1)
-Module13Grid29FormSet  = inlineformset_factory(Module13,  Module13Grid29, Module13Grid29Form,extra=1,max_num=1)
-Module13Grid31FormSet  = inlineformset_factory(Module13,  Module13Grid31,Module13Grid31Form, extra=1,max_num=1)
-Module13Matrix47FormSet  = inlineformset_factory(Module13,  Module13Matrix47,Module13Matrix47Form, extra=4,max_num=4)
+Module13WeaknessesFormSet  = inlineformset_factory(Module13,  Module13Weaknesses, extra=1,fields = '__all__',max_num=1)
+Module13Grid2FormSet  = inlineformset_factory(Module13,  Module13Grid2,Module13Grid2Form, extra=1,fields = '__all__',max_num=1)
+Module13Grid3FormSet  = inlineformset_factory(Module13,  Module13Grid3,Module13Grid3Form, extra=1,fields = '__all__',max_num=1)
+Module13Grid22FormSet  = inlineformset_factory(Module13,  Module13Grid22,Module13Grid22Form, extra=1,fields = '__all__',max_num=1)
+Module13Grid29FormSet  = inlineformset_factory(Module13,  Module13Grid29, Module13Grid29Form,extra=1,fields = '__all__',max_num=1)
+Module13Grid31FormSet  = inlineformset_factory(Module13,  Module13Grid31,Module13Grid31Form, extra=1,fields = '__all__',max_num=1)
+Module13Matrix47FormSet  = inlineformset_factory(Module13,  Module13Matrix47,Module13Matrix47Form, extra=4,fields = '__all__',max_num=4)
           
 class StakeholdersForm(forms.ModelForm):
     class Meta:
@@ -5969,9 +5970,9 @@ class StakeholdersForm(forms.ModelForm):
            'session', 
            'module',
            ]
-        exclude = ('author', 'slug', 'publish_date',  'modify_date','session', 'module'  )
+        exclude = ('author', 'slug', 'publish_date',  'modify_date','session', 'module',  )
     
-StakeholdersFieldsFormSet  = inlineformset_factory(Stakeholders,  StakeholdersFields, extra=1)
+StakeholdersFieldsFormSet  = inlineformset_factory(Stakeholders,  StakeholdersFields, extra=1,fields = '__all__',)
 
 class ProblemAnalysisForm(forms.ModelForm):
     class Meta:
@@ -6018,11 +6019,11 @@ class SwotAnalysisForm(forms.ModelForm):
         
 
     
-SwotAnalysis1FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis1, extra=1)
-SwotAnalysis2FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis2, extra=1)
-SwotAnalysis3FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis3, extra=1)
-SwotAnalysis4FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis4, extra=1)
-SwotAnalysis5FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis5, extra=1)
+SwotAnalysis1FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis1, extra=1,fields = '__all__')
+SwotAnalysis2FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis2, extra=1,fields = '__all__')
+SwotAnalysis3FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis3, extra=1,fields = '__all__')
+SwotAnalysis4FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis4, extra=1,fields = '__all__')
+SwotAnalysis5FormSet  = inlineformset_factory(SwotAnalysis,  SwotAnalysis5, extra=1,fields = '__all__')
 
 
 
@@ -6068,15 +6069,15 @@ class LogicalFrameworkForm(forms.ModelForm):
        
 
     
-LogicalFrameworkAct1FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct1, extra=1)
-LogicalFrameworkAct2FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct2, extra=1)
-LogicalFrameworkAct3FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct3, extra=1)
-LogicalFrameworkAct4FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct4, extra=1)
-LogicalFrameworkAct5FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct5, extra=1)
+LogicalFrameworkAct1FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct1, extra=1,fields = '__all__')
+LogicalFrameworkAct2FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct2, extra=1,fields = '__all__')
+LogicalFrameworkAct3FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct3, extra=1,fields = '__all__')
+LogicalFrameworkAct4FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct4, extra=1,fields = '__all__')
+LogicalFrameworkAct5FormSet  = inlineformset_factory(LogicalFramework,  LogicalFrameworkAct5, extra=1,fields = '__all__')
 
 
-class HorizontalRadioRenderer(forms.RadioSelect.renderer):
-  def render(self):
-    return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+#class HorizontalRadioRenderer(forms.RadioSelect.renderer):
+#  def render(self):
+#    return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
 #
 #

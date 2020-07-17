@@ -1,4 +1,5 @@
-import autocomplete_light
+#import autocomplete_light 
+from dal import autocomplete
 
 from .models import Crops
 
