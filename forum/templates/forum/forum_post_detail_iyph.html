@@ -1,7 +1,7 @@
 {% extends "baseiyph.html" %}
 
     
-{% load mezzanine_tags comment_tags keyword_tags i18n future disqus_tags %}
+{% load mezzanine_tags comment_tags keyword_tags i18n  disqus_tags %}
 
 
 {% block meta_title %}{{ forum_post.meta_title }}{% endblock %}
@@ -9,7 +9,7 @@
 {% block meta_keywords %}{% metablock %}
   {% keywords_for forum_post as tags %}
   {% for tag in tags %}{% if not forloop.first %}, {% endif %}{{ tag }}{% endfor %}
-{% endmetablock %}{% endblock %}
+{% endmetablock %}{% endblock %} 
 
 {% block meta_description %}{% metablock %}
   {{ forum_post.description }}
@@ -49,7 +49,7 @@
 
 <p>
 {% if user.is_superuser or perms.forum.add_forumpost  %} {#and request.user.get_profile.user_id  == forum_post.user_id#}
-    <a class="btn btn-small btn-info" href="/admin/forum/forumpost/{{ forum_post.id }}"><i class="icon-edit"></i> Edit as Admin</a><br>
+    <a class="btn btn-small btn-info" href="/admin/forum/forumpost/{{ forum_post.id }}/change/"><i class="icon-edit"></i> Edit as Admin</a><br>
 {% endif %}
 </p>
 
@@ -89,7 +89,7 @@
 
   {% block forum_post_detail_content %}
     {% editable forum_post.content %}
-      {{ forum_post.content|richtext_filter|safe }}
+      {{ forum_post.content|richtext_filters|safe }}
         {% if files %}
         <p><strong>{% trans "Files" %}</strong></p>
             {% for f in files %} 

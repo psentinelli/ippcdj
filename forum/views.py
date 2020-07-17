@@ -1,7 +1,13 @@
+from __future__ import unicode_literals
+from future.builtins import str, int
+
 from calendar import month_name
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+
+from django.template.response import TemplateResponse
+from django.utils.translation import ugettext_lazy as _
 
 from forum.models import ForumPost, ForumCategory,ForumPost_Files
 from ippc.models import IppcUserProfile
@@ -58,7 +64,8 @@ def forum_post_list(request, tag=None, year=None, month=None, username=None,
         template="forum/forum_post_list_iyph.html"
     print('====================== -------------------------')
     templates.append(template)
-    return render(request, templates, context)
+    #return render(request, templates, context)
+    return TemplateResponse(request, templates, context)
 
 from collections import defaultdict
 
@@ -83,11 +90,11 @@ def forum_post_detail(request, slug, year=None, month=None, day=None,
             break
   
     if category_id == 51:
-        templates = [u"forum/forum_post_detail_%s.html" % unicode(slug), "forum/forum_post_detail_iyph.html"]
+        templates = [u"forum/forum_post_detail_%s.html" % sre(slug), "forum/forum_post_detail_iyph.html"]
     else:
-        templates = [u"forum/forum_post_detail_%s.html" % unicode(slug), template]
-    return render(request, templates, context)
-
+        templates = [u"forum/forum_post_detail_%s.html" % str(slug), template]
+    #return render(request, templates, context)
+    return TemplateResponse(request, templates, context)
 
 def forum_post_feed(request, format, **kwargs):
     """

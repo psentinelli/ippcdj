@@ -1,4 +1,4 @@
-{% load forum_tags keyword_tags i18n future %}
+{% load forum_tags keyword_tags i18n  %}
 
 {% block forum_recent_posts %}
 {% forum_recent_posts 5 as recent_posts %}
@@ -7,7 +7,7 @@
 <ul class="unstyled recent-posts">
 {% for recent_post in recent_posts %}
 <li><a href="{{ recent_post.get_absolute_url }}">{{ recent_post.title }}</a></li>
-{% endfor %}
+{% endfor %} 
 </ul>
 {% endif %}
 {% endblock %}

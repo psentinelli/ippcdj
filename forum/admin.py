@@ -17,7 +17,7 @@ import markdown
 from django.template.defaultfilters import slugify
 from ippc.models import  MassEmailUtilityMessage
 from django.utils import timezone
-
+from django.utils.html import format_html
 forumpost_fieldsets = deepcopy(DisplayableAdmin.fieldsets)
 
 forumpost_fieldsets[0][1]["fields"].insert(1, "categories")
@@ -25,10 +25,10 @@ forumpost_fieldsets[0][1]["fields"].extend(["content", "allow_comments", "login_
 forumpost_fieldsets[0][1]["fields"].insert(5, "groups")
 forumpost_fieldsets[0][1]["fields"].insert(6, "users")
 forumpost_fieldsets[0][1]["fields"].insert(7, "notification_groups")
-forumpost_list_display = ["title", "user", "status", "admin_link"]
+forumpost_list_display = ["title", "user", "status", "admin_link1"]
 if settings.FORUM_USE_FEATURED_IMAGE:
     forumpost_fieldsets[0][1]["fields"].insert(-2, "featured_image")
-    forumpost_list_display.insert(0, "admin_thumb")
+    forumpost_list_display.insert(0, "thumbnail")
 forumpost_fieldsets = list(forumpost_fieldsets)
 forumpost_fieldsets.insert(1, (_("Other posts"), {
     "classes": ("collapse-closed",),
@@ -37,7 +37,7 @@ forumpost_list_filter = deepcopy(DisplayableAdmin.list_filter) + ("categories",)
 
 class ForumPostFileInline(admin.TabularInline):
     model = ForumPost_Files
-    formset = inlineformset_factory(ForumPost, ForumPost_Files,extra=1)
+    formset = inlineformset_factory(ForumPost, ForumPost_Files,extra=1,fields = '__all__')
     
 
 #class ForumPostAdmin(DisplayableAdmin,OwnableAdmin):
@@ -45,7 +45,19 @@ class ForumPostAdmin(DisplayableAdmin):
     """
     Admin class for forum posts.
     """
-    
+    def thumbnail(self, obj):
+        if obj.featured_image:
+            return format_html('<img src="'+settings.MEDIA_URL+format(obj.featured_image)+'" style="width: 30px; height: 30px"/>')
+        else:
+            return format_html('')
+    def admin_link1(self, obj):
+        return format_html("<a href='"+obj.get_absolute_url()+"'>View on site</a>")
+ 
+    admin_link1.allow_tags = True
+    admin_link1.short_description = ""
+    thumbnail.short_description = 'thumbnail'
+
+
     fieldsets = forumpost_fieldsets
     list_display = forumpost_list_display
     list_filter = forumpost_list_filter
@@ -91,7 +103,7 @@ class ForumPostAdmin(DisplayableAdmin):
 
             notifificationmessage = mail.EmailMessage(subject,text,'ippc@fao.org',  emailto_all, ['paola.sentinelli@fao.org'])
             notifificationmessage.content_subtype = "html"  
-            sent =notifificationmessage.send()
+            #paola sent =notifificationmessage.send()
            
         
         return DisplayableAdmin.save_form(self, request, form, change)

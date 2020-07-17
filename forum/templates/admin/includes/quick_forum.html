@@ -1,4 +1,4 @@
-{% load i18n future %}
+{% load i18n  %}
 
 {% if perms.forum.add_forumpost and perms.forum.change_forumpost %}
 <script>
@@ -10,7 +10,7 @@ $(function() {
         var value = field.attr('value').split('\n\n').join('</p><p>');
         value = '<p>' + value.split('\n').join('<br>') + '</p>';
         field.attr('value', value);
-        return true;
+        return true; 
     });
 });
 </script>

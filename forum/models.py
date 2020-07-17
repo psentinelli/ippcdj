@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
+from django.urls import reverse
 from django.contrib.auth.models import User, Group
 
 from mezzanine.conf import settings
@@ -25,7 +25,7 @@ class ForumCategory(Slugged):
         verbose_name_plural = _("Forum Categories")
         ordering = ("title",)
 
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         return ("forum_post_list_category", (), {"category": self.slug})
 
@@ -53,13 +53,13 @@ class ForumPost(Displayable, Ownable, RichText, AdminThumbMixin):
     
     users = models.ManyToManyField(User,
         verbose_name=_("Users this forum post is accessible to"),
-        related_name='forumusers', blank=True, null=True)
+        related_name='forumusers', blank=True)#, null=True)    
     groups = models.ManyToManyField(Group,
         verbose_name=_("Groups this forum post is accessible to"),
-        related_name='forumgroups', blank=True, null=True)
+        related_name='forumgroups', blank=True)#, null=True)
     notification_groups = models.ManyToManyField(Group,
         verbose_name=_("Groups you want automatically notify of new POST and Comments"),
-        related_name='forumnotificationgroups', blank=True, null=True)    
+        related_name='forumnotificationgroups', blank=True)#, null=True)    
     login_required = models.BooleanField(verbose_name=_("Login required"),
                                          default=True)
     
@@ -78,7 +78,7 @@ class ForumPost(Displayable, Ownable, RichText, AdminThumbMixin):
             ("can_view", "View Forum Post"),
         )
 
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         """
         URLs for forum posts can either be just their slug, or prefixed
@@ -103,7 +103,9 @@ class ForumPost(Displayable, Ownable, RichText, AdminThumbMixin):
                 kwargs[date_part] = date_value
                 if date_part == settings.FORUM_URLS_DATE_FORMAT:
                     break
-        return (url_name, (), kwargs)
+        #return (url_name, (), kwargs)
+
+        return reverse(url_name, kwargs=kwargs)
 
     # These methods are deprecated wrappers for keyword and category
     # access. They existed to support Django 1.3 with prefetch_related
@@ -137,7 +139,7 @@ def validate_file_extension(value):
         raise ValidationError(u'You can only upload files:  txt pdf ppt doc xls jpg png docx xlsx pptx zip rar.')
         
 class ForumPost_Files(models.Model):
-    forum_post = models.ForeignKey(ForumPost)
+    forum_post = models.ForeignKey(ForumPost,on_delete=models.DO_NOTHING,)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='files/forum/%Y/%m/%d/', validators=[validate_file_extension])
 
     def __unicode__(self):  

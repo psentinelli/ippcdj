@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n future mezzanine_tags forum_tags keyword_tags disqus_tags %}
+{% load i18n  mezzanine_tags forum_tags keyword_tags disqus_tags %}
 
 {% block meta_title %}{% if page %}{{ page.richtextpage.meta_title }}{% else %}{% trans "Forum" %}{% endif %}{% endblock %}
 
@@ -7,7 +7,7 @@
 {% keywords_for page as keywords %}
 {% for keyword in keywords %}
     {% if not forloop.first %}, {% endif %}
-    {{ keyword }}
+    {{ keyword }} 
 {% endfor %}
 {% endmetablock %}{% endblock %}
 
