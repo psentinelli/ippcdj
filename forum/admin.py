@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.shortcuts import get_object_or_404
 
 from .models import ForumPost, ForumCategory,ForumPost_Files
-from mezzanine.conf import settings
+from mezzanine.conf import settings 
 from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin
 from django.core import mail
 from django.core.mail import send_mail
