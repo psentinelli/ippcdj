@@ -1,12 +1,12 @@
 
-from django.conf.urls import patterns, url
+from django.conf.urls import  url
 
 from mezzanine.conf import settings
 from mezzanine.core.views import direct_to_template
 from .views import CourseListView,CourseDetailView,ModuleListView,ModuleDetailView,LessonDetailView,QuizDetailView,question_answer,course_enroll,course_certificate,CertPDFView,eLearnAutoRegistrationListView,auto_register_elearn,auto_register_elearn_approve,auto_register_elearn_delete,requestaccess,course_certificateall
 
-#-------------- PCE ---------------------------------#
-urlpatterns = patterns("learn.views",  
+#-------------- PCE  ---------------------------------#
+urlpatterns = [ 
     url(r"^$", direct_to_template, {"template": "learn/index.html"}, name="e-learning"),
  
    
@@ -31,5 +31,4 @@ urlpatterns = patterns("learn.views",
     url(r'^accounts/requestaccess/$',view=requestaccess,name='request-acccess'),
  
    
-  
-)
+]

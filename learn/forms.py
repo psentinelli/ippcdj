@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 
 
 #import autocomplete_light_registry
-import autocomplete_light
+from dal import autocomplete
 #autocomplete_light.autodiscover()
 
 from django import forms

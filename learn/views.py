@@ -1,7 +1,7 @@
 
 #import autocomplete_light
 #autocomplete_light.autodiscover()
-# -- coding: utf-8 --
+# -- coding: utf-8 -- 
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.messages import info, error
@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import User,Group
 from symbol import except_clause
 from ippc.models import  CountryPage,IppcUserProfile
+from django.template.response import TemplateResponse
 
 from .models import Course, Module,Lesson,Category,Resource,Quiz,Question,QuestionField,QuestionResult,QuestionM,QuestionMultiField,QuestionMultiVal,eLearnAutoRegistration
 from .forms import QuestionForm,eLearnAutoRegistrationForm
@@ -19,18 +20,18 @@ from .forms import QuestionForm,eLearnAutoRegistrationForm
     
 
 from django.views.generic import ListView, MonthArchiveView, YearArchiveView, DetailView, TemplateView, CreateView
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.mail import send_mail
 from django.template.defaultfilters import slugify, lower
 from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.forms.models import inlineformset_factory
-from django.contrib.contenttypes.generic import generic_inlineformset_factory 
+from django.contrib.contenttypes.forms import generic_inlineformset_factory 
 from django.forms.formsets import formset_factory
-from compiler.pyassem import order_blocks
+#from compiler.pyassem import order_blocks
 import time
 from django.http import HttpResponse
 from datetime import datetime
@@ -46,9 +47,10 @@ import os
 import shutil
 
 import zipfile
-import StringIO
-from settings import PROJECT_ROOT, MEDIA_ROOT,DATABASES
+from io import StringIO
+#from settings import PROJECT_ROOT, MEDIA_ROOT,DATABASES
 from django.core.files.storage import default_storage
+from myzzz.settings import PROJECT_ROOT, MEDIA_ROOT,DATABASES
 
 import getpass, imaplib, email
 from xml.dom import minidom
@@ -187,7 +189,7 @@ class ModuleDetailView(DetailView):
         modules = Module.objects.filter(course=course)
         module_prev=''
         module_next=''
-        print('xxxxxxxxxxxxxxxxxxxxx')
+        #print('xxxxxxxxxxxxxxxxxxxxx')
         if module.previousmodule != 0:
             module_p = get_object_or_404(Module, id=module.previousmodule)
             module_prev=module_p.title
@@ -238,7 +240,7 @@ class LessonDetailView(DetailView):
         modules = Module.objects.filter(course=course)
         module = get_object_or_404(Module, id=self.kwargs['moduleid'])
         lesson = get_object_or_404(Lesson, id=self.kwargs['pk'])
-        print('ssssssssssssssssssss')
+        #print('ssssssssssssssssssss')
         
         lessons = Lesson.objects.filter(module=module).order_by('_order')
         resource=None
@@ -315,13 +317,13 @@ class QuizDetailView(DetailView):
             results  = QuestionResult.objects.filter(question_id=q.id, userquestion_id=user.id)
             if results.count()>0:
                 res=results[0].result
-                sumresult=sumresult+int(res)
+                sumresult=sumresult+float(res)
         for q in questionMs:
             results  = QuestionResult.objects.filter(question_id=q.id, userquestion_id=user.id)
             if results.count()>0:
                 res=results[0].result
                 print(res)
-                sumresult=sumresult+int(res)
+                sumresult=sumresult+float(res)
         print(sumresult)    
         print('-------------------------------')
         quizattemptresult=sumresult/finalcountquestion 
@@ -358,6 +360,9 @@ def question_answer(request, quizid=None, courseid=None,pk=None,qtype=None, ):
     countchoice=0
     course = get_object_or_404(Course,  id=courseid)
     quiz = get_object_or_404(Quiz,  id=quizid)
+    print("courseid")
+    print(courseid)
+    print(quizid)
     is_in_group=user.groups.filter(name='eLearn').count()>0
     enrolledusers=course.enrolledusers
     if user in course.enrolledusers.all():
@@ -365,10 +370,17 @@ def question_answer(request, quizid=None, courseid=None,pk=None,qtype=None, ):
     if  user.groups.filter(name='Admin') or (is_in_group and enrolled):
         canseecourse=1
     results_id=''
-    results  = QuestionResult.objects.filter(question_id=pk, userquestion_id=user.id)
-    if results.count()>0:
-        results_id=str(results[0].id)
+    print("QUIZ ID")
+    print(quizid)
     
+    results  = QuestionResult.objects.filter(question_id=pk, userquestion_id=user.id,quiz_id=quizid)
+    if results.count()>0:
+        for r in results:
+             print("r.id")
+             print(r.id)
+            
+        results_id=str(results[0].id)
+    print(results_id)
     question=None
     questionM=None
     fieldsMultiVal=''
@@ -497,8 +509,8 @@ def question_answer(request, quizid=None, courseid=None,pk=None,qtype=None, ):
             qnextq_type=questionM.nextq_type
         if results_id == '':
              sql = "INSERT INTO learn_questionresult(question_id,userquestion_id,quiz_id,result,q_latest_date) VALUES ("+str(q_id)+", '"+str(user.id)+"', "+str(quiz.id)+", '"+str(result)+"','"+str(datetime.today())+"');"
-        else:
-            sql = "UPDATE learn_questionresult set result= '"+str(result)+"' where  question_id="+str(q_id)+", q_latest_date='"+str(datetime.today())+"';"
+        else: 
+            sql = "UPDATE learn_questionresult set result= '"+str(result)+"',q_latest_date='"+str(datetime.today())+"' where  userquestion_id="+str(user.id)+" and question_id="+str(q_id)+" and id="+str(results_id)+";"
         
         print(sql)    
         
@@ -520,9 +532,10 @@ def question_answer(request, quizid=None, courseid=None,pk=None,qtype=None, ):
         form = QuestionForm()
        
     
-    return render_to_response('learn/questionform.html', {'form': form,'quiz':quiz,'course':course,'question':question,'questionM':questionM,'questions':questions,'questionMs':questionMs,'arrayfields':arrayfields,'fieldsMultiVal':fieldsMultiVal,'canseecourse':canseecourse},
-            context_instance=RequestContext(request))
-  
+  #  return render_to_response('learn/questionform.html', {'form': form,'quiz':quiz,'course':course,'question':question,'questionM':questionM,'questions':questions,'questionMs':questionMs,'arrayfields':arrayfields,'fieldsMultiVal':fieldsMultiVal,'canseecourse':canseecourse},
+  #          context_instance=RequestContext(request))
+    return TemplateResponse(request,'learn/questionform.html', {'form': form,'quiz':quiz,'course':course,'question':question,'questionM':questionM,'questions':questions,'questionMs':questionMs,'arrayfields':arrayfields,'fieldsMultiVal':fieldsMultiVal,'canseecourse':canseecourse})        
+ 
 @login_required
 @permission_required('learn.add_course', login_url="/accounts/login/")
 def course_enroll(request, courseid=None ):
@@ -636,13 +649,16 @@ def course_certificate(request, id=None):
             cert_ok=1
       
        
-        return render_to_response('learn/certificate.html', {'course':course,'quizzes_array':quizzes_array,'certgrade':certgrade,'canseecourse':canseecourse,'cert_ok':cert_ok},
-            context_instance=RequestContext(request))
+        #return render_to_response('learn/certificate.html', {'course':course,'quizzes_array':quizzes_array,'certgrade':certgrade,'canseecourse':canseecourse,'cert_ok':cert_ok},
+         #   context_instance=RequestContext(request))
+        return TemplateResponse(request,'learn/certificate.html', {'course':course,'quizzes_array':quizzes_array,'certgrade':certgrade,'canseecourse':canseecourse,'cert_ok':cert_ok})        
+     
   
     else:   
-        return render_to_response('learn/certificate.html', {'course':course,'quizzes_array':quizzes_array,'certgrade':certgrade,'canseecourse':canseecourse,'cert_ok':cert_ok},
-            context_instance=RequestContext(request))
-            
+        #return render_to_response('learn/certificate.html', {'course':course,'quizzes_array':quizzes_array,'certgrade':certgrade,'canseecourse':canseecourse,'cert_ok':cert_ok},
+         #   context_instance=RequestContext(request))
+        return TemplateResponse(request,'learn/certificate.html', {'course':course,'quizzes_array':quizzes_array,'certgrade':certgrade,'canseecourse':canseecourse,'cert_ok':cert_ok})        
+          
 
 class CertPDFView(PDFTemplateView):
     context_object_name = 'latest'
@@ -769,8 +785,10 @@ def auto_register_elearn(request):
             if not(request.POST['captcha'] == request.POST['result_element'] ) :
                 error_captcha='error'
                   
-            return render_to_response('learn/elearn_register_create.html', {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha},
-            context_instance=RequestContext(request))
+            #return render_to_response('learn/elearn_register_create.html', {'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha},
+            #context_instance=RequestContext(request))
+            return TemplateResponse(request,'learn/elearn_register_create.html',{'form': form,'x_element': request.POST['x_element'],'y_element': request.POST['y_element'],'result_element': request.POST['result_element'] ,'error_captcha':error_captcha})        
+       
     else:
          x_element=random.randint(1,10)   
          y_element=random.randint(1,10)
@@ -778,9 +796,10 @@ def auto_register_elearn(request):
      
          form = eLearnAutoRegistrationForm()
 # 
-    return render_to_response('learn/elearn_register_create.html', {'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element},
-        context_instance=RequestContext(request))
-     
+   # return render_to_response('learn/elearn_register_create.html', {'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element},
+    #    context_instance=RequestContext(request))
+    return TemplateResponse(request,'learn/elearn_register_create.html',{'form': form ,'x_element':x_element,'y_element':y_element,'result_element':result_element})        
+       
     
 @login_required
 @permission_required('ippc.delete_group', login_url="/accounts/login/")
@@ -876,76 +895,89 @@ def course_certificateall(request, id=None):
     user = request.user
     if user.id ==  1652:
         canseepage=1
-    
+    print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     course = get_object_or_404(Course,  id=id)
     enrolledusers=course.enrolledusers
     for user in enrolledusers.all():
-        quizzes_array=[] 
-        result_array=[] 
-        if course.has_certificate ==1:
-            modules = Module.objects.filter(course=course)
-            q_grade=0
-            quizcount=0
-            done_count=0
-            q_ok_count=0
-            for mod in modules:
-                quiz=None
-                try:
-                    quiz = get_object_or_404(Quiz,  module=mod)
-                except:
+        if user.id == 1652:
+            quizzes_array=[] 
+            result_array=[] 
+            if course.has_certificate ==1:
+
+                modules = Module.objects.filter(course=course)
+                q_grade=0
+                quizcount=0
+                done_count=0
+                q_ok_count=0
+                for mod in modules:
                     quiz=None
+                
+                    try:
+                        quiz = get_object_or_404(Quiz,  module=mod)
+                    except:
+                        quiz=None
 
-                if quiz!=None:
-                    quizcount+=1
-                    questions  =Question.objects.filter(quiz_id=quiz.id)
-                    countquestions=questions.count()
-                    questionMs  =QuestionM.objects.filter(quiz_id=quiz.id)
-                    countquestionMs=questionMs.count()
-                    final_countquestion=countquestionMs+countquestions
-                    done=0
-                    done_count=0
-                    sumresult=0
-                    for q in questions:
-                        results  = QuestionResult.objects.filter(question_id=q.id,quiz_id=quiz.id, userquestion_id=user.id)
-                        if results.count()>0:
-                           done= 1
-                           done_count+=1
-                           sumresult=sumresult+int(results[0].result)
-                        else:
-                           done= 0
-                    for q in questionMs:
-                        results  = QuestionResult.objects.filter(question_id=q.id,quiz_id=quiz.id, userquestion_id=user.id)
-                        if results.count()>0:
-                           done= 1
-                           done_count+=1
-                           sumresult=sumresult+int(results[0].result)
-                        else:
-                           done= 0       
-                    quiz_result=sumresult/final_countquestion
-                    q_ok=0
-                    if quiz_result >= int(quiz.quizgrade):
-                        q_ok=1
-                        q_ok_count+=1
+                    if quiz!=None:
+                        print(quiz)
+                        print(quiz.id)
+                        quizcount+=1
+                        questions  =Question.objects.filter(quiz_id=quiz.id)
+                        countquestions=questions.count()
+                        questionMs  =QuestionM.objects.filter(quiz_id=quiz.id)
+                        countquestionMs=questionMs.count()
+                        final_countquestion=countquestionMs+countquestions
+                        print("........final_countquestion.....................")
+                        print(final_countquestion)
+                      
+                        done=0
+                        done_count=0
+                        sumresult=0
+                        for q in questions:
+                            print(q.id)
+                            results  = QuestionResult.objects.filter(question_id=q.id,quiz_id=quiz.id, userquestion_id=user.id)
+                          
+                            if results.count()>0:
+                               done= 1
+                               done_count+=1
+                               sumresult=sumresult+float(results[0].result)
+                            else:
+                               done= 0
+                        for q in questionMs:
+                            results  = QuestionResult.objects.filter(question_id=q.id,quiz_id=quiz.id, userquestion_id=user.id)
+                            if results.count()>0:
+                               done= 1
+                               done_count+=1
+                               sumresult=sumresult+float(results[0].result)
+                            else:
+                               done= 0       
+                        quiz_result=sumresult/final_countquestion
+                        print("...>>>>>>>>>>>>>quiz_result.......")
+                        print(quiz_result)
+                        q_ok=0
+                        if quiz_result >= int(quiz.quizgrade):
+                            q_ok=1
+                            q_ok_count+=1
 
-                    quizz_array=[]
-                    quizz_array.append(quiz.title)
-                    quizz_array.append(done)
-                    quizz_array.append(q_ok)
-                    quizz_array.append(quiz_result)
-                    quizzes_array.append(quizz_array)
-                    q_grade=q_grade+quiz_result
+                        quizz_array=[]
+                        quizz_array.append(quiz.title)
+                        quizz_array.append(done)
+                        quizz_array.append(q_ok)
+                        quizz_array.append(quiz_result)
+                        quizzes_array.append(quizz_array)
+                        q_grade=q_grade+quiz_result
 
-            certgrade=  q_grade/ quizcount
-            cert_ok=0
-            if certgrade >= int(course.certificategrade) and done_count==quizcount and q_ok_count==quizcount:
-                cert_ok=1
-            result_array.append(quizzes_array)#0
-            result_array.append(user)#1
-            result_array.append(cert_ok)#2
-            result_array.append(certgrade)#3
-            resultss_array.append(result_array)
+                certgrade=  q_grade/ quizcount
+                cert_ok=0
+                if certgrade >= int(course.certificategrade) and done_count==quizcount and q_ok_count==quizcount:
+                    cert_ok=1
+                result_array.append(quizzes_array)#0
+                result_array.append(user)#1
+                result_array.append(cert_ok)#2
+                result_array.append(certgrade)#3
+                resultss_array.append(result_array)
             
-    return render_to_response('learn/certificateall.html', {'course':course,'resultss_array':resultss_array,'canseepage':canseepage,},
-            context_instance=RequestContext(request))
-  
+    #return render_to_response('learn/certificateall.html', {'course':course,'resultss_array':resultss_array,'canseepage':canseepage,},
+     #       context_instance=RequestContext(request))
+    return TemplateResponse(request,'learn/certificateall.html', {'course':course,'resultss_array':resultss_array,'canseepage':canseepage,})        
+       
  

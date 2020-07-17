@@ -1,6 +1,6 @@
 
 from string import punctuation
-from urllib import unquote
+#from urllib import unquote 
 
 from django.db import models
 #from django.contrib.gis.db import models as gismodels
@@ -27,9 +27,13 @@ from mezzanine.utils.importing import import_dotted_path
 from mezzanine.utils.models import upload_to
 
 
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.generic import GenericRelation
+#from django.contrib.contenttypes import generic
+#from django.contrib.contenttypes.generic import GenericRelation
+#from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import fields
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
+
 from django.db.models.signals import post_save
 
 from django.core.exceptions import ValidationError
@@ -58,7 +62,7 @@ class Category(models.Model):
     """ Category  """
     title = models.CharField(_("Category"), max_length=500)
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
     class Meta:
         verbose_name = _("Category")
@@ -68,29 +72,29 @@ class Category(models.Model):
 class Course(models.Model):
     """ Course  """
     title = models.CharField(_("Course"), max_length=500)
-    category = models.ForeignKey(Category, related_name="learn_category")
+    category = models.ForeignKey(Category, related_name="learn_category",on_delete=models.DO_NOTHING,)
     status = models.IntegerField(_("Status"), choices=STATUS_CHOICES, default=IS_PUBLIC)
     datecreated = models.DateTimeField(_("Date created"), blank=True, null=True, editable=False, auto_now=True)    
     coursesummary = models.TextField(_("Course summary"),  blank=True, null=True)
     enrolledusers = models.ManyToManyField(User, 
         verbose_name=_("Users enrolled"), 
-        related_name='enrolledusers', blank=True, null=True)
+        related_name='enrolledusers', blank=True)#, null=True)   
     has_certificate = models.BooleanField(_("Generate a certificate of achivment "), help_text=_("True/False"), default=False)        
     certificategrade = models.CharField(_("Certificate grade"), max_length=50)
    
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 class Module(models.Model):
     """ Module  """
     title = models.CharField(_("Title"), max_length=500)
-    course = models.ForeignKey(Course, related_name="learn_course")
+    course = models.ForeignKey(Course, related_name="learn_course",on_delete=models.DO_NOTHING,)
     image = models.ImageField(_("Image of background"), upload_to="files/mediakitdocument/images/", blank=True)
     modulesummary = models.TextField(_("Module summary"),  blank=True, null=True)
     previousmodule=  models.IntegerField(_("Previous"),default=0)
     nextmodule=  models.IntegerField(_("Next"),default=0)
  
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 class Lesson(Orderable):
@@ -100,18 +104,18 @@ class Lesson(Orderable):
         verbose_name = _("Lesson")
         verbose_name_plural = _("Lessons")
   
-    course = models.ForeignKey(Course, related_name="learnmod_course")
-    module = models.ForeignKey(Module, related_name="learn_module")
+    course = models.ForeignKey(Course, related_name="learnmod_course",on_delete=models.DO_NOTHING,)
+    module = models.ForeignKey(Module, related_name="learn_module",on_delete=models.DO_NOTHING,)
     title = models.CharField(_("Title"), blank=False, null=True, max_length=250)
     lessontext = models.TextField(_("Short Description"),  blank=True, null=True)
     previouspage=  models.IntegerField(_("Previous"),default=0)
     nextpage=  models.IntegerField(_("Next"),default=0)
    
   
-    def __unicode__(self):
+    def __str__(self):
         return self.title
  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('lesson-detail', (), {
@@ -126,17 +130,17 @@ class Quiz(Orderable):
         verbose_name = _("Quiz")
         verbose_name_plural = _("Quizzes")
   
-    course = models.ForeignKey(Course, related_name="quiz_course")
-    module = models.ForeignKey(Module, related_name="quiz_module")
+    course = models.ForeignKey(Course, related_name="quiz_course",on_delete=models.DO_NOTHING,)
+    module = models.ForeignKey(Module, related_name="quiz_module",on_delete=models.DO_NOTHING,)
     title = models.CharField(_("Title"), blank=False, null=True, max_length=250)
     quiztext = models.TextField(_("Short Description"),  blank=True, null=True)
     quizgrade = models.CharField(_("Quiz grade"), max_length=50)
    
   
-    def __unicode__(self):
+    def __str__(self):
         return self.title
  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a PCE Version."""
         return ('quiz-detail', (), {
@@ -173,7 +177,7 @@ class Question(Orderable):
   
     title = models.CharField(_("Title"), blank=False, null=True, max_length=250)
     q_summary = models.TextField(_("Summary"),  blank=True, null=True)
-    quiz = models.ForeignKey(Quiz, related_name="quiz")
+    quiz = models.ForeignKey(Quiz, related_name="quiz",on_delete=models.DO_NOTHING,)
     q_type= models.IntegerField(_("Question type"), choices=QUESTION_TYPE_CHOICES, default=QUESTION_TYPE_1)      
     previousq=  models.IntegerField(_("Previous"),default=0)
     nextq=  models.IntegerField(_("Next"),default=0)
@@ -181,15 +185,15 @@ class Question(Orderable):
     nextq_type= models.IntegerField(_("Question next type"), choices=QUESTIONNEXTPREV, default=QUESTIONNEXTPREV_TYPE_1)      
  
   
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 class QuestionField(models.Model):
-    question = models.ForeignKey(Question)
+    question = models.ForeignKey(Question,on_delete=models.DO_NOTHING,)
     text = models.CharField(max_length=500)
     answer = models.BooleanField(verbose_name=_("True/False"), default=False)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.text  
 
 
@@ -202,7 +206,7 @@ class QuestionM(Orderable):
   
     title = models.CharField(_("Title"), blank=False, null=True, max_length=250)
     q_summary = models.TextField(_("Summary"),  blank=True, null=True)
-    quiz = models.ForeignKey(Quiz, related_name="quizm")
+    quiz = models.ForeignKey(Quiz, related_name="quizm",on_delete=models.DO_NOTHING,)
     q_type= models.IntegerField(_("Question type"), choices=QUESTION_TYPE_CHOICES, default=QUESTION_TYPE_1)      
     previousq=  models.IntegerField(_("Previous"),default=0)
     nextq=  models.IntegerField(_("Next"),default=0)
@@ -211,21 +215,21 @@ class QuestionM(Orderable):
  
    
   
-    def __unicode__(self):
+    def __str__(self):
         return self.title
     
 class QuestionMultiField(models.Model):
-    question = models.ForeignKey(QuestionM)
+    question = models.ForeignKey(QuestionM,on_delete=models.DO_NOTHING,)
     text = models.CharField(max_length=500)
   
-    def __unicode__(self):  
+    def __str__(self):  
         return self.text 
 class QuestionMultiVal(models.Model):
-    question = models.ForeignKey(QuestionMultiField)
+    question = models.ForeignKey(QuestionMultiField,on_delete=models.DO_NOTHING,)
     value = models.CharField(max_length=500)
     answer = models.BooleanField(verbose_name=_("True/False"), default=False)
 
-    def __unicode__(self):  
+    def __str__(self):  
         return self.value 
     
 class QuestionResult(Orderable):
@@ -234,14 +238,14 @@ class QuestionResult(Orderable):
     class Meta:
         verbose_name = _("Question Result")
         verbose_name_plural = _("Question Results")
-    question = models.ForeignKey(Question)
-    quiz = models.ForeignKey(Quiz)
-    userquestion = models.ForeignKey(User, related_name="question_user")
+    question = models.ForeignKey(Question,on_delete=models.DO_NOTHING,)
+    quiz = models.ForeignKey(Quiz,on_delete=models.DO_NOTHING,)
+    userquestion = models.ForeignKey(User, related_name="question_user",on_delete=models.DO_NOTHING,)
     result = models.CharField(_("result"), blank=False, null=True, max_length=250)
     q_latest_date = models.DateTimeField(_("Publication date"), blank=True, null=True, editable=True)
     
   
-    def __unicode__(self):
+    def __str__(self):
         return self.question
  
                             
@@ -254,13 +258,13 @@ class Resource(Orderable):
         verbose_name = _("Resource")
         verbose_name_plural = _("Resources")
   
-    course = models.ForeignKey(Course, related_name="resmod_course")
-    module = models.ForeignKey(Module, related_name="reslearn_module")
+    course = models.ForeignKey(Course, related_name="resmod_course",on_delete=models.DO_NOTHING,)
+    module = models.ForeignKey(Module, related_name="reslearn_module",on_delete=models.DO_NOTHING,)
     title = models.CharField(_("Title"), blank=False, null=True, max_length=250)
     resourcetext = models.TextField(_("Resources Description"),  blank=True, null=True)
     
   
-    def __unicode__(self):
+    def __str__(self):
         return self.title                                                        
 AUTOREGISTER_1 = 1
 AUTOREGISTER_2 = 2
@@ -280,7 +284,7 @@ class eLearnAutoRegistration(models.Model):
     summary =  models.CharField(_("describe why you need access to e-learning courses"), blank=True, null=True,max_length=500,)
     status = models.IntegerField(_("Publish or Reject"), choices=AUTOREGISTER_CHOICES, default=AUTOREGISTER_1)
     publish_date = models.DateTimeField(_("Publish date"), blank=True, null=True, editable=True)
-    def __unicode__(self):  
+    def __str__(self):  
         return self.lastname+self.firstname+'.'
     def name(self):
         return self.lastname

@@ -1,4 +1,4 @@
-# https://gist.github.com/renyi/3596248
+# https://gist.github.com/renyi/3596248 
 from django import template
 from django.utils import translation
 

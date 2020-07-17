@@ -1,12 +1,11 @@
 
-# https://gist.github.com/renyi/3596248
+# https://gist.github.com/renyi/3596248 
 from copy import deepcopy
 from django.contrib import admin
 from mezzanine.pages.models import Page, RichTextPage, Link
 from mezzanine.pages.admin import PageAdmin, LinkAdmin
 from mezzanine.conf import settings
-from mezzanine.core.admin import TabularDynamicInlineAdmin, StackedDynamicInlineAdmin,DisplayableAdmin, OwnableAdmin
-from settings import ALLOWED_HOSTS 
+from mezzanine.core.admin import TabularDynamicInlineAdmin, DisplayableAdmin, OwnableAdmin
 
 from .models import Category, Course,Lesson,Module,Resource,Question,Quiz,QuestionField,QuestionMultiField,QuestionMultiVal,QuestionM
 
@@ -18,14 +17,15 @@ from django import forms
 from django.core import mail
 from django.core.mail import send_mail
 
-from django_markdown.admin import MarkdownModelAdmin
+#from django_markdown.admin import MarkdownModelAdmin
 
 from django.shortcuts import get_object_or_404
 
-import autocomplete_light
+#import autocomplete_light
+from dal import autocomplete
 #import autocomplete_light_registry
 
-from django_markdown.widgets import MarkdownWidget
+#from django_markdown.widgets import MarkdownWidget
 
 
 
@@ -91,7 +91,7 @@ admin.site.register(Quiz, QuizAdmin)
 
 class QuestionFieldInline(admin.TabularInline):
     model = QuestionField
-    formset = inlineformset_factory(Question,  QuestionField,extra=1)
+    formset = inlineformset_factory(Question,  QuestionField,extra=1,fields = '__all__')
    
 
 
@@ -109,7 +109,7 @@ admin.site.register(Question, QuestionAdmin)
 
 class QuestionMultiValInline(admin.TabularInline):
     model = QuestionMultiVal
-    formset = inlineformset_factory(QuestionMultiField,  QuestionMultiVal,extra=1)
+    formset = inlineformset_factory(QuestionMultiField,  QuestionMultiVal,extra=1,fields = '__all__')
   
    
    
@@ -127,7 +127,7 @@ admin.site.register(QuestionMultiField, QuestionMultiFieldAdmin)
     
 class QuestionMultiFieldInline(admin.TabularInline):
     model = QuestionMultiField
-    formset = inlineformset_factory(QuestionM,  QuestionMultiField,extra=1)
+    formset = inlineformset_factory(QuestionM,  QuestionMultiField,extra=1,fields = '__all__')
    
 
 

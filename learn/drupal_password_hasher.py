@@ -1,5 +1,5 @@
 """
-DrupalPasswordHasher
+DrupalPasswordHasher 
 http://stackoverflow.com/questions/9876700/migrate-passwords-from-drupal-7-to-django
 https://gist.github.com/2344345/8713ee2d498ef9d0263a53e4c367aa3507a57d81
 
