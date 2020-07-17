@@ -1,20 +1,27 @@
-import autocomplete_light
-autocomplete_light.autodiscover()
+from __future__ import unicode_literals
 
-from django.conf.urls import patterns, include, url
+ 
+from django.conf.urls import include, url
+from django.conf.urls.i18n import i18n_patterns
+from django.contrib import admin
+from django.views.i18n import set_language
+
+from mezzanine.core.views import direct_to_template
+from mezzanine.conf import settings
+
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.contrib.sitemaps import GenericSitemap
 from mezzanine.pages.models import RichTextPage
-from .news.models import NewsPost
+from news.models import NewsPost
+from django.views.i18n import JavaScriptCatalog
 
-# from django.contrib.auth.decorators import login_required
 
-# from django.contrib.admin.views.decorators import staff_member_required
+# Uncomment to use blog as home page. See also urlpatterns section below.
+# from mezzanine.blog import views as blog_views
 
-from django.contrib import admin
 admin.autodiscover()
-from .ippc.views import IppcUserProfileDetailView,profile_update, PestReportListView, PestReportHiddenListView,\
+from ippc.views import IppcUserProfileDetailView,profile_update, PestReportListView, PestReportHiddenListView,\
 PestReportDetailView, CountryView,PartnersView, pest_report_create, pest_report_edit, PublicationDetailView,PublicationDetail2View,\
 PublicationListView,ReportingObligationListView, ReportingObligationDetailView,reporting_obligation_create, reporting_obligation_edit, \
 EventReportingListView, EventReportingDetailView,event_reporting_create, event_reporting_edit,\
@@ -50,46 +57,40 @@ B_CertificatesToolListView,B_CertificatesToolDetailView,generate_b_certificates,
 MembershipShortListView,generate_shortlist,generate_shortlistparticipant,generate_listNEW1,\
 generate_b_certificatesnew,generate_certificatesnew,CountryStatsSingleListOfRegulatesPestsListView,select_cns_nros_stats,nro_stats_files,contactPointsXML,\
 ContributedResourceListView,  ContributedResourceDetailView,ContributedResourcePendingListView,ContributedResourcePendingDetailView,contribuitedresource_create,contribuitedresource_edit,my_tool2,MyTool2DetailView,nro_stats3_files,AdvancesSearchResourcesListView,PublicationMeetingFilesListView,ReportingSystemCNListView,\
-ReportingSystemSummaryCNListView,UserAutoRegistrationResourcesListView,auto_registerresources,auto_registerresources_approve,auto_registerresources_delete,disable_users,enable_users
+ReportingSystemSummaryCNListView,UserAutoRegistrationResourcesListView,auto_registerresources,auto_registerresources_approve,auto_registerresources_delete,disable_users,enable_users,\
+profile,NamesAutocomplete,IssueKeywordAutocomplete,CommodityKeywordAutocomplete,PhytosanitaryTreatmentTypeAutocomplete,TopicAutocomplete,UserAutocomplete
 #reporting_obligation_translate,
 from schedule.periods import Year, Month, Week, Day
 from mezzanine.core.views import direct_to_template
-
+from schedule.views import register_to_event,   unregister_to_event,   resend_invite,   calendar_by_cn,   calendar_by_periods,   create_or_edit_event,   calendar_by_year
+    
 import mezzanine_pagedown.urls
-
-# http://django-envelope.readthedocs.org/en/latest/customization.html
-# from envelope.views import ContactView
-
-
-
+from mezzanine.accounts.views import signup
 # Add the urlpatterns for any custom Django applications here.
 # You can also change the ``home`` view to add your own functionality
 # to the project's homepage.
-js_info_dict = {
-    'packages': ('ippc',),
-}
-# Sitemaps 
-# Define information to be published in dictionaries
-ippcnews_dict = {
-    'queryset': NewsPost.objects.published(),
-    'date_field': 'publish_date',
-    }
-page_dict = {
-    'queryset': RichTextPage.objects.published(),
-    }
-sitemaps = {
-    'pages': GenericSitemap(page_dict, priority=0.6),
-    'ippcnews': GenericSitemap(ippcnews_dict, priority=0.8),
-    }
+urlpatterns = [
+  
+    url('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
 
+url(r'^google10111c8a3426cf77\.html$', lambda r:HttpResponse("google-site-verification: google10111c8a3426cf77.html", mimetype="text/plain")),
+url(r'^robots\.txt$', lambda r: HttpResponse("User-agent:*\nDisallow: ", mimetype="text/plain")),
 
-urlpatterns = patterns("",
-    (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
-(r'^google10111c8a3426cf77\.html$', lambda r:HttpResponse("google-site-verification: google10111c8a3426cf77.html", mimetype="text/plain")),
-(r'^robots\.txt$', lambda r: HttpResponse("User-agent:*\nDisallow: ", mimetype="text/plain")),
-    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
+ 
+]
+urlpatterns += i18n_patterns(
+    url("^$", direct_to_template, {"template": "index.html"}, name="home"),
+    url(r'^su/', include('django_su.urls')),
+    url(r'^account/signup/$',  signup, name="signup"),
    
-   #-------------- NEWS notification subscribe:
+    url(r'^names-autocomplete/$', NamesAutocomplete.as_view(), name='names-autocomplete',),
+    url(r'^issuekeyword-autocomplete/$', IssueKeywordAutocomplete.as_view(), name='issuekeyword-autocomplete',),
+    url(r'^commoditykeyword-autocomplete/$', CommodityKeywordAutocomplete.as_view(), name='commoditykeyword-autocomplete',),
+    url(r'^phytosanitarytreatmenttype-autocomplete/$', PhytosanitaryTreatmentTypeAutocomplete.as_view(), name='phytosanitarytreatmenttype-autocomplete',),
+    url(r'^topic-autocomplete/$',TopicAutocomplete.as_view(), name='topic-autocomplete',),
+    url(r'^user-autocomplete/$', UserAutocomplete.as_view(), name='user-autocomplete',),
+    
+#-------------- NEWS notification subscribe:
    url(r'^news-subscribe/(?P<type>\d+)/$',subscribe_to_news, name='subscribe_to_news'),
    url(r'^news-un-subscribe/(?P<type>\d+)/$',unsubscribe_to_news, name='un-subscribe_to_news'),
    
@@ -173,7 +174,7 @@ urlpatterns = patterns("",
     
 
 
-    url('^markdown/', include( 'django_markdown.urls')),
+    #url('^markdown/', include( 'django_markdown.urls')),
     # forum detail
     # url(r'^forum/(?P<slug>[\w-]+)/$',
     #     view=ForumPostDetailView.as_view(),
@@ -194,54 +195,50 @@ urlpatterns = patterns("",
     # url("^legal/$", direct_to_template, {"template": "legal.html"}, name="legal"),
     # url("^colophon/$", direct_to_template, {"template": "colophon.html"}, name="colophon"),
     # url("^faq/$", direct_to_template, {"template": "sitemap.html"}, name="sitemap"),
-    url(r'^autocomplete/', include('autocomplete_light.urls')),
+    #url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^events/', include('schedule.urls')),
-    
-    
-    
-   
-    url(r'^month/(?P<calendar_slug>[-\w]+)/$',
-        'schedule.views.calendar_by_periods',
+   url(r'^month/(?P<calendar_slug>[-\w]+)/$',
+       calendar_by_periods,
         name="month_calendar",
         kwargs={'periods': [Month], 'template_name': 'schedule/calendar_month.html'}),
     url(r'^event/create/(?P<calendar_slug>[-\w]+)/$',
-        'schedule.views.create_or_edit_event',
+        create_or_edit_event,
         name='calendar_create_event'),
     url(r'^year/(?P<calendar_slug>[-\w]+)/$',
-        'schedule.views.calendar_by_year',
+       calendar_by_year,
         name="year_calendar",
         kwargs={'year': [Year], 'template_name': 'schedule/calendar_year.html'}),
     url(r'^countries/(?P<country>[\w-]+)/calendar/$',
-        'schedule.views.calendar_by_cn',
+        calendar_by_cn,
         name="country_calendar",
         kwargs={'template_name': 'schedule/calendar_cn.html'}),
         
         
     url(r'^countries/(?P<country>[\w-]+)/(?P<calendar_slug>[-\w]+)/add/$',
-        'schedule.views.create_or_edit_event',
+        create_or_edit_event,
         name='calendar_create_event'),
     url(r'^create/(?P<country>[\w-]+)/(?P<calendar_slug>[-\w]+)/$',
-        'schedule.views.create_or_edit_event',
+       create_or_edit_event,
         name='calendar_create_event'),   
     #edit    
     url(r'^edit/(?P<country>[\w-]+)/(?P<calendar_slug>[-\w]+)/(?P<event_id>\d+)/$',
-        'schedule.views.create_or_edit_event',
+       create_or_edit_event,
         name='edit_event'),    
   # countries
     
     #register-to-event
       url(r'^register/(?P<id>\d+)/$',
-        'schedule.views.register_to_event',
+      register_to_event,
         name='register-to-event'),   
     #un-register-to-event
       url(r'^un-register/(?P<id>\d+)/$',
-        'schedule.views.unregister_to_event',
+       unregister_to_event,
         name='un-register-to-event'), 
     #url(r'^generate-participants-list/(?P<id>\d+)/$',
     #    'ippc.views.generate_participantslist',
     #    name='generate-participants-list'),     
    url(r'^resend-invite/(?P<id>\d+)/$',
-        'schedule.views.resend_invite',
+      resend_invite,
         name='resend-invite'),     
     
     # individual country home
@@ -842,12 +839,14 @@ url(r'^external-cooperation/organizations-page-in-ipp/(?P<partner>[\w-]+)/$',   
     #    name='event-reporting-hidden-list'),
     #------------------USERS------------------
     #url(r'^users/(?P<pk>[\w-]+)/$',
-    #    view=IppcUserProfileDetailView.as_view(),
-    #    name="user-detail"),
+     #   view=IppcUserProfileDetailView.as_view(),
+      #  name="user-detail"),
     # url(r'^account/update/(?P<id>[\w-]+)/$',
     #     view=profile_update,
     #     name="profile-update"),
-         
+    url(r'^users/(?P<username>[\w-]+)/$',
+            view=profile, name="profile"),
+    
 #-------------------------------------------#
    # pfa list
     url(r'^countries/(?P<country>[\w-]+)/pestfreeareas/$',
@@ -916,7 +915,7 @@ url(r'^external-cooperation/organizations-page-in-ipp/(?P<partner>[\w-]+)/$',   
         name='commenta'),
 
 
-    url(r"^login/user/(?P<user_id>.+)/$", "loginas.views.user_login", name="loginas-user-login"),
+#    url(r"^login/user/(?P<user_id>.+)/$", "loginas.views.user_login", name="loginas-user-login"),
 
 #---------- USER MEMBERSHIP HISTORY ------------------------------#
 
@@ -946,12 +945,8 @@ url(r'^external-cooperation/organizations-page-in-ipp/(?P<partner>[\w-]+)/$',   
 
 #-------------------------------------------#
     # pagedown for markdown wysiwyg
-    ("^pagedown/", include(mezzanine_pagedown.urls)),
-    
-    # Change the admin prefix here to use an alternate URL for the
-    # admin interface, which would be marginally more secure.
-    ("^admin/", include(admin.site.urls)),
-
+  url("^pagedown/", include(mezzanine_pagedown.urls)),
+   
     # We don't want to presume how your homepage works, so here are a
     # few patterns you can use to set it up.
 
@@ -962,8 +957,7 @@ url(r'^external-cooperation/organizations-page-in-ipp/(?P<partner>[\w-]+)/$',   
     # one homepage pattern, so if you use a different one, comment this
     # one out.
 
-    url("^$", direct_to_template, {"template": "index.html"}, name="home"),
-
+   
     # HOMEPAGE AS AN EDITABLE PAGE IN THE PAGE TREE
     # ---------------------------------------------
     # This pattern gives us a normal ``Page`` object, so that your
@@ -992,7 +986,7 @@ url(r'^external-cooperation/organizations-page-in-ipp/(?P<partner>[\w-]+)/$',   
     # MEZZANINE'S URLS
     # ----------------
     # ADD YOUR OWN URLPATTERNS *ABOVE* THE LINE BELOW.
-    # ``mezzanine.urls`` INCLUDES A *CATCH ALL* PATTERN
+    # ``mezzanine.urls`` IloginNCLUDES A *CATCH ALL* PATTERN
     # FOR PAGES, SO URLPATTERNS ADDED BELOW ``mezzanine.urls``
     # WILL NEVER BE MATCHED!
 
@@ -1001,9 +995,7 @@ url(r'^external-cooperation/organizations-page-in-ipp/(?P<partner>[\w-]+)/$',   
     # from it, and use them directly below instead of using
     # ``mezzanine.urls``.
 
-    ("^", include("mezzanine.urls")),
-
-
+  
     # MOUNTING MEZZANINE UNDER A PREFIX
     # ---------------------------------
     # You can also mount all of Mezzanine's urlpatterns under a
@@ -1019,8 +1011,21 @@ url(r'^external-cooperation/organizations-page-in-ipp/(?P<partner>[\w-]+)/$',   
     # need to use the ``SITE_PREFIX`` setting as well.
 
     # ("^%s/" % settings.SITE_PREFIX, include("mezzanine.urls"))
+    url(r'^admin/', include(admin.site.urls)),
+        # If you'd like more granular control over the patterns in
+    # ``mezzanine.urls``, go right ahead and take the parts you want
+    # from it, and use them directly below instead of using
+    # ``mezzanine.urls``.
+    url("^", include("mezzanine.urls")),
 
 )
+
+
+#if settings.USE_MODELTRANSLATION:
+  #  urlpatterns += [
+ #       url('^i18n/$', set_language, name='set_language'),
+#    ]
+
 
 # Adds ``STATIC_URL`` to the context of error pages, so that error
 # pages can use JS, CSS and images.
