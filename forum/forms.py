@@ -9,7 +9,7 @@ from mezzanine.core.models import CONTENT_STATUS_DRAFT
 # since it posts to the forum post admin, which includes these fields
 # and will use empty values instead of the model defaults, without
 # these specified.
-hidden_field_defaults = ("status", "gen_description", "allow_comments")
+hidden_field_defaults = ("status",  "gen_description", "allow_comments")
 
 
 class ForumPostForm(forms.ModelForm):
