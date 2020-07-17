@@ -15,7 +15,7 @@ from mezzanine.utils.views import render, paginate
 from mezzanine.utils.models import get_user_model
 from django.views.generic import ListView,DetailView,TemplateView
 from django.contrib.auth.decorators import login_required, permission_required
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.contrib.messages import info, error
 from django.utils.translation import ugettext_lazy as _

@@ -6,22 +6,23 @@ from django.utils.translation import ugettext_lazy as _
 
 from .models import IyphPost, IyphCategory,TransIyphPost,Chronology,TransChronology,IYPHSteeringCommitteeResource,IYPHToolBoxItem,IYPHToolBoxCategory,PhotoLibrary,Photo,IYPHPage,ChronologyFiles,TransIYPHPage
 from mezzanine.conf import settings
-from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin,StackedDynamicInlineAdmin
+from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin,TabularDynamicInlineAdmin
 
 from django.forms.models import inlineformset_factory
 from django.forms.formsets import formset_factory
 from django.contrib.auth.models import User,Group
 from django import forms
-from django_markdown.widgets import MarkdownWidget
+#from django_markdown.widgets import MarkdownWidget
+from mezzanine_pagedown.widgets import PageDownWidget
 
 
-class TransIyphPostAdmin(StackedDynamicInlineAdmin):
+class TransIyphPostAdmin(TabularDynamicInlineAdmin):
     model = TransIyphPost
     fields = ("lang", "title", "content")
     
 
 
-class TransChronologyAdmin(StackedDynamicInlineAdmin):
+class TransChronologyAdmin(TabularDynamicInlineAdmin):
     model = TransChronology
     fields = ("lang", "title", "summary")
     
@@ -91,7 +92,7 @@ admin.site.register(IyphPost, IyphPostAdmin)
 admin.site.register(IyphCategory, IyphCategoryAdmin)
 class ChronologyFilesInline(admin.TabularInline):
     model = ChronologyFiles
-    formset = inlineformset_factory(Chronology,  ChronologyFiles,extra=1)
+    formset = inlineformset_factory(Chronology,  ChronologyFiles,extra=1,fields = '__all__')
     
 class ChronologyAdmin(admin.ModelAdmin):
     save_on_top = True
@@ -144,7 +145,8 @@ admin.site.register(IYPHToolBoxCategory, IYPHToolBoxCategoryAdmin)
 class MyPhotoLibraryAdminForm(forms.ModelForm):
     class Meta:
         model = PhotoLibrary
-        widgets = { 'short_description':MarkdownWidget() 
+        fields = '__all__'
+        widgets = { 'short_description':PageDownWidget() 
         }
 
 
@@ -175,12 +177,13 @@ admin.site.register(PhotoLibrary, PhotoLibraryAdmin)
 class MyIYPHPageAdminForm(forms.ModelForm):
     class Meta:
         model = IYPHPage
-        widgets = { 'short_description':MarkdownWidget() 
+        fields = '__all__'
+        widgets = { 'short_description':PageDownWidget() 
         }
 
    
 
-class TransIYPHPageAdmin(StackedDynamicInlineAdmin):
+class TransIYPHPageAdmin(TabularDynamicInlineAdmin):
     model = TransIYPHPage
     fields = ("lang", "title", "short_description")
 

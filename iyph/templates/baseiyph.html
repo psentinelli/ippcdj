@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="{{ LANGUAGE_CODE }}"{% if LANGUAGE_BIDI %} dir="rtl"{% endif %}>
-{% load pages_tags mezzanine_tags i18n future staticfiles %}
+{% load pages_tags mezzanine_tags i18n static %}
 <head>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width">
@@ -10,7 +10,7 @@
 <title>{% block meta_title %}{% endblock %} - {% trans "International Year Plant Health" %}</title>
 <link rel="shortcut icon" href="{% static "img/favicon.ico" %}">
 <link rel="stylesheet" type="text/css" href="/static/grappelli/css/widgets.css">
-{% ifinstalled iyph %}
+{% ifinstalled iyph %} 
 <link rel="alternate" type="application/rss+xml" title="RSS" href="{% url "iyph_post_feed" "rss" %}">
 <link rel="alternate" type="application/atom+xml" title="Atom" href="{% url "iyph_post_feed" "atom" %}">
 {% endifinstalled %}
@@ -44,7 +44,8 @@
 <script src="{% static "js/chosen.jquery.min.js" %}"></script>
 <script src="{% static "js/jquery.min.js" %}"></script>
 
-<script type="text/javascript" src="{% url "django.views.i18n.javascript_catalog" %}"></script>
+<script type="text/javascript" src="/en/jsi18n/"></script>
+   
 <script type="text/javascript" src="/static/admin/js/core.js"></script>
 
 <script type="tepxt/javascript" src="/static/admin/js/jquery.min.js"></script> 
@@ -55,7 +56,7 @@
 <script type="text/javascript" src="https://www.ippc.int/static/admin/js/admin/DateTimeShortcuts.js"></script>
 <script src="http://127.0.0.1:8000/static/js/timeline_2.3.0/timeline_js/timeline-api.js?bundle=true" type="text/javascript"></script>
 
-{% include 'autocomplete_light/static.html' %}
+
 
 <script src="{% static "js/jquery.formset.js" %}"></script>
 

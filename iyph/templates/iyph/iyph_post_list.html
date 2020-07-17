@@ -1,5 +1,5 @@
-{% extends "baseiyph.html" %}
-{% load i18n future mezzanine_tags iyph_tags keyword_tags disqus_tags %}
+{% extends "baseiyph.html"  %}
+{% load i18n  mezzanine_tags iyph_tags keyword_tags disqus_tags %}
 
 {% block meta_title %}{% if page %}{{ page.richtextpage.meta_title }}{% else %}{% trans "Iyph" %}{% endif %}{% endblock %}
 
@@ -70,7 +70,7 @@
     {% if page %}
     {% block iyph_post_list_pagecontent %}
     {# {% editable page.richtextpage.content %} #}
-    {{ page.richtextpage.content|richtext_filter|safe }}
+    {{ page.richtextpage.content|richtext_filters|safe }}
     {# {% endeditable %} #}
     {% endblock %}
     {% endif %}
@@ -115,7 +115,7 @@
 {# {% editable iyph_post.content %} #}
 
  {% with iyph_post|get_object_translation as translated_page %}
-             {{ translated_page.content|richtext_filter|safe |truncatewords_html:100 }}
+             {{ translated_page.content|richtext_filters|safe |truncatewords_html:100 }}
       
     {% endwith %}
 {# {% endeditable %} #}

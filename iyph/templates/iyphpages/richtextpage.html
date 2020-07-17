@@ -1,4 +1,4 @@
-{% extends "baseiyph.html" %}
+{% extends "baseiyph.html" %} 
 {% load i18n mezzanine_tags keyword_tags translate_tags %}
 
 {% block meta_title %}
@@ -28,14 +28,14 @@
 {% block main %}
  {% if user.is_superuser %} 
     <div class="pull-right">
-        <a class="btn btn-info btn-small" href="/admin/pages/richtextpage/{{ page.id }}">Edit as Admin</a><br>
+        <a class="btn btn-info btn-small" href="/admin/pages/richtextpage/{{ page.id }}/change/">Edit as Admin</a><br>
     </div>
     {% endif %}
     
     
     {{ block.super }}
     {% with page.richtextpage|get_object_translation as translated_page %}
-        {{ translated_page.content|richtext_filter|safe }}
+        {{ translated_page.content|richtext_filters|safe }}
     {% endwith %}
     {% ifequal page.id  530 %} 
          {% include "pages/tools.html" %}

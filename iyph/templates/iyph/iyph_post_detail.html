@@ -1,5 +1,5 @@
-{% extends "iyph/iyph_post_list.html" %}
-{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n future disqus_tags iyph_tags %}
+{% extends "iyph/iyph_post_list.html"  %}
+{% load mezzanine_tags comment_tags keyword_tags rating_tags i18n  disqus_tags iyph_tags %}
 
 {% block meta_title %}{{ iyph_post.meta_title }}{% endblock %}
 
@@ -38,7 +38,7 @@
 {% if user.is_superuser or perms.iyph.add_iyphpost  %} {#and request.user.get_profile.user_id  == iyph_post.user_id#} 
 
     <div class="pull-right">
-        <a class="btn btn-info btn-small" href="/admin/iyph/iyphpost/{{ iyph_post.id }}">Edit as Admin</a><br>
+        <a class="btn btn-info btn-small" href="/admin/iyph/iyphpost/{{ iyph_post.id }}/change/">Edit as Admin</a><br>
     </div>
 {% endif %}
 {% block iyph_post_detail_postedby %}
@@ -62,7 +62,7 @@
 {% block iyph_post_detail_content %}
 
  {% with iyph_post|get_object_translation as translated_page %}
-            {{ translated_page.content|richtext_filter|safe  }}
+            {{ translated_page.content|richtext_filters|safe  }}
     {% endwith %}
 {% endblock %}
 

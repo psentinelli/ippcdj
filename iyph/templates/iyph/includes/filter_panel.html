@@ -1,7 +1,7 @@
-{% load iyph_tags keyword_tags i18n mezzanine_tags staticfiles future %}
+{% load iyph_tags keyword_tags i18n mezzanine_tags static  %}
 
 {% if user.is_superuser  or perms.iyph.add_iyphpost  %} 
-    <div class="pull-right">
+    <div class="pull-right"> 
         <a class="btn btn-small btn-info" href="/admin/iyph/iyphpost/add/">{% trans "Add new item" %}</a><br>
     </div>
 {% endif %}

@@ -7,7 +7,7 @@ the setting is editable via Django's admin.
 Thought should be given to how a setting is actually used before
 making it editable, as it may be inappropriate - for example settings
 that are only read during startup shouldn't be editable, since changing
-them would require an application reload.
+them would require  an application reload.
 """
 
 from django.conf import settings

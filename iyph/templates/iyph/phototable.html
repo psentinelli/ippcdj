@@ -1,4 +1,4 @@
-{% load mezzanine_tags staticfiles i18n %}
+{% load mezzanine_tags static i18n  %}
 
 {%if photolibrary.id == 4%}
    {% if user.is_superuser or perms.ippc.change_publication  or perms.iyph.change_photo %}
@@ -24,7 +24,7 @@
                      <br> <b>Place taken: </b>{{ photo.place_taken}}
                      <br> <b>Agree to the Terms and Condition: </b>{{ photo.agree}}
             </td>
-              <td> {% if user.is_superuser or perms.ippc.change_publication %} <a class="btn btn-small btn-success" href="/admin/iyph/photo/{{photo.id}}" style="color:#fff;"><i class="icon-edit icon-white"></i> {% trans "Edit as admin" %}</a>  {% endif %}     </p>
+              <td> {% if user.is_superuser or perms.ippc.change_publication %} <a class="btn btn-small btn-success" href="/admin/iyph/photo/{{photo.id}}/change/" style="color:#fff;"><i class="icon-edit icon-white"></i> {% trans "Edit as admin" %}</a>  {% endif %}     </p>
     
              </td>
         </tr> 

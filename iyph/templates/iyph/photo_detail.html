@@ -1,5 +1,5 @@
-{% extends "baseiyph.html" %}
-{% load pages_tags mezzanine_tags i18n future staticfiles accounts_tags %}
+{% extends "baseiyph.html"  %}
+{% load pages_tags mezzanine_tags i18n static accounts_tags %}
   {% load ippc_tags %}
 {% block meta_title %}{{ photo.title }}{% endblock %}
 
@@ -17,7 +17,7 @@
 {% endblock pageinfo %}
 
 {% block main %}
-    {% load mezzanine_tags staticfiles i18n %}
+    {% load mezzanine_tags static i18n %}
           {% if photo.agree == 1 and photo.status == 2%} 
                 {% include "iyph/photo_detail_2.html" %}
           {% else %}       

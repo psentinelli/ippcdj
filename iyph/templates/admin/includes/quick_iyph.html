@@ -1,4 +1,4 @@
-{% load i18n future %}
+{% load i18n  %}
 
 {% if perms.iyph.add_iyphpost and perms.iyph.change_iyphpost %}
 <script>
@@ -9,7 +9,7 @@ $(function() {
         var field = $('#quick-iyph-form #id_content');
         var value = field.attr('value').split('\n\n').join('</p><p>');
         value = '<p>' + value.split('\n').join('<br>') + '</p>';
-        field.attr('value', value);
+        field.attr('value' , value);
         return true;
     });
 });

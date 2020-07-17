@@ -1,21 +1,29 @@
-{% load i18n future mezzanine_tags accounts_tags   pages_tags localeurl_tags %}
-<form action=""  method="POST" enctype="multipart/form-data">
+{% load i18n  mezzanine_tags accounts_tags   pages_tags  %}
+<form action=""  method="POST"  enctype="multipart/form-data">
 {% csrf_token %}
     <select class="lang-select" id="selectlang">
-   {% for lang in LANGUAGES %}
-        
-        <option value="{{ request.path|chlocale:lang.0 }}" style="background-color:#28903B; color:white;" {% ifequal lang.0 LANGUAGE_CODE %}selected  {% endifequal %} >
-                {% if lang.0 == 'en' %}EN
-                {% elif lang.0 == 'es' %}ES
-                {% elif lang.0 == 'fr' %}FR
-                {% elif lang.0 == 'ar' %}AR
-                {% elif lang.0 == 'ru' %}RU
-                {% elif lang.0 == 'zh' %}ZH
+      {% get_available_languages as languages %}
+
+            {% for lang_code, lang_name in languages %}
+               
+             {% language lang_code %}
+               <option value="/{{ lang_code }}{{ request.get_full_path|slice:'3:' }}" style="background-color:#28903B; color:white;" {% ifequal lang_code LANGUAGE_CODE %}selected  {% endifequal %} >
+      
+               {% if lang_code == 'en' %}EN
+                {% elif lang_code == 'es' %}ES
+                {% elif lang_code == 'fr' %}FR
+                {% elif lang_code == 'ar' %}AR
+                {% elif lang_code == 'ru' %}RU
+                {% elif lang_code == 'zh' %}ZH
                 {% endif%}
                 
                 </option>
+                
+                 {% endlanguage %}               
+            {% endfor %}
+        
       
-    {% endfor %}
+
 </select><!--
 {% if request.user.is_authenticated %}
   {% if user.is_authenticated and user.is_staff %}

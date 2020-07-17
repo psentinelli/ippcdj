@@ -55,7 +55,7 @@ class ChronologyForm(forms.ModelForm):
             'start_date': AdminDateWidget(), 
             'end_date': AdminDateWidget(), 
         }
-ChronologyFilesFormSet = inlineformset_factory(Chronology,  ChronologyFiles,extra=1)
+ChronologyFilesFormSet = inlineformset_factory(Chronology,  ChronologyFiles,extra=1,fields = '__all__',)
 
 class PhotoForm(forms.ModelForm):
     class Meta:

@@ -1,5 +1,5 @@
 {% extends "baseiyph.html" %}
-{% load i18n future mezzanine_tags iyph_tags keyword_tags disqus_tags %}
+{% load i18n   mezzanine_tags iyph_tags keyword_tags disqus_tags %}
 
 {% block meta_title %}{% if res_type == '1' %}{% trans "IYPH Technical Advisory Board" %}{%elif res_type == '2'%}{% trans "IYPH International Steering Committee" %}{%endif%}{% endblock %}
 
@@ -140,7 +140,7 @@
    <p>{% trans "The following materials were produced by the IPPC Secretariat under the auspices of the IYPH Technical Advisory Board." %}</p>
     {% if results %}
     <div class="clearfix">
-        {% for category in results %}{{category|richtext_filter|safe}}{% endfor %}
+        {% for category in results %}{{category|richtext_filters|safe}}{% endfor %}
     </div>
     {% endif %}
 </div-->

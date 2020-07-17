@@ -1,5 +1,5 @@
 {% extends "baseiyph.html" %}
-{% load i18n future pages_tags mezzanine_tags iyph_tags staticfiles keyword_tags disqus_tags %}
+{% load i18n  pages_tags mezzanine_tags  iyph_tags static keyword_tags disqus_tags %}
 
 {% block meta_title %}{% if page %}{{ page.richtextpage.meta_title }}{% else %}{%if type == '1'%}{% trans "IYPH preparation events" %}{% else %}{% trans "IYPH 2020 Programme of events" %}{% endif %}{% endif %}{% endblock %}
 
@@ -172,7 +172,7 @@
         <td>{{chronology.venue}}, {{chronology.country}}</td>
         <td> {% if chronology.url_website %}<a href="{{chronology.url_website}}">Link</a>{% endif%}
             {% if user.is_superuser %} 
-                <a class="small pull-right" href="/admin/iyph/chronology/{{ chronology.id }}"><i class="icon-edit"></i> {% trans "Edit as Admin" %}</a><br>
+                <a class="small pull-right" href="/admin/iyph/chronology/{{ chronology.id }}/change/"><i class="icon-edit"></i> {% trans "Edit as Admin" %}</a><br>
             {% endif %}
             {% if request.user.id == chronology.author_id %}
                 <a class="small pull-right" href="/iyph/chronologies/{{chronology.id }}/edit/"><i class="icon-edit"></i>{% trans "Edit" %}</a>
@@ -226,7 +226,7 @@
         <td>{{chronology.venue}}, {{chronology.country}}</td>
         <td> {% if chronology.url_website %}<a href="{{chronology.url_website}}">Link</a>{% endif%}
             {% if user.is_superuser %} 
-                <a class="small pull-right" href="/admin/iyph/chronology/{{ chronology.id }}"><i class="icon-edit"></i> {% trans "Edit as Admin" %}</a><br>
+                <a class="small pull-right" href="/admin/iyph/chronology/{{ chronology.id }}/change/"><i class="icon-edit"></i> {% trans "Edit as Admin" %}</a><br>
             {% endif %}
             {% if request.user.id == chronology.author_id %}
                 <a class="small pull-right" href="/iyph/chronologies/{{chronology.id }}/edit/"><i class="icon-edit"></i>{% trans "Edit" %}</a>

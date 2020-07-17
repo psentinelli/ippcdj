@@ -1,6 +1,6 @@
-{% extends "baseiyph.html" %}
+{% extends "baseiyph.html"  %}
 
-{% load mezzanine_tags translate_tags staticfiles i18n %}
+{% load mezzanine_tags translate_tags static i18n %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static "css/DT_bootstrap.css" %}">
@@ -39,7 +39,7 @@
 
                 <td>{% if photo.agree == 1%}<i class="icon-ok"></i>{%else%}<i class="icon-ban-circle"></i>{%endif%}</td>
                {% if user.is_superuser or perms.ippc.change_publication  %}
-                <td><a class="btn btn-small btn-info" href="/admin/iyph/photo/{{photo.id}}"><i class="icon-edit icon-white"></i> Edit as admin</a>  </td>
+                <td><a class="btn btn-small btn-info" href="/admin/iyph/photo/{{photo.id}}/change/"><i class="icon-edit icon-white"></i> Edit as admin</a>  </td>
               {% endif %}
             </tr> 
         {% endfor %} 

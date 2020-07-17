@@ -1,12 +1,12 @@
 
-from django.conf.urls import patterns, url
+from django.conf.urls import  url
 
 from mezzanine.conf import settings
 from mezzanine.pages.models import RichTextPage
 
-from .views import ChronologyListView,ChronologyDetailView,Page1View,Page2View,chronology_create,chronology_edit,PhotoLibraryView,PhotoListView,PhotoHiddenDetailView,\
-PhotoDetailView,photo_create,IYPHPageView
+from .views import ChronologyListView,ChronologyDetailView,Page1View,Page2View,chronology_create,chronology_edit,PhotoLibraryView,PhotoListView,PhotoHiddenDetailView,PhotoDetailView,photo_create,IYPHPageView
 from mezzanine.core.views import direct_to_template
+from .views import iyph_post_feed,iyph_post_list,iyph_post_detail,homeview
 # Leading and trailing slahes for urlpatterns based on setup.
 # _slashes = (
 #     "/" if settings.IYPH_SLUG else "",
@@ -14,20 +14,20 @@ from mezzanine.core.views import direct_to_template
 # )
 
 # iyph patterns.
-urlpatterns = patterns("iyph.views",
+urlpatterns =[
     #---------POST ------------------------------#    
-    url(r"^feeds/(?P<format>.*)/$",    "iyph_post_feed", name="iyph_post_feed"),   
-    url(r"^tag/(?P<tag>.*)/feeds/(?P<format>.*)/$","iyph_post_feed", name="iyph_post_feed_tag"),    
-    url(r"^tag/(?P<tag>.*)/$", "iyph_post_list",name="iyph_post_list_tag"),
-    url(r"^category/(?P<category>.*)/feeds/(?P<format>.*)/$",        "iyph_post_feed", name="iyph_post_feed_category"),
-    url(r"^category/(?P<category>.*)/$",        "iyph_post_list", name="iyph_post_list_category"),
-    url(r"^author/(?P<username>.*)/feeds/(?P<format>.*)/$",        "iyph_post_feed", name="iyph_post_feed_author"),
-    url(r"^author/(?P<username>.*)/$",        "iyph_post_list", name="iyph_post_list_author"),
-    url(r"^archive/(?P<year>\d{4})/(?P<month>\d{1,2})/$",        "iyph_post_list", name="iyph_post_list_month"),
-    url(r"^archive/(?P<year>\d{4})/$",        "iyph_post_list", name="iyph_post_list_year"),
-    url(r"^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<slug>.*)/$",        "iyph_post_detail", name="iyph_post_detail_day"),
-    url(r"^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<slug>.*)/$",    "iyph_post_detail", name="iyph_post_detail_month"),
-    url(r"^(?P<year>\d{4})/(?P<slug>.*)/$", "iyph_post_detail", name="iyph_post_detail_year"),
+    url(r"^feeds/(?P<format>.*)/$",    iyph_post_feed, name="iyph_post_feed"),   
+    url(r"^tag/(?P<tag>.*)/feeds/(?P<format>.*)/$",iyph_post_feed, name="iyph_post_feed_tag"),    
+    url(r"^tag/(?P<tag>.*)/$", iyph_post_list,name="iyph_post_list_tag"),
+    url(r"^category/(?P<category>.*)/feeds/(?P<format>.*)/$",        iyph_post_feed, name="iyph_post_feed_category"),
+    url(r"^category/(?P<category>.*)/$",       iyph_post_list, name="iyph_post_list_category"),
+    url(r"^author/(?P<username>.*)/feeds/(?P<format>.*)/$",       iyph_post_feed, name="iyph_post_feed_author"),
+    url(r"^author/(?P<username>.*)/$",        iyph_post_list, name="iyph_post_list_author"),
+    url(r"^archive/(?P<year>\d{4})/(?P<month>\d{1,2})/$",     iyph_post_list, name="iyph_post_list_month"),
+    url(r"^archive/(?P<year>\d{4})/$",  iyph_post_list, name="iyph_post_list_year"),
+    url(r"^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<slug>.*)/$",      iyph_post_detail, name="iyph_post_detail_day"),
+    url(r"^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<slug>.*)/$",  iyph_post_detail, name="iyph_post_detail_month"),
+    url(r"^(?P<year>\d{4})/(?P<slug>.*)/$", iyph_post_detail, name="iyph_post_detail_year"),
     #---------EVENTS ------------------------------# 
    # url(r'^chronologies/(?P<type>\d+)/create/$', view=chronology_create, name='chronology-create'),
    # url(r'^chronologies/(?P<id>\d+)/edit/$',        view=chronology_edit,        name='chronology-edit'),
@@ -56,9 +56,9 @@ urlpatterns = patterns("iyph.views",
     #url(r'^accounts/autoregister/delete/(?P<id>\d+)/$',view=auto_register_photo_delete,name='auto-register-photo-delete'),
     #url(r'^accounts/requestaccess/$',view=requestaccess,name='request-acccess'),
  
-    url(r"^(?P<slug>.*)/$", "iyph_post_detail", name="iyph_post_detail"),
-    url(r"^$", "homeview", name="homeview"),
-    url(r"^postlist$", "iyph_post_list", name="iyph_post_list_l"),
+    url(r"^(?P<slug>.*)/$", iyph_post_detail, name="iyph_post_detail"),
+    url(r"^$", homeview, name="homeview"),
+    url(r"^postlist$", iyph_post_list, name="iyph_post_list_l"),
    
     
     #url("^$", direct_to_template, {"template": "index1.html"}, name="hoame"),
@@ -68,4 +68,4 @@ urlpatterns = patterns("iyph.views",
 
 
     
-)
+]

@@ -38,7 +38,7 @@ class IyphPost(Displayable, Ownable, RichText, AdminThumbMixin):
         verbose_name_plural = _("Iyph")
         ordering = ("-publish_date",)
 
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         """
         URLs for iyph posts can either be just their slug, or prefixed
@@ -99,7 +99,7 @@ class IyphCategory(Slugged):
         verbose_name_plural = _("Iyph Categories")
         ordering = ("title",)
 
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         return ("iyph_post_list_category", (), {"category": self.slug})
     
@@ -134,7 +134,7 @@ class Chronology (Displayable, models.Model):
     modify_date = models.DateTimeField(_("Modified date"), blank=True, null=True, editable=False)
     image = models.ImageField(_("Image of page of Event"), upload_to="uploads/iyph/%Y/%m/", blank=True)
     summary = models.TextField(_("Summary or Short Description"), blank=True, null=True)
-    author = models.ForeignKey(User, related_name="chron_author")
+    author = models.ForeignKey(User, related_name="chron_author",on_delete=models.DO_NOTHING,)
     venue_description = models.TextField(_("Venue Description and map"), blank=True, null=True)
     
     start_date = models.DateTimeField(_("Start date"), blank=True, null=True, default=datetime.now, editable=True)
@@ -145,7 +145,7 @@ class Chronology (Displayable, models.Model):
     chron_type = models.IntegerField(_("Type of events"), choices=CHRONS, default=CHRON_1)
     programme_type = models.IntegerField(_("Programme Type"), choices=PROGRAMME, default=PROGRAM_1)
     venue = models.CharField(_("Venue"), max_length=250, blank=True, null=True)
-    country = models.ForeignKey(CountryPage, related_name="country", default=-1)
+    country = models.ForeignKey(CountryPage, related_name="country", default=-1,on_delete=models.DO_NOTHING,)
   
     contact = models.CharField(_("Contact"),max_length=250, blank=True, null=True)
     url_website = models.URLField(_("Website URL"),blank=True, null=True)
@@ -163,7 +163,7 @@ class Chronology (Displayable, models.Model):
         return self.title
      
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Chronology."""
         print( 'year'+ self.publish_date.strftime("%Y"))
@@ -204,7 +204,7 @@ def validate_file_extension(value):
         raise ValidationError(u'You can only upload files:  txt pdf ppt doc xls jpg png docx xlsx pptx zip rar.')
     
 class ChronologyFiles(models.Model):
-    chronology = models.ForeignKey(Chronology)
+    chronology = models.ForeignKey(Chronology,on_delete=models.DO_NOTHING,)
     description = models.CharField(max_length=255)
     file = models.FileField(max_length=255,blank=True, help_text='10 MB maximum file size.', verbose_name='Upload a file', upload_to='uploads/iyph/%Y/%m/%d/', validators=[validate_file_extension])
 
@@ -265,7 +265,7 @@ class IYPHSteeringCommitteeResource (Displayable, models.Model):
         return self.title
      
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a IYPHSteeringCommitteeResource."""
         print( 'year'+ self.publish_date.strftime("%Y"))
@@ -295,7 +295,7 @@ class IYPHToolBoxCategory(Slugged):
         verbose_name_plural = _("IYPHToolBox Categories")
         ordering = ("title",)
 
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
         return ("iyphtoolbox_category", (), {"category": self.slug})
     
@@ -327,7 +327,7 @@ class IYPHToolBoxItem (Displayable, models.Model):
         return self.title
      
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a IYPHToolBoxItem."""
         print( 'year'+ self.publish_date.strftime("%Y"))
@@ -359,7 +359,7 @@ class PhotoLibrary(Displayable, models.Model):
     def __unicode__(self):
         return self.title
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Photo."""
         return ('photo-library-detail', (), {
@@ -388,12 +388,12 @@ class Photo(Displayable, models.Model):
     # status - provided by mezzanine.core.models.displayable
     # publish_date - provided by mezzanine.core.models.displayable
     modify_date = models.DateTimeField(_("Modified date"),       blank=True, null=True, editable=False, auto_now=True)
-    library = models.ForeignKey("PhotoLibrary", related_name="photos") 
+    library = models.ForeignKey("PhotoLibrary", related_name="photos",on_delete=models.DO_NOTHING,) 
     photographer_first_name= models.CharField(_("Your first name"), max_length=100, blank=False, null=False)
     photographer_last_name = models.CharField(_("Your last name"), max_length=100, blank=False, null=False)
     email= models.CharField(_("Email address"), max_length=100, blank=False,null=False,)   
     emailconfirmation= models.CharField(_("Email address confirmation"), max_length=100, blank=False,null=False,)   
-    country = models.ForeignKey(CountryPage, related_name="countryphotographer", default=-1)
+    country = models.ForeignKey(CountryPage, related_name="countryphotographer", default=-1,on_delete=models.DO_NOTHING,)
     age =  models.CharField(_("Age (years)"), max_length=100, blank=False,null=False,) 
     image = models.ImageField(_("Photo"), upload_to="uploads/photocontest/", blank=False)
     date_taken = models.DateTimeField(_("Date Taken"), blank=False, null=False, editable=True)
@@ -415,7 +415,7 @@ class Photo(Displayable, models.Model):
         return self.title
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
     
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a photo."""
         return ('photo-detail', (), {
@@ -476,7 +476,7 @@ class IYPHPage(Displayable, models.Model):
     def __unicode__(self):
         return self.title
     # http://devwiki.beloblotskiy.com/index.php5/Django:_Decoupling_the_URLs  
-    @models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
+    #@models.permalink # or: get_absolute_url = models.permalink(get_absolute_url) below
     def get_absolute_url(self): # "view on site" link will be visible in admin interface
         """Construct the absolute URL for a Photo."""
         return ('iyphpage-detail', (), {
@@ -502,7 +502,7 @@ class Translatable(models.Model):
         ordering = ("lang",)
         
 class TransIyphPost(Translatable,   Slugged):
-    translation = models.ForeignKey(IyphPost, related_name="translation")
+    translation = models.ForeignKey(IyphPost, related_name="translation",on_delete=models.DO_NOTHING,)
     content = models.TextField(blank=True, null=True)
     
     class Meta:
@@ -512,7 +512,7 @@ class TransIyphPost(Translatable,   Slugged):
 
    
 class TransChronology(Translatable,   Slugged):
-    translation = models.ForeignKey(Chronology, related_name="translation")
+    translation = models.ForeignKey(Chronology, related_name="translation",on_delete=models.DO_NOTHING,)
     summary = models.TextField(blank=True, null=True)
     
     class Meta:
@@ -523,7 +523,7 @@ class TransChronology(Translatable,   Slugged):
 
    
 class TransIYPHPage(Translatable,   Slugged):
-    translation = models.ForeignKey(IYPHPage, related_name="translation")
+    translation = models.ForeignKey(IYPHPage, related_name="translation",on_delete=models.DO_NOTHING,)
     short_description = models.TextField(blank=True, null=True)
     
     class Meta:
