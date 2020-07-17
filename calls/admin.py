@@ -1,4 +1,4 @@
-
+from __future__ import unicode_literals
 from copy import deepcopy
 
 from django.contrib import admin
@@ -14,26 +14,27 @@ from django.core import mail
 from django.core.mail import send_mail
 from .models import CallsPost, CallsCategory,TransCallsPost
 from mezzanine.conf import settings
-from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin,StackedDynamicInlineAdmin
+from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin,TabularDynamicInlineAdmin#StackedDynamicInlineAdmin
 from datetime import datetime
-from django_markdown.widgets import MarkdownWidget
+#from django_markdown.widgets import MarkdownWidget
 from django import forms
-from django_markdown.admin import MarkdownModelAdmin
-from django_markdown.widgets import AdminMarkdownWidget
+#from django_markdown.admin import MarkdownModelAdmin
+#from django_markdown.widgets import AdminMarkdownWidget
+from django.utils.html import format_html
 
-
-class TransCallsPostAdmin(StackedDynamicInlineAdmin):
+class TransCallsPostAdmin(TabularDynamicInlineAdmin):
     model = TransCallsPost
+    
     fields = ("lang", "title", "content")
     
 callspost_fieldsets = deepcopy(DisplayableAdmin.fieldsets)
 callspost_fieldsets[0][1]["fields"].insert(1, "categories")
 callspost_fieldsets[0][1]["fields"].insert(2, "deadline_date")
 callspost_fieldsets[0][1]["fields"].extend(["content"])
-callspost_list_display = ["title", "user", "status", "admin_link"]
+callspost_list_display = ["title", "user", "status", "admin_link1"]
 if settings.CALLS_USE_FEATURED_IMAGE:
     callspost_fieldsets[0][1]["fields"].insert(-2, "featured_image")
-    callspost_list_display.insert(0, "admin_thumb")
+    callspost_list_display.insert(0, "thumbnail")
 callspost_fieldsets = list(callspost_fieldsets)
 callspost_fieldsets.insert(1, (_("Other posts"), {
     "classes": ("collapse-closed",),
@@ -44,19 +45,32 @@ callspost_list_filter = deepcopy(DisplayableAdmin.list_filter) + ("categories",)
 
 
 
-#class CallsPostAdmin(DisplayableAdmin, OwnableAdmin):
-class CallsPostAdmin(DisplayableAdmin):
+class CallsPostAdmin(DisplayableAdmin):#, OwnableAdmin):
     """
     Admin class for calls posts. 
     """
+    def thumbnail(self, obj):
+        if obj.featured_image:
+            return format_html('<img src="'+settings.MEDIA_URL+format(obj.featured_image)+'" style="width: 30px; height: 30px"/>')
+        else:
+            return format_html('')
+    def admin_link1(self, obj):
+        return format_html("<a href='"+obj.get_absolute_url()+"'>View on site</a>")
+    admin_link1.allow_tags = True
+    admin_link1.short_description = ""
+    thumbnail.short_description = 'thumbnail'
 
+   
     fieldsets = callspost_fieldsets
     list_display = callspost_list_display
     list_filter = callspost_list_filter
-    inlines = [ TransCallsPostAdmin]
+    inlines = (TransCallsPostAdmin,)
    
     filter_horizontal = ("categories", "related_posts",)
-
+    #image_tag.short_description = 'Image' 
+    
+        
+        
     def save_form(self, request, form, change):
         """
         Super class ordering is important here - user must get saved first.
