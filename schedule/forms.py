@@ -4,8 +4,14 @@ from django.utils.translation import ugettext_lazy as _
 from schedule.models import Event, Occurrence, EventFile,EventUrl,EventParticipants
 from ippc.models import IssueKeywordsRelate
 from django.contrib.admin.widgets import AdminDateWidget 
-import autocomplete_light
-import ippc.autocomplete_light_registry
+#import autocomplete_light_registry
+#import autocomplete_light
+
+from dal import autocomplete
+#autocomplete_light.autodiscover()
+from dal_select2.widgets import  Select2,  Select2Multiple,  ModelSelect2 ,   ModelSelect2Multiple,TagSelect2,        ListSelect2
+
+
 from ippc.forms import IssueKeywordsRelateForm
 from ippc.models import Topic
 
@@ -41,12 +47,17 @@ class EventForm(SpanForm):
             'start': AdminDateWidget(),
             'end': AdminDateWidget(),
             'end_register_date': AdminDateWidget(),
-        #    'topic_numbers': forms.SelectMultiple(attrs={'class':'yyy1'}),
-            'topic_numbers': autocomplete_light.MultipleChoiceWidget ('TopicAutocomplete'),   
-     
+
+            #'topic_numbers': autocomplete_light.MultipleChoiceWidget ('TopicAutocomplete'),   
+          'topic_numbers': ModelSelect2(url='topic-autocomplete',attrs={
+        # Set some placeholder
+        'data-placeholder': 'Type at least two letters ...',
+        # Only trigger autocompletion after 3 characters have been typed
+        'data-minimum-input-length': 2,
+    },)
         }
-EventFileFormSet = inlineformset_factory(Event,  EventFile,extra=1)
-EventUrlFormSet  = inlineformset_factory(Event,  EventUrl, extra=1)
+EventFileFormSet = inlineformset_factory(Event,  EventFile,extra=1,fields = '__all__')
+EventUrlFormSet  = inlineformset_factory(Event,  EventUrl, extra=1,fields = '__all__')
 
 
 
@@ -72,7 +83,13 @@ class EventParticipantsForm(forms.ModelForm):
         exclude = ( 'event', )
         
         widgets = {
-              'user': autocomplete_light.ChoiceWidget('UserAutocomplete'),
+             #'user': autocomplete_light.ChoiceWidget('UserAutocomplete'),
+             'user':  ModelSelect2(url='user-autocomplete',attrs={
+        # Set some placeholder
+        'data-placeholder': 'Type at least two letters ...',
+        # Only trigger autocompletion after 3 characters have been typed
+        'data-minimum-input-length': 2,
+    },)
         }
 
 

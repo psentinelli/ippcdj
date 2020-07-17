@@ -2,15 +2,16 @@
 import json
 import pytz
 import datetime
-from urllib import quote
+#from urllib import quote
+from six.moves.urllib.parse import quote
 from django.contrib.messages import info, error
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.http import HttpResponseRedirect, Http404
 from django.template import RequestContext
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import DeleteView
@@ -23,7 +24,7 @@ from schedule.utils import check_event_permissions, coerce_date_dict
 from ippc.forms import IssueKeywordsRelateForm
 from ippc.models import IssueKeywordsRelate,CountryPage,IppcUserProfile, UserMembershipHistory
 from ippc.views import  CPMS, split,send_notificationevent_message,send_notification_register_event_message
-
+from django.template.response import TemplateResponse
 from django.core import mail
 from django.core.mail import send_mail
 
@@ -85,8 +86,18 @@ def calendar_by_year(request, calendar_slug, year=None, template_name="schedule/
         event_list2.append((m,monthevents))
         
     period_objects = dict([(period.__name__.lower(), period(event_list, date)) for period in year])
-    return render_to_response(template_name, {
-        'periods': period_objects,
+  #  return render_to_response(template_name, {
+  #      'periods': period_objects,
+  #      'calendar': calendar,
+  #      'weekday_names': weekday_names,
+  #      'event_list': event_list,
+  #      'months_list': months_list,
+  #      'event_list2': event_list2,
+  #      'current_year': date.year,
+  #      'can_add': can_add,
+  #      'here': quote(request.get_full_path()),
+  #  }, context_instance=RequestContext(request), )
+    return TemplateResponse(request,template_name,  { 'periods': period_objects,
         'calendar': calendar,
         'weekday_names': weekday_names,
         'event_list': event_list,
@@ -94,8 +105,8 @@ def calendar_by_year(request, calendar_slug, year=None, template_name="schedule/
         'event_list2': event_list2,
         'current_year': date.year,
         'can_add': can_add,
-        'here': quote(request.get_full_path()),
-    }, context_instance=RequestContext(request), )
+        'here': quote(request.get_full_path()),})        
+
 
 def calendar_by_cn(request, country,template_name="schedule/calendar_cn.html"):
     """
@@ -119,14 +130,19 @@ def calendar_by_cn(request, country,template_name="schedule/calendar_cn.html"):
     calendar = get_object_or_404(Calendar, slug='calendar')
     country = get_object_or_404(CountryPage, name=country)
     event_list= calendar.event_set.filter(country__country_slug=country)
-    return render_to_response(template_name, {
-        'calendar': calendar,
-        'weekday_names': weekday_names,
-        'event_list': event_list,
-        'here': quote(request.get_full_path()),
-        'country' : country
-        
-    }, context_instance=RequestContext(request), )
+    user = request.user 
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+    
+
+    #return render_to_response(template_name, {
+    #    'calendar': calendar,
+    #    'weekday_names': weekday_names,
+    #    'event_list': event_list,
+    #    'here': quote(request.get_full_path()),
+    #    'country' : country
+    #    
+    #}, context_instance=RequestContext(request), )
+    return TemplateResponse(request, template_name, {  'userprofile':userprofile, 'calendar': calendar,        'weekday_names': weekday_names,        'event_list': event_list,        'here': quote(request.get_full_path()),        'country' : country},)        
 
 
 def calendar_by_periods(request, calendar_slug, periods=None, template_name="schedule/calendar_by_period.html"):
@@ -391,16 +407,23 @@ def create_or_edit_event(request, country, calendar_slug, event_id=None, next=No
     is_contryeditor=0
     is_contryeditor_1=0
     can_add_edit=0
-    
+      
     if user.groups.filter(name='IPPC Secretariat'):
         is_secretariat=1
     if user.groups.filter(name='Country editor'):
         is_contryeditor=1
+    if user.groups.filter(name='Country Contact Points'):
+        is_contryeditor=1
     issueform =IssueKeywordsRelateForm(request.POST)
     calendar = get_object_or_404(Calendar, slug=calendar_slug)
+    userprofile = get_object_or_404(IppcUserProfile, user_id=user.id)
+  
+    
     if event_id is not None:
         instance = get_object_or_404(Event, id=event_id)
-        if user.groups.filter(name='Country editor') and (instance.country==user.get_profile().country):
+        
+      
+        if user.groups.filter(name='Country editor') and (instance.country==userprofile.country):
             is_contryeditor_1=1
             can_add_edit=1  
         if instance.country.id!=-1 :
@@ -465,13 +488,26 @@ def create_or_edit_event(request, country, calendar_slug, event_id=None, next=No
            send_notificationevent_message(event.id)
      
         next = next or reverse('event', args=[event.id])
-        next = get_next_url(request, next)
+        #next = get_next_url(request, next)
         return HttpResponseRedirect(next)
 
-    next = get_next_url(request, next)
+    #next = get_next_url(request, next)
  
-    return render_to_response(template_name, {
-        "form": form,
+    #return render_to_response(template_name, {
+    #    "form": form,
+    #    "issueform": issueform,
+    #    "f_form": f_form,
+    #    "u_form": u_form,
+    #    "p_form": p_form,
+    #    "calendar": calendar,
+    #    "is_contryeditor":is_contryeditor,
+    #    "is_contryeditor_1":is_contryeditor_1,        
+    #    "is_secretariat":is_secretariat,
+    #    "can_add_edit":can_add_edit,
+    #    "event_id":event_id,
+    #    "next": next
+    #}, context_instance=RequestContext(request))
+    return TemplateResponse(request, template_name, { "userprofile":userprofile, "form": form,
         "issueform": issueform,
         "f_form": f_form,
         "u_form": u_form,
@@ -482,8 +518,7 @@ def create_or_edit_event(request, country, calendar_slug, event_id=None, next=No
         "is_secretariat":is_secretariat,
         "can_add_edit":can_add_edit,
         "event_id":event_id,
-        "next": next
-    }, context_instance=RequestContext(request))
+        "next": next},)        
 
 
 @login_required

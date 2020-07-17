@@ -1,7 +1,7 @@
 import datetime
 from django.conf import settings
 from django import template
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.dateformat import format
 from schedule.conf.settings import CHECK_EVENT_PERM_FUNC, CHECK_CALENDAR_PERM_FUNC
 from schedule.models import Calendar
@@ -90,7 +90,7 @@ def options(context, occurrence):
     user = context['request'].user
     if CHECK_EVENT_PERM_FUNC(occurrence.event, user) and CHECK_EVENT_PERM_FUNC(occurrence.event.calendar, user):
         context['edit_occurrence'] = occurrence.get_edit_url()
-        print context['edit_occurrence']
+        print (context['edit_occurrence'])
         context['cancel_occurrence'] = occurrence.get_cancel_url()
         context['delete_event'] = reverse('delete_event', args=(occurrence.event.id,))
         context['edit_event'] = reverse('edit_event', args=(occurrence.event.calendar.slug, occurrence.event.id,))
@@ -134,7 +134,7 @@ def do_get_calendar_for_object(parser, token):
     elif len(contents) == 5:
         tag_name, content_object, distinction, _, context_var = token.split_contents()
     else:
-        raise template.TemplateSyntaxError, "%r tag follows form %r <content_object> as <context_var>" % (token.contents.split()[0], token.contents.split()[0])
+        raise template.TemplateSyntaxError#, "%r tag follows form %r <content_object> as <context_var>" % (token.contents.split()[0], token.contents.split()[0])
     return CalendarNode(content_object, distinction, context_var)
 
 
@@ -171,9 +171,9 @@ def do_get_or_create_calendar_for_object(parser, token):
             as_index = contents.index('as')
             context_var = contents[as_index + 1]
         else:
-            raise template.TemplateSyntaxError, "%r tag requires an a context variable: %r <content_object> [named <calendar name>] [by <distinction>] as <context_var>" % (token.split_contents()[0], token.split_contents()[0])
+            raise template.TemplateSyntaxError#, "%r tag requires an a context variable: %r <content_object> [named <calendar name>] [by <distinction>] as <context_var>" % (token.split_contents()[0], token.split_contents()[0])
     else:
-        raise template.TemplateSyntaxError, "%r tag follows form %r <content_object> [named <calendar name>] [by <distinction>] as <context_var>" % (token.split_contents()[0], token.split_contents()[0])
+        raise template.TemplateSyntaxError#, "%r tag follows form %r <content_object> [named <calendar name>] [by <distinction>] as <context_var>" % (token.split_contents()[0], token.split_contents()[0])
     return CreateCalendarNode(obj, distinction, context_var, name)
 
 register.tag('get_calendar', do_get_calendar_for_object)
